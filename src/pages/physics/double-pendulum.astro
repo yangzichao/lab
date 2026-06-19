@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PhysicsLabShell from '../../components/physics-lab/PhysicsLabShell.astro';
+import { findPhysicsLab } from '../../scripts/physics-lab/physics-lab-catalog';
+
+const entry = findPhysicsLab('double-pendulum')!;
+---
+
+<BaseLayout title={`${entry.title} — Lab`} description={entry.tagline}>
+  <PhysicsLabShell entry={entry}>
+    <Fragment slot="readouts">
+      <div class="plab__readout"><span>Time</span><strong data-readout="time">0.0 s</strong></div>
+      <div class="plab__readout"><span>Total energy</span><strong data-readout="energy">0.00 J</strong></div>
+      <div class="plab__readout"><span>Tip speed</span><strong data-readout="speed">0.00 m/s</strong></div>
+      <div class="plab__readout"><span>Twin gap</span><strong data-readout="twinGap">0.00°</strong></div>
+    </Fragment>
+
+    <form class="plab__panel" slot="controls" aria-label="Double pendulum controls">
+      <div class="plab__panel-head">
+        <p>Controls</p>
+        <h2>Double Pendulum</h2>
+      </div>
+
+      <div class="plab__actions">
+        <button class="plab__button is-primary" type="button" data-action="toggle">
+          <i class="ph ph-pause" aria-hidden="true"></i><span>Pause</span>
+        </button>
+        <button class="plab__button" type="button" data-action="reset">
+          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>Reset</span>
+        </button>
+      </div>
+
+      <div class="plab__presets">
+        <button class="plab__preset" type="button" data-preset="gentle">Gentle</button>
+        <button class="plab__preset" type="button" data-preset="chaotic">Chaotic</button>
+        <button class="plab__preset" type="button" data-preset="overTop">Over the top</button>
+      </div>
+
+      <label class="plab__toggle">
+        <input type="checkbox" data-control="showTrail" checked />
+        <span><strong>Trace the tip</strong><small>Fading path of the lower bob.</small></span>
+      </label>
+
+      <label class="plab__toggle">
+        <input type="checkbox" data-control="showTwin" checked />
+        <span><strong>Show chaos twin</strong><small>A copy started 0.001° away.</small></span>
+      </label>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Gravity</span><output data-output="gravity">1.00×</output></span>
+        <input type="range" min="0.4" max="2.2" step="0.05" value="1" data-control="gravity" />
+      </label>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Damping</span><output data-output="damping">0.040</output></span>
+        <input type="range" min="0" max="0.16" step="0.005" value="0.04" data-control="damping" />
+      </label>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Upper angle θ₁</span><output data-output="angle1">120°</output></span>
+        <input type="range" min="-179" max="179" step="1" value="120" data-control="angle1" />
+      </label>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Lower angle θ₂</span><output data-output="angle2">-35°</output></span>
+        <input type="range" min="-179" max="179" step="1" value="-35" data-control="angle2" />
+      </label>
+    </form>
+  </PhysicsLabShell>
+
+  <script>
+    import { initDoublePendulumLab } from '../../scripts/physics-lab/double-pendulum/double-pendulum-lab';
+    initDoublePendulumLab();
+  </script>
+</BaseLayout>

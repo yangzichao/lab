@@ -1,0 +1,62 @@
+---
+import '../../styles/physics-lab/physics-lab.css';
+import { physicsLabCatalog, type PhysicsLabEntry } from '../../scripts/physics-lab/physics-lab-catalog';
+
+interface Props {
+  entry: PhysicsLabEntry;
+}
+
+const { entry } = Astro.props;
+---
+
+<section class="plab" data-lab={entry.slug}>
+  <header class="plab__head">
+    <a class="plab__back" href="/">
+      <i class="ph ph-arrow-left" aria-hidden="true"></i>
+      <span>All labs</span>
+    </a>
+
+    <p class="plab__eyebrow">{entry.eyebrow}</p>
+    <h1 class="plab__title">{entry.title}</h1>
+    <p class="plab__lede">{entry.description}</p>
+
+    <nav class="plab__switcher" aria-label="Physics labs">
+      {
+        physicsLabCatalog.map((lab) => (
+          <a
+            class={`plab__switcher-link ${lab.slug === entry.slug ? 'is-current' : ''}`}
+            href={lab.href}
+            aria-current={lab.slug === entry.slug ? 'page' : undefined}
+          >
+            <i class={`ph ${lab.icon}`} aria-hidden="true"></i>
+            <span>{lab.title}</span>
+          </a>
+        ))
+      }
+    </nav>
+  </header>
+
+  <div class="plab__workspace">
+    <div class="plab__stage-col">
+      <div class="plab__stage">
+        <canvas
+          class="plab__canvas"
+          width="900"
+          height="560"
+          data-stage-canvas
+          aria-label={`${entry.title} simulation canvas`}></canvas>
+      </div>
+      <div class="plab__readouts">
+        <slot name="readouts" />
+      </div>
+    </div>
+
+    <aside class="plab__controls-col">
+      <slot name="controls" />
+      <p class="plab__notice">
+        <i class="ph ph-lightbulb" aria-hidden="true"></i>
+        <span>{entry.notice}</span>
+      </p>
+    </aside>
+  </div>
+</section>

@@ -1,16 +1,4 @@
-export type SimulationController = {
-  start: () => void;
-  stop: () => void;
-  render: () => void;
-};
-
-export type Point = {
-  x: number;
-  y: number;
-};
-
-export const CANVAS_WIDTH = 900;
-export const CANVAS_HEIGHT = 520;
+// Small number/angle formatting helpers shared by every physics lab.
 
 export function clamp(value: number, minimum: number, maximum: number): number {
   return Math.min(maximum, Math.max(minimum, value));
@@ -35,4 +23,9 @@ export function formatCompact(value: number, digits = 1): string {
   return value.toLocaleString('en-US', {
     maximumFractionDigits: digits,
   });
+}
+
+export function formatSigned(value: number, digits = 2): string {
+  const formatted = formatFixed(Math.abs(value), digits);
+  return value < 0 ? `−${formatted}` : `+${formatted}`;
 }

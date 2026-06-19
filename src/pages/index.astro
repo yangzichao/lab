@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { physicsLabCatalog } from '../scripts/physics-lab/physics-lab-catalog';
+import { systemDesignLabPages } from '../scripts/system-design-lab/system-design-pages';
 
 const labs = [
   {
@@ -14,18 +16,16 @@ const labs = [
     description:
       'An interactive 3D teaching lab for quaternion rotations, SLERP, the SU(2) double cover, Pauli matrices, and Bloch-sphere motion.',
   },
-  {
-    title: 'Physics Simulation Lab',
-    href: '/physics-simulations/',
-    description:
-      'Double pendulum chaos, central-force orbital mechanics, and two-source wave interference — live controls and canvas rendering.',
-  },
-  {
-    title: 'System Design Lab',
-    href: '/system-design-lab/',
-    description:
-      'Constraint-driven system design playgrounds: ad tracking, Google Docs, Online Judge, and rate limiter trade-offs.',
-  },
+  ...physicsLabCatalog.map((lab) => ({
+    title: lab.title,
+    href: lab.href,
+    description: lab.tagline,
+  })),
+  ...systemDesignLabPages.map((page) => ({
+    title: page.cardTitle,
+    href: `/system-design/${page.slug}/`,
+    description: page.cardDescription,
+  })),
 ];
 ---
 

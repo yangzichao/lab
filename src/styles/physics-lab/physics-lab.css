@@ -1,0 +1,327 @@
+/* Shared chrome for the per-lab physics pages (/physics/<slug>/). One light
+ * "blackboard" look across every lab: the canvas is the hero, controls sit in a
+ * quiet sidebar, and a teaching note closes the column. */
+
+.plab {
+  --plab-ink: #16201c;
+  --plab-muted: #5d6863;
+  --plab-border: #d7ded8;
+  --plab-surface: #f5f7f3;
+  --plab-panel: #ffffff;
+  --plab-teal: #0f766e;
+
+  color: var(--plab-ink);
+}
+
+/* ---- Header ---- */
+.plab__head {
+  margin-bottom: 26px;
+}
+
+.plab__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: var(--plab-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.plab__back:hover {
+  color: var(--plab-ink);
+}
+
+.plab__eyebrow {
+  margin-bottom: 8px;
+  color: var(--plab-teal);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.plab__title {
+  margin-bottom: 12px;
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+}
+
+.plab__lede {
+  max-width: 60ch;
+  color: var(--plab-muted);
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+
+/* ---- Lab switcher ---- */
+.plab__switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.plab__switcher-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 13px;
+  border: 1px solid var(--plab-border);
+  border-radius: 999px;
+  background: var(--plab-panel);
+  color: var(--plab-muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    border-color var(--transition),
+    color var(--transition),
+    background var(--transition);
+}
+
+.plab__switcher-link i {
+  font-size: 1rem;
+}
+
+.plab__switcher-link:hover {
+  border-color: #a8b4ad;
+  color: var(--plab-ink);
+}
+
+.plab__switcher-link.is-current {
+  border-color: var(--plab-teal);
+  background: #eef8f5;
+  color: var(--plab-teal);
+}
+
+/* ---- Workspace ---- */
+.plab__workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(290px, 0.85fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.plab__stage-col {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.plab__stage {
+  overflow: hidden;
+  border: 1px solid var(--plab-border);
+  border-radius: var(--radius);
+  background: var(--plab-surface);
+}
+
+.plab__canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 900 / 560;
+  touch-action: none;
+}
+
+.plab__readouts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  border: 1px solid var(--plab-border);
+  border-radius: var(--radius);
+  background: var(--plab-panel);
+  overflow: hidden;
+}
+
+.plab__readout {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-right: 1px solid var(--plab-border);
+  border-bottom: 1px solid var(--plab-border);
+}
+
+.plab__readout span {
+  color: var(--plab-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.plab__readout strong {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Controls column ---- */
+.plab__controls-col {
+  display: grid;
+  gap: 12px;
+}
+
+.plab__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 18px;
+  border: 1px solid var(--plab-border);
+  border-radius: var(--radius);
+  background: var(--plab-panel);
+}
+
+.plab__panel-head h2 {
+  font-size: 1.16rem;
+  font-weight: 800;
+}
+
+.plab__panel-head p {
+  margin-bottom: 3px;
+  color: var(--plab-teal);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.plab__actions,
+.plab__presets {
+  display: grid;
+  gap: 8px;
+}
+
+.plab__actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.plab__presets {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.plab__button,
+.plab__preset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--plab-border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--plab-ink);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    transform var(--transition);
+}
+
+.plab__button:hover,
+.plab__preset:hover {
+  border-color: #a8b4ad;
+  background: var(--plab-surface);
+  transform: translateY(-1px);
+}
+
+.plab__button.is-primary {
+  border-color: var(--plab-teal);
+  background: var(--plab-teal);
+  color: #ffffff;
+}
+
+.plab__button i {
+  font-size: 1rem;
+}
+
+.plab__field {
+  display: grid;
+  gap: 6px;
+}
+
+.plab__field-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.plab__field-label output {
+  color: var(--plab-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.plab__field input[type='range'] {
+  width: 100%;
+  accent-color: var(--plab-teal);
+}
+
+.plab__toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--plab-border);
+  border-radius: 8px;
+  background: var(--plab-surface);
+  cursor: pointer;
+}
+
+.plab__toggle input {
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+  accent-color: var(--plab-teal);
+}
+
+.plab__toggle span {
+  display: grid;
+  gap: 2px;
+}
+
+.plab__toggle strong {
+  font-size: 0.86rem;
+}
+
+.plab__toggle small {
+  color: var(--plab-muted);
+  font-size: 0.77rem;
+  line-height: 1.35;
+}
+
+.plab__notice {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--plab-border);
+  border-radius: var(--radius);
+  background: #f3f8f4;
+  color: var(--plab-muted);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.plab__notice i {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--plab-teal);
+  font-size: 1.05rem;
+}
+
+@media (max-width: 900px) {
+  .plab__workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .plab__title {
+    font-size: 1.8rem;
+  }
+}
