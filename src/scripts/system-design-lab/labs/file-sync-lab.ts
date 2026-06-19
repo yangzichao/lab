@@ -331,10 +331,10 @@ export const fileSyncLabDefinition: SystemDesignLabDefinition = {
     },
     {
       title: 'Files are split into content-addressed blocks',
-      source: 'Dropbox Help',
-      url: 'https://help.dropbox.com/security/file-types-thumbnails',
+      source: 'Content-addressable storage',
+      url: 'https://en.wikipedia.org/wiki/Content-addressable_storage',
       summary:
-        'Dropbox breaks files into blocks of up to 4 MB, hashes each block, and stores blocks by content so identical data is kept once.',
+        'Content-addressable storage names each block by a hash of its contents, so identical blocks are stored once — the basis for block-level dedup.',
     },
     {
       title: 'Content-defined chunking enables cross-file deduplication',

@@ -337,11 +337,11 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
         'Bloom filters answer "have I seen this URL?" using a few bits per element and never produce false negatives, making them the standard seen-set at billions of URLs.',
     },
     {
-      title: 'Mercator describes a scalable, distributed, extensible web crawler',
-      source: 'Heydon & Najork, 1999',
-      url: 'https://www.cindoc.csic.es/cybermetrics/pdf/68.pdf',
+      title: 'A scalable crawler partitions the frontier and seen-set across machines',
+      source: 'Olston & Najork (Google Research)',
+      url: 'https://research.google/pubs/web-crawling/',
       summary:
-        'The Mercator design partitions the frontier and seen-set across machines so a single crawler can scale to the whole web.',
+        'The "Web Crawling" survey describes partitioning the URL frontier and duplicate-detection state across machines so a crawler can scale toward the whole web.',
     },
   ],
   teachingAssumptions: [
