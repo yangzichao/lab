@@ -1,4 +1,5 @@
-.container:has([data-system-design-lab]) {
+.container:has([data-system-design-lab]),
+.container:has([data-system-design-constraint-lab]) {
   max-width: 1280px;
 }
 

@@ -8,6 +8,12 @@ export default defineConfig({
     enabled: false,
   },
 
+  // The system design labs used to live on one combined page; keep the old
+  // URL pointing at the first standalone lab so existing links don't break.
+  redirects: {
+    '/system-design-lab': '/system-design/ad-tracking/',
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },

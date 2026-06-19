@@ -1,0 +1,34 @@
+---
+import { systemDesignLabPages } from '../../scripts/system-design-lab/system-design-pages';
+
+interface Props {
+  /** Slug of the page currently being viewed; highlighted in the nav. */
+  current: string;
+}
+
+const { current } = Astro.props;
+---
+
+<nav class="system-lab-page-nav" aria-label="System Design Lab navigation">
+  <a href="/">Home</a>
+  {
+    systemDesignLabPages.map((page) => (
+      <a
+        href={`/system-design/${page.slug}/`}
+        aria-current={page.slug === current ? 'page' : undefined}
+      >
+        {page.navLabel}
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  /* Base `.system-lab-page-nav` styling ships with the lab CSS that the lab
+     component on this page imports globally; only the active state is added. */
+  .system-lab-page-nav a[aria-current='page'] {
+    background: var(--color-card-hover);
+    border-color: #bbbbbb;
+    cursor: default;
+  }
+</style>

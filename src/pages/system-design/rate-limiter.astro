@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SystemDesignLabNav from '../../components/system-design-lab/SystemDesignLabNav.astro';
+import SystemDesignConstraintLab from '../../components/system-design-lab/SystemDesignConstraintLab.astro';
+import { rateLimiterLabDefinition } from '../../scripts/system-design-lab/labs/rate-limiter-lab';
+import { getSystemDesignLabPage } from '../../scripts/system-design-lab/system-design-pages';
+
+const page = getSystemDesignLabPage('rate-limiter');
+---
+
+<BaseLayout title={page.pageTitle} description={page.metaDescription}>
+  <SystemDesignLabNav current="rate-limiter" />
+  <SystemDesignConstraintLab lab={rateLimiterLabDefinition} />
+</BaseLayout>
