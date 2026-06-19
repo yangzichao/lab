@@ -45,6 +45,27 @@ export type ScenarioDefinition = {
   values: WorkloadValues;
 };
 
+/**
+ * One step of the guided ("循循善诱") walkthrough. The learner is asked to
+ * predict an outcome, the step applies the matching workload `scenario` so the
+ * diagram and meters react live, and the reasoning is revealed on demand.
+ */
+export type TeachingStep = {
+  id: string;
+  /** Two-digit step marker, e.g. "01". */
+  step: string;
+  /** Short framing of what changes at this step, e.g. "Traffic 10x". */
+  focus: string;
+  /** Id of the {@link ScenarioDefinition} this step applies on entry. */
+  scenarioId: string;
+  /** Socratic prompt: what should the learner predict before revealing? */
+  question: string;
+  /** The reasoning revealed after the learner has formed a guess. */
+  reveal: string;
+  /** One durable, quotable insight to carry forward. */
+  takeaway: string;
+};
+
 export type DiagramZoneDefinition = {
   id: string;
   label: string;
@@ -152,5 +173,7 @@ export type SystemDesignLabDefinition = {
   decisions: DecisionDefinition[];
   sourceBackedRules: SourceBackedRule[];
   teachingAssumptions: string[];
+  /** Optional guided Socratic walkthrough; each step applies a scenario by id. */
+  teachingWalkthrough?: TeachingStep[];
   analyze: (workload: WorkloadValues) => LabAnalysis;
 };

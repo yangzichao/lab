@@ -24,6 +24,66 @@ const flowMarkerId = `system-lab-arrow-${lab.id}`;
     }
   </div>
 
+  {
+    lab.teachingWalkthrough && lab.teachingWalkthrough.length > 0 && (
+      <section
+        class="system-lab__walkthrough"
+        data-walkthrough
+        aria-label={`${lab.title} guided walkthrough`}
+      >
+        <div class="system-lab__walkthrough-header">
+          <div>
+            <p class="system-lab__eyebrow">Guided walkthrough</p>
+            <h2>Reason about it one step at a time</h2>
+          </div>
+          <div class="system-lab__walkthrough-progress">
+            <span data-walkthrough-position />
+            <span class="system-lab__walkthrough-dots" aria-hidden="true">
+              {lab.teachingWalkthrough.map((step, stepIndex) => (
+                <span class="system-lab__walkthrough-dot" data-walkthrough-dot={stepIndex}>
+                  {step.step}
+                </span>
+              ))}
+            </span>
+          </div>
+        </div>
+
+        <div class="system-lab__walkthrough-body">
+          <span class="system-lab__walkthrough-focus" data-walkthrough-focus />
+          <p class="system-lab__walkthrough-question" data-walkthrough-question />
+          <button
+            type="button"
+            class="system-lab__walkthrough-reveal-btn"
+            data-walkthrough-reveal-btn
+          >
+            Reveal the reasoning
+          </button>
+          <div class="system-lab__walkthrough-reveal" data-walkthrough-reveal hidden>
+            <p data-walkthrough-reveal-text />
+            <p class="system-lab__walkthrough-takeaway">
+              <span>Takeaway</span>
+              <strong data-walkthrough-takeaway />
+            </p>
+          </div>
+        </div>
+
+        <div class="system-lab__walkthrough-footer">
+          <p class="system-lab__walkthrough-hint">
+            Each step sets the workload below — watch the diagram, meters, and decisions react.
+          </p>
+          <div class="system-lab__walkthrough-nav">
+            <button type="button" data-walkthrough-prev>
+              &larr; Prev
+            </button>
+            <button type="button" data-walkthrough-next>
+              Next &rarr;
+            </button>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   <section class="system-lab__scenarios" aria-label={`${lab.title} scenarios`}>
     <div class="system-lab__scenarios-header">
       <h2>Normal evolution scenarios</h2>

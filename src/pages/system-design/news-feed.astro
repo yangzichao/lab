@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SystemDesignLabNav from '../../components/system-design-lab/SystemDesignLabNav.astro';
+import SystemDesignConstraintLab from '../../components/system-design-lab/SystemDesignConstraintLab.astro';
+import { newsFeedLabDefinition } from '../../scripts/system-design-lab/labs/news-feed-lab';
+import { getSystemDesignLabPage } from '../../scripts/system-design-lab/system-design-pages';
+
+const page = getSystemDesignLabPage('news-feed');
+---
+
+<BaseLayout title={page.pageTitle} description={page.metaDescription}>
+  <SystemDesignLabNav current="news-feed" />
+  <SystemDesignConstraintLab lab={newsFeedLabDefinition} />
+</BaseLayout>

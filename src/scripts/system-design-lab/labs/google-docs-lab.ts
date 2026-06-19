@@ -293,6 +293,63 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
     'One document room is the ordering point for edits; large read or presence fanout can be split away from that room.',
     'Presence is modeled as best effort because cursor updates are ephemeral, unlike document operations.',
   ],
+  teachingWalkthrough: [
+    {
+      id: 'solo',
+      step: '01',
+      focus: 'One author',
+      scenarioId: 'solo',
+      question:
+        'A solo writer edits one document. Do you need operational transforms, a WebSocket, or any ordering machinery yet?',
+      reveal:
+        'No. With one author there are no concurrent edits to reconcile, so periodically saving the latest document body is correct. The collaboration machinery only earns its place once edits can conflict.',
+      takeaway: 'No concurrency means no ordering problem — just persist the latest version.',
+    },
+    {
+      id: 'team',
+      step: '02',
+      focus: 'A few editors',
+      scenarioId: 'team',
+      question:
+        'Now a small team edits together live. What is the first piece you add, and why does one document need a single owner?',
+      reveal:
+        'A WebSocket layer pushes changes in real time, and each document gets one authoritative room that serializes operations into a single order — without one ordering point, two clients would diverge.',
+      takeaway: 'Live collaboration needs one authoritative ordering point per document.',
+    },
+    {
+      id: 'offline',
+      step: '03',
+      focus: 'Edits on stale base',
+      scenarioId: 'offline',
+      question:
+        'An editor goes offline and edits an old version, then reconnects. Why can you not just append their operations?',
+      reveal:
+        'Their operations were written against a base that has since moved, so positions are stale. You must transform (OT) or merge (CRDT) the operations against everything that happened meanwhile, or edits land in the wrong place.',
+      takeaway: 'Edits on a drifted base need transformation/merge, not blind append.',
+    },
+    {
+      id: 'public-doc',
+      step: '04',
+      focus: 'Many viewers',
+      scenarioId: 'public-doc',
+      question:
+        'A document is shared widely; most connections only watch. Should presence and broadcast run through the edit room?',
+      reveal:
+        'No — presence and view fanout are high-volume and best-effort, while the edit room is the scarce ordering point. Split presence/broadcast into their own tier so spectators never slow down the authoritative ordering.',
+      takeaway: 'Keep best-effort fanout off the scarce ordering path.',
+    },
+    {
+      id: 'hot-doc',
+      step: '05',
+      focus: 'One hot document',
+      scenarioId: 'hot-doc',
+      question:
+        'One document is enormously popular. The room still orders edits — so what has to scale around it?',
+      reveal:
+        'The single ordering room stays authoritative, but reads, presence, and broadcast need fanout tiers, and the op log needs snapshots so new joiners recover fast instead of replaying the whole history.',
+      takeaway: 'The ordering point stays single; reads, presence, and recovery fan out around it.',
+    },
+  ],
   analyze: analyzeGoogleDocsWorkload,
 };
 

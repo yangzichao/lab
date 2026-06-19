@@ -330,6 +330,63 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
     'Hot-key thresholds are intentionally conservative because one abusive key can dominate a shard even when total QPS looks safe.',
     'Strict global quotas across regions are modeled as a correctness choice that spends latency and availability budget.',
   ],
+  teachingWalkthrough: [
+    {
+      id: 'single',
+      step: '01',
+      focus: 'One server',
+      scenarioId: 'single-process',
+      question:
+        'A single service does ~80 checks/s against 500 keys. Where do you keep the counters, and is anything else needed?',
+      reveal:
+        'An in-process map is correct and fastest while one process owns every decision — there is no cross-instance race, so Redis, sharding, and a quota service would all be premature.',
+      takeaway: 'With one decision-maker, a local in-memory counter is the correct baseline.',
+    },
+    {
+      id: 'fleet',
+      step: '02',
+      focus: 'Many servers race',
+      scenarioId: 'api-fleet',
+      question:
+        'Now 12 servers enforce the same key. Why do per-process counters give the wrong answer, and what is the minimum fix?',
+      reveal:
+        'Independent counters each allow the full quota, so the real limit is multiplied by the fleet size. You need one shared atomic check-and-update — Redis with a Lua script makes read-decide-write a single operation instead of a race.',
+      takeaway: 'Distributed enforcement needs one atomic check-and-update, not per-process state.',
+    },
+    {
+      id: 'bursty',
+      step: '03',
+      focus: 'Bursts + tight latency',
+      scenarioId: 'bursty-api',
+      question:
+        'A public API allows short bursts and wants single-digit-ms decisions. What changes about the algorithm and the path?',
+      reveal:
+        'A token bucket tolerates bursts up to a refill cap, and a tight latency budget favors a local pre-check (or cached grant) before the remote store, so most requests never pay the network round trip.',
+      takeaway: 'Tight latency pushes work local; burst tolerance picks the algorithm (token bucket).',
+    },
+    {
+      id: 'hot-key',
+      step: '04',
+      focus: 'One key gets hammered',
+      scenarioId: 'hot-key-abuse',
+      question:
+        'Total QPS looks safe, but one abusive key takes 40% of it. Does sharding by key solve the problem?',
+      reveal:
+        'Sharding spreads total load, but a single hot key still maps to one shard and can overload it. Hot keys need isolation, local pre-filtering, or per-key bucketing on top of sharding.',
+      takeaway: 'Sharding scales totals, not skew; hot keys need their own handling.',
+    },
+    {
+      id: 'global',
+      step: '05',
+      focus: 'Exact global quota',
+      scenarioId: 'global-strict',
+      question:
+        'Six regions must share one precise quota. Why is this the most expensive option, and when is it worth it?',
+      reveal:
+        'Exact global counting needs cross-region coordination (or pre-allocated regional budgets), which spends latency and availability. It is only worth it when overshoot is costly; otherwise approximate regional enforcement is faster and more available.',
+      takeaway: 'Strict global correctness trades latency and availability — choose it deliberately.',
+    },
+  ],
   analyze: analyzeRateLimiterWorkload,
 };
 

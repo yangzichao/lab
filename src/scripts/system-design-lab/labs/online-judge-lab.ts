@@ -303,6 +303,63 @@ export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
     'The result cache stores final or in-progress verdict objects, not the source code blob.',
     'Kafka is deliberately not required here unless the design needs replay, analytics fanout, or multiple consumers.',
   ],
+  teachingWalkthrough: [
+    {
+      id: 'toy',
+      step: '01',
+      focus: 'A prototype',
+      scenarioId: 'toy',
+      question:
+        'A toy judge gets a handful of submissions. Can the API just compile, run, and return the verdict in the same request?',
+      reveal:
+        'At this volume, yes — a synchronous run is the simplest correct design. But notice the request is now held open for seconds of untrusted code execution, which is exactly what breaks as soon as traffic arrives.',
+      takeaway: 'Synchronous execution is fine at toy scale but couples request time to run time.',
+    },
+    {
+      id: 'async',
+      step: '02',
+      focus: 'Decouple run time',
+      scenarioId: 'async',
+      question:
+        'Submissions climb and runs take seconds. Why return a token immediately instead of the verdict?',
+      reveal:
+        'Holding a request open for seconds ties up API capacity and times out under load. Accept the submission, persist metadata, return a token, and let workers execute asynchronously while the client polls.',
+      takeaway: 'Decouple submission from execution: accept fast, run async, poll for the verdict.',
+    },
+    {
+      id: 'contest',
+      step: '03',
+      focus: 'Contest spike',
+      scenarioId: 'contest',
+      question:
+        'A contest starts and submissions spike 50x. What actually determines how long users wait — API CPU or something else?',
+      reveal:
+        'The API is cheap; the cost is sandboxed execution. A queue absorbs the spike and gives workers a pull-based backlog, so user wait time is governed by queue depth and worker count, not API throughput.',
+      takeaway: 'In an online judge, queue depth and worker slots — not API CPU — set the wait.',
+    },
+    {
+      id: 'many-languages',
+      step: '04',
+      focus: 'Many runtimes',
+      scenarioId: 'many-languages',
+      question:
+        'Now you support many languages. Why can a single generic worker pool make latency worse?',
+      reveal:
+        'Each language needs its runtime image, and cold-starting the wrong one adds seconds. Language-specific warm pools keep runners hot so a submission lands on a ready sandbox instead of paying a cold start.',
+      takeaway: 'Per-language warm pools beat one generic pool once runtimes and cold starts diverge.',
+    },
+    {
+      id: 'leetcode-scale',
+      step: '05',
+      focus: 'Full platform scale',
+      scenarioId: 'leetcode-scale',
+      question:
+        'At platform scale, what has to scale beyond just adding workers?',
+      reveal:
+        'Verdicts are immutable, so a result cache absorbs polling; submission metadata is partitioned; and contest traffic gets isolated queues so a spike in one event cannot starve everyone else.',
+      takeaway: 'Scale the judge with cached immutable verdicts, partitioned metadata, and isolated queues.',
+    },
+  ],
   analyze: analyzeOnlineJudgeWorkload,
 };
 

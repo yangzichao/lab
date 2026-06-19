@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SystemDesignLabNav from '../../components/system-design-lab/SystemDesignLabNav.astro';
+import SystemDesignConstraintLab from '../../components/system-design-lab/SystemDesignConstraintLab.astro';
+import { webCrawlerLabDefinition } from '../../scripts/system-design-lab/labs/web-crawler-lab';
+import { getSystemDesignLabPage } from '../../scripts/system-design-lab/system-design-pages';
+
+const page = getSystemDesignLabPage('web-crawler');
+---
+
+<BaseLayout title={page.pageTitle} description={page.metaDescription}>
+  <SystemDesignLabNav current="web-crawler" />
+  <SystemDesignConstraintLab lab={webCrawlerLabDefinition} />
+</BaseLayout>

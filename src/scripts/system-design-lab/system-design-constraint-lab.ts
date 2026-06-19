@@ -121,11 +121,107 @@ function initLab(definition: SystemDesignLabDefinition, labElement: HTMLElement)
     });
   });
 
-  if (activeScenarioId) {
+  const walkthroughActive = setupWalkthrough(definition, labElement, applyScenario);
+
+  if (walkthroughActive) {
+    // The first walkthrough step already applied its scenario and rendered.
+  } else if (activeScenarioId) {
     applyScenario(activeScenarioId);
   } else {
     render();
   }
+}
+
+function setupWalkthrough(
+  definition: SystemDesignLabDefinition,
+  labElement: HTMLElement,
+  applyScenario: (scenarioId: string) => void,
+): boolean {
+  const walkthrough = definition.teachingWalkthrough;
+  const root = labElement.querySelector<HTMLElement>('[data-walkthrough]');
+  if (!walkthrough || walkthrough.length === 0 || !root) {
+    return false;
+  }
+
+  const positionElement = root.querySelector<HTMLElement>('[data-walkthrough-position]');
+  const focusElement = root.querySelector<HTMLElement>('[data-walkthrough-focus]');
+  const questionElement = root.querySelector<HTMLElement>('[data-walkthrough-question]');
+  const revealButton = root.querySelector<HTMLButtonElement>('[data-walkthrough-reveal-btn]');
+  const revealPanel = root.querySelector<HTMLElement>('[data-walkthrough-reveal]');
+  const revealText = root.querySelector<HTMLElement>('[data-walkthrough-reveal-text]');
+  const takeawayElement = root.querySelector<HTMLElement>('[data-walkthrough-takeaway]');
+  const prevButton = root.querySelector<HTMLButtonElement>('[data-walkthrough-prev]');
+  const nextButton = root.querySelector<HTMLButtonElement>('[data-walkthrough-next]');
+  const dotElements = Array.from(root.querySelectorAll<HTMLElement>('[data-walkthrough-dot]'));
+
+  let currentIndex = 0;
+
+  const showReveal = (visible: boolean): void => {
+    if (revealPanel) {
+      revealPanel.hidden = !visible;
+    }
+    if (revealButton) {
+      revealButton.setAttribute('aria-expanded', String(visible));
+      revealButton.textContent = visible ? 'Hide the reasoning' : 'Reveal the reasoning';
+    }
+  };
+
+  const renderStep = (index: number): void => {
+    const step = walkthrough[index];
+    if (!step) {
+      return;
+    }
+    currentIndex = index;
+
+    if (positionElement) {
+      positionElement.textContent = `Step ${index + 1} / ${walkthrough.length}`;
+    }
+    if (focusElement) {
+      focusElement.textContent = step.focus;
+    }
+    if (questionElement) {
+      questionElement.textContent = step.question;
+    }
+    if (revealText) {
+      revealText.textContent = step.reveal;
+    }
+    if (takeawayElement) {
+      takeawayElement.textContent = step.takeaway;
+    }
+
+    dotElements.forEach((dot, dotIndex) => {
+      dot.dataset.state = dotIndex === index ? 'active' : dotIndex < index ? 'done' : 'todo';
+    });
+    if (prevButton) {
+      prevButton.disabled = index === 0;
+    }
+    if (nextButton) {
+      nextButton.disabled = index === walkthrough.length - 1;
+    }
+
+    showReveal(false);
+    applyScenario(step.scenarioId);
+  };
+
+  revealButton?.addEventListener('click', () => {
+    showReveal(revealPanel?.hidden ?? true);
+  });
+  prevButton?.addEventListener('click', () => {
+    if (currentIndex > 0) {
+      renderStep(currentIndex - 1);
+    }
+  });
+  nextButton?.addEventListener('click', () => {
+    if (currentIndex < walkthrough.length - 1) {
+      renderStep(currentIndex + 1);
+    }
+  });
+  dotElements.forEach((dot, dotIndex) => {
+    dot.addEventListener('click', () => renderStep(dotIndex));
+  });
+
+  renderStep(0);
+  return true;
 }
 
 function readWorkloadValues(

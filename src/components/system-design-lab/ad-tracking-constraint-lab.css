@@ -168,6 +168,209 @@
   line-height: 1.4;
 }
 
+.system-lab__walkthrough {
+  margin-bottom: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.system-lab__walkthrough-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(180deg, #f3f8fb, #fafcfd);
+}
+
+.system-lab__walkthrough-header h2 {
+  font-size: 1.1rem;
+  letter-spacing: 0;
+}
+
+.system-lab__walkthrough-progress {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.system-lab__walkthrough-progress > span {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.system-lab__walkthrough-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.system-lab__walkthrough-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 22px;
+  border: 1px solid #c4ccd3;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #8a939c;
+  font-size: 0.7rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.system-lab__walkthrough-dot[data-state='done'] {
+  border-color: #8aa98f;
+  background: #eef6ef;
+  color: #3f7b54;
+}
+
+.system-lab__walkthrough-dot[data-state='active'] {
+  border-color: #2f78a5;
+  background: #2f78a5;
+  color: #ffffff;
+}
+
+.system-lab__walkthrough-body {
+  display: grid;
+  gap: 14px;
+  padding: 22px 20px;
+}
+
+.system-lab__walkthrough-focus {
+  justify-self: start;
+  padding: 4px 10px;
+  border: 1px solid #b9d4e4;
+  border-radius: 999px;
+  background: #f3f9fc;
+  color: #2f6f97;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.system-lab__walkthrough-question {
+  color: var(--color-text-main);
+  font-size: 1.18rem;
+  font-weight: 700;
+  line-height: 1.45;
+  max-width: 820px;
+}
+
+.system-lab__walkthrough-reveal-btn {
+  justify-self: start;
+  padding: 9px 16px;
+  border: 1px solid #2f78a5;
+  border-radius: var(--radius);
+  background: #ffffff;
+  color: #2f6f97;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.system-lab__walkthrough-reveal-btn:hover {
+  background: #f3f9fc;
+}
+
+.system-lab__walkthrough-reveal {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid #d8e4ec;
+  border-left: 3px solid #2f78a5;
+  border-radius: var(--radius);
+  background: #f8fbfd;
+}
+
+.system-lab__walkthrough-reveal p {
+  color: var(--color-text-muted);
+  font-size: 0.96rem;
+  line-height: 1.6;
+  max-width: 820px;
+}
+
+.system-lab__walkthrough-takeaway {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.system-lab__walkthrough-takeaway span {
+  flex: 0 0 auto;
+  color: #3f7b54;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.system-lab__walkthrough-takeaway strong {
+  color: var(--color-text-main);
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.system-lab__walkthrough-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-border);
+  background: #fafafa;
+}
+
+.system-lab__walkthrough-hint {
+  color: var(--color-text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  max-width: 520px;
+}
+
+.system-lab__walkthrough-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.system-lab__walkthrough-nav button {
+  padding: 8px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #ffffff;
+  color: var(--color-text-main);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.system-lab__walkthrough-nav button:hover:not(:disabled) {
+  background: var(--color-card-hover);
+  border-color: #bbbbbb;
+}
+
+.system-lab__walkthrough-nav button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .system-lab__workspace {
   display: grid;
   grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
