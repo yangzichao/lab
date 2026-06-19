@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PhysicsLabShell from '../../components/physics-lab/PhysicsLabShell.astro';
+import { findPhysicsLab } from '../../scripts/physics-lab/physics-lab-catalog';
+
+const entry = findPhysicsLab('diffraction')!;
+---
+
+<BaseLayout title={`${entry.title} — Lab`} description={entry.tagline}>
+  <PhysicsLabShell entry={entry}>
+    <Fragment slot="readouts">
+      <div class="plab__readout"><span>First single-slit min</span><strong data-readout="firstMinimum">sin θ = 0.000</strong></div>
+      <div class="plab__readout"><span>Principal-max spacing</span><strong data-readout="maximaSpacing">— (single)</strong></div>
+      <div class="plab__readout"><span>Slits</span><strong data-readout="slits">1</strong></div>
+      <div class="plab__readout"><span>First-order angle</span><strong data-readout="firstOrderAngle">— (single)</strong></div>
+    </Fragment>
+
+    <form class="plab__panel" slot="controls" aria-label="Diffraction controls">
+      <div class="plab__panel-head">
+        <p>Controls</p>
+        <h2>Diffraction</h2>
+      </div>
+
+      <div class="plab__actions">
+        <button class="plab__button" type="button" data-action="toggle">
+          <i class="ph ph-play" aria-hidden="true"></i><span>Play</span>
+        </button>
+        <button class="plab__button" type="button" data-action="reset">
+          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>Reset</span>
+        </button>
+      </div>
+
+      <div class="plab__presets">
+        <button class="plab__preset" type="button" data-preset="single">Single slit</button>
+        <button class="plab__preset" type="button" data-preset="double">Double slit</button>
+        <button class="plab__preset" type="button" data-preset="grating">Grating</button>
+      </div>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Slit width a</span><output data-output="slitWidth">4.0 µ</output></span>
+        <input type="range" min="1" max="14" step="0.5" value="4" data-control="slitWidth" />
+      </label>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Slit spacing d</span><output data-output="slitSpacing">18.0 µ</output></span>
+        <input type="range" min="6" max="40" step="0.5" value="18" data-control="slitSpacing" />
+      </label>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Slit count N</span><output data-output="slitCount">6</output></span>
+        <input type="range" min="2" max="12" step="1" value="6" data-control="slitCount" />
+      </label>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Wavelength λ</span><output data-output="wavelength">540 nm</output></span>
+        <input type="range" min="380" max="720" step="1" value="540" data-control="wavelength" />
+      </label>
+
+      <label class="plab__toggle">
+        <input type="checkbox" data-control="showEnvelope" checked />
+        <span><strong>Single-slit envelope</strong><small>Dashed sinc² cap over the fine fringes.</small></span>
+      </label>
+
+      <label class="plab__toggle">
+        <input type="checkbox" data-control="showScreenBand" checked />
+        <span><strong>Screen band</strong><small>Intensity painted as the colour you would see.</small></span>
+      </label>
+    </form>
+  </PhysicsLabShell>
+
+  <script>
+    import { initDiffractionLab } from '../../scripts/physics-lab/diffraction/diffraction-lab';
+    initDiffractionLab();
+  </script>
+</BaseLayout>

@@ -11,10 +11,29 @@ they can evolve independently. Lives at **[lab.zichaoyang.com](https://lab.zicha
 | Double Pendulum | `/physics/double-pendulum/` |
 | Orbit Lab | `/physics/orbit/` |
 | Wave Interference | `/physics/wave-interference/` |
-| Ad Click Tracking Lab | `/system-design/ad-tracking/` |
+| Electric Field | `/physics/electric-field/` |
+| Fourier Epicycles | `/physics/fourier-epicycles/` |
+| Kinetic Theory | `/physics/ideal-gas/` |
+| Coupled Oscillators | `/physics/coupled-oscillators/` |
+| Diffraction | `/physics/diffraction/` |
+| Charged Particle | `/physics/charged-particle/` |
+| Three-Body Problem | `/physics/three-body/` |
+| Lenses & Refraction | `/physics/lens-optics/` |
+| URL Shortener Lab | `/system-design/url-shortener/` |
+| Rate Limiter Lab | `/system-design/rate-limiter/` |
+| News Feed Lab | `/system-design/news-feed/` |
+| Chat / Messaging Lab | `/system-design/chat-messaging/` |
+| Notification System Lab | `/system-design/notification-system/` |
+| Search Autocomplete Lab | `/system-design/search-autocomplete/` |
+| Web Crawler Lab | `/system-design/web-crawler/` |
+| Video Streaming Lab | `/system-design/video-streaming/` |
+| File Sync Lab | `/system-design/file-sync/` |
+| Ride Sharing Lab | `/system-design/ride-sharing/` |
+| Key-Value Store Lab | `/system-design/kv-store/` |
+| Payment Ledger Lab | `/system-design/payment-ledger/` |
 | Google Docs Lab | `/system-design/google-docs/` |
 | Online Judge Lab | `/system-design/online-judge/` |
-| Rate Limiter Lab | `/system-design/rate-limiter/` |
+| Ad Click Tracking Lab | `/system-design/ad-tracking/` |
 
 ## Develop
 
@@ -34,12 +53,18 @@ Pushed to `main` → GitHub Actions builds and publishes to GitHub Pages
 
 - `src/pages/index.astro` — landing page listing the labs.
 - `src/pages/{geoduck-dig,quaternions}.astro`,
-  `src/pages/physics/{double-pendulum,orbit,wave-interference}.astro`, and
-  `src/pages/system-design/{ad-tracking,google-docs,online-judge,rate-limiter}.astro`
-  — the labs.
+  `src/pages/physics/{double-pendulum,orbit,wave-interference,electric-field,fourier-epicycles,ideal-gas,coupled-oscillators,diffraction,charged-particle,three-body,lens-optics}.astro`, and
+  and `src/pages/system-design/<slug>.astro` (15 labs) — the labs.
 - Each system design lab is its own page; metadata (page title, nav label, index
   card) lives in `src/scripts/system-design-lab/system-design-pages.ts` and the
   cross-lab nav is `src/components/system-design-lab/SystemDesignLabNav.astro`.
+  Adding a data-driven lab is: write its definition under
+  `src/scripts/system-design-lab/labs/<slug>-lab.ts` (build the architecture
+  diagram with `buildColumnDiagram` from `diagram-layout.ts` instead of
+  hand-placing SVG coordinates), register it in `lab-definitions.ts`, add a page,
+  and add a `system-design-pages.ts` entry. Most labs ship a `teachingWalkthrough`
+  — an ordered Socratic walkthrough whose steps apply scenarios so the diagram,
+  meters, and decisions react live (Ad Tracking is the one bespoke exception).
 - Each physics lab is one page driven by a shared shell
   (`src/components/physics-lab/PhysicsLabShell.astro`) and registered in
   `src/scripts/physics-lab/physics-lab-catalog.ts`. Adding a new physics lab is:

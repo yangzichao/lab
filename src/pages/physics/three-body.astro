@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PhysicsLabShell from '../../components/physics-lab/PhysicsLabShell.astro';
+import { findPhysicsLab } from '../../scripts/physics-lab/physics-lab-catalog';
+
+const entry = findPhysicsLab('three-body')!;
+---
+
+<BaseLayout title={`${entry.title} — Lab`} description={entry.tagline}>
+  <PhysicsLabShell entry={entry}>
+    <Fragment slot="readouts">
+      <div class="plab__readout"><span>Time</span><strong data-readout="time">0.0 s</strong></div>
+      <div class="plab__readout"><span>Total energy</span><strong data-readout="energy">+0.000</strong></div>
+      <div class="plab__readout"><span>Total momentum</span><strong data-readout="momentum">0.000</strong></div>
+      <div class="plab__readout"><span>Status</span><strong data-readout="status">Bounded</strong></div>
+    </Fragment>
+
+    <form class="plab__panel" slot="controls" aria-label="Three-body controls">
+      <div class="plab__panel-head">
+        <p>Controls</p>
+        <h2>Three-Body Problem</h2>
+      </div>
+
+      <div class="plab__actions">
+        <button class="plab__button is-primary" type="button" data-action="toggle">
+          <i class="ph ph-pause" aria-hidden="true"></i><span>Pause</span>
+        </button>
+        <button class="plab__button" type="button" data-action="reset">
+          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>Reset</span>
+        </button>
+      </div>
+
+      <div class="plab__presets">
+        <button class="plab__preset" type="button" data-preset="figure8">Figure-8</button>
+        <button class="plab__preset" type="button" data-preset="chaos">Chaos</button>
+        <button class="plab__preset" type="button" data-preset="triangle">Triangle</button>
+      </div>
+
+      <label class="plab__toggle">
+        <input type="checkbox" data-control="showTrails" checked />
+        <span><strong>Show trails</strong><small>Fading path each body leaves behind.</small></span>
+      </label>
+
+      <label class="plab__toggle">
+        <input type="checkbox" data-control="showVectors" />
+        <span><strong>Show velocity vectors</strong><small>Teal arrow per body.</small></span>
+      </label>
+
+      <label class="plab__toggle">
+        <input type="checkbox" data-control="showCenterOfMass" />
+        <span><strong>Show centre of mass</strong><small>Should stay put — momentum is conserved.</small></span>
+      </label>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Speed</span><output data-output="speed">1.00×</output></span>
+        <input type="range" min="0.2" max="3" step="0.05" value="1" data-control="speed" />
+      </label>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Perturbation</span><output data-output="perturbation">0.50%</output></span>
+        <input type="range" min="0" max="5" step="0.05" value="0.5" data-control="perturbation" />
+      </label>
+    </form>
+  </PhysicsLabShell>
+
+  <script>
+    import { initThreeBodyLab } from '../../scripts/physics-lab/three-body/three-body-lab';
+    initThreeBodyLab();
+  </script>
+</BaseLayout>

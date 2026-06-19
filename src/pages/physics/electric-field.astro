@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PhysicsLabShell from '../../components/physics-lab/PhysicsLabShell.astro';
+import { findPhysicsLab } from '../../scripts/physics-lab/physics-lab-catalog';
+
+const entry = findPhysicsLab('electric-field')!;
+---
+
+<BaseLayout title={`${entry.title} — Lab`} description={entry.tagline}>
+  <PhysicsLabShell entry={entry}>
+    <Fragment slot="readouts">
+      <div class="plab__readout"><span>Potential V</span><strong data-readout="potential">+0.0</strong></div>
+      <div class="plab__readout"><span>Field |E|</span><strong data-readout="fieldStrength">0.00</strong></div>
+      <div class="plab__readout"><span>Charges</span><strong data-readout="charges">2</strong></div>
+      <div class="plab__readout"><span>Net charge</span><strong data-readout="netCharge">0</strong></div>
+    </Fragment>
+
+    <form class="plab__panel" slot="controls" aria-label="Electric field controls">
+      <div class="plab__panel-head">
+        <p>Controls</p>
+        <h2>Electric Field</h2>
+      </div>
+
+      <div class="plab__actions">
+        <button class="plab__button is-primary" type="button" data-action="toggle">
+          <i class="ph ph-pause" aria-hidden="true"></i><span>Pause</span>
+        </button>
+        <button class="plab__button" type="button" data-action="reset">
+          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>Reset</span>
+        </button>
+      </div>
+
+      <div class="plab__presets">
+        <button class="plab__preset" type="button" data-preset="dipole">Dipole</button>
+        <button class="plab__preset" type="button" data-preset="like">Like pair</button>
+        <button class="plab__preset" type="button" data-preset="quadrupole">Quadrupole</button>
+      </div>
+
+      <label class="plab__toggle">
+        <input type="checkbox" data-control="showEquipotentials" checked />
+        <span><strong>Equipotential lines</strong><small>Contours where the potential is level.</small></span>
+      </label>
+
+      <label class="plab__toggle">
+        <input type="checkbox" data-control="showFieldLines" checked />
+        <span><strong>Field lines</strong><small>Streamlines flowing from + to −.</small></span>
+      </label>
+
+      <p class="plab__notice">
+        <i class="ph ph-hand-pointing" aria-hidden="true"></i>
+        <span>Drag any charge on the canvas to reshape the field. The teal dot is a positive test charge drifting along E.</span>
+      </p>
+    </form>
+  </PhysicsLabShell>
+
+  <script>
+    import { initElectricFieldLab } from '../../scripts/physics-lab/electric-field/electric-field-lab';
+    initElectricFieldLab();
+  </script>
+</BaseLayout>

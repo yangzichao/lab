@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PhysicsLabShell from '../../components/physics-lab/PhysicsLabShell.astro';
+import { findPhysicsLab } from '../../scripts/physics-lab/physics-lab-catalog';
+
+const entry = findPhysicsLab('ideal-gas')!;
+---
+
+<BaseLayout title={`${entry.title} — Lab`} description={entry.tagline}>
+  <PhysicsLabShell entry={entry}>
+    <Fragment slot="readouts">
+      <div class="plab__readout"><span>Particles</span><strong data-readout="count">170</strong></div>
+      <div class="plab__readout"><span>Temperature</span><strong data-readout="temperature">1.00</strong></div>
+      <div class="plab__readout"><span>Pressure</span><strong data-readout="pressure">0.00</strong></div>
+      <div class="plab__readout"><span>Mean speed</span><strong data-readout="meanSpeed">0.00</strong></div>
+    </Fragment>
+
+    <form class="plab__panel" slot="controls" aria-label="Kinetic theory controls">
+      <div class="plab__panel-head">
+        <p>Controls</p>
+        <h2>Kinetic Theory</h2>
+      </div>
+
+      <div class="plab__actions">
+        <button class="plab__button is-primary" type="button" data-action="toggle">
+          <i class="ph ph-pause" aria-hidden="true"></i><span>Pause</span>
+        </button>
+        <button class="plab__button" type="button" data-action="reset">
+          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>Reset</span>
+        </button>
+      </div>
+
+      <div class="plab__presets">
+        <button class="plab__preset" type="button" data-preset="cold">Cold</button>
+        <button class="plab__preset" type="button" data-preset="warm">Warm</button>
+        <button class="plab__preset" type="button" data-preset="hot">Hot</button>
+      </div>
+
+      <label class="plab__toggle">
+        <input type="checkbox" data-control="showHistogram" checked />
+        <span><strong>Show speed distribution</strong><small>Live histogram with the Maxwell–Boltzmann curve.</small></span>
+      </label>
+
+      <label class="plab__toggle">
+        <input type="checkbox" data-control="colorBySpeed" checked />
+        <span><strong>Colour by speed</strong><small>Blue is slow and cold, red is fast and hot.</small></span>
+      </label>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Particles</span><output data-output="count">170</output></span>
+        <input type="range" min="60" max="240" step="2" value="170" data-control="count" />
+      </label>
+
+      <label class="plab__field">
+        <span class="plab__field-label"><span>Temperature</span><output data-output="temperature">1.00×</output></span>
+        <input type="range" min="0.1" max="4" step="0.05" value="1" data-control="temperature" />
+      </label>
+    </form>
+  </PhysicsLabShell>
+
+  <script>
+    import { initIdealGasLab } from '../../scripts/physics-lab/ideal-gas/ideal-gas-lab';
+    initIdealGasLab();
+  </script>
+</BaseLayout>
