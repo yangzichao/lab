@@ -6,6 +6,7 @@ they can evolve independently. Lives at **[lab.zichaoyang.com](https://lab.zicha
 
 | Lab | Path |
 | --- | --- |
+| Geoduck Dig | `/geoduck-dig/` |
 | Quaternion Rotation Lab | `/quaternions/` |
 | Physics Simulation Lab | `/physics-simulations/` |
 | System Design Lab | `/system-design-lab/` |
@@ -27,7 +28,7 @@ Pushed to `main` → GitHub Actions builds and publishes to GitHub Pages
 ## Layout
 
 - `src/pages/index.astro` — landing page listing the labs.
-- `src/pages/{quaternions,physics-simulations,system-design-lab}.astro` — the labs.
+- `src/pages/{geoduck-dig,quaternions,physics-simulations,system-design-lab}.astro` — the labs.
 - `src/scripts/<lab>/` — per-lab logic; `src/styles/tools/` — per-lab styles.
 - `src/components/system-design-lab/` — system-design lab widgets.
 - `src/layouts/BaseLayout.astro` + `src/scripts/effects/` — shared shell carried
