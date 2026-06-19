@@ -1,0 +1,136 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const labs = [
+  {
+    title: 'Quaternion Rotation Lab',
+    href: '/quaternions/',
+    description:
+      'An interactive 3D teaching lab for quaternion rotations, SLERP, the SU(2) double cover, Pauli matrices, and Bloch-sphere motion.',
+  },
+  {
+    title: 'Physics Simulation Lab',
+    href: '/physics-simulations/',
+    description:
+      'Double pendulum chaos, central-force orbital mechanics, and two-source wave interference — live controls and canvas rendering.',
+  },
+  {
+    title: 'System Design Lab',
+    href: '/system-design-lab/',
+    description:
+      'Constraint-driven system design playgrounds: ad tracking, Google Docs, Online Judge, and rate limiter trade-offs.',
+  },
+];
+---
+
+<BaseLayout
+  title="Lab — Zichao Yang"
+  description="Interactive teaching labs & toys by Zichao Yang: quaternion rotations, physics simulations, and system design playgrounds. Everything runs in your browser."
+>
+  <header class="lab-index__header">
+    <a href="https://zichaoyang.com/" class="lab-index__back">&larr; zichaoyang.com</a>
+    <h1>Lab</h1>
+    <p>
+      Interactive labs &amp; toys — small things I build to understand bigger things.
+      Everything runs entirely in your browser.
+    </p>
+  </header>
+
+  <ul class="lab-index__grid">
+    {
+      labs.map((lab) => (
+        <li>
+          <a href={lab.href} class="lab-index__card">
+            <h2>{lab.title}</h2>
+            <p>{lab.description}</p>
+            <span class="lab-index__go">Open &rarr;</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</BaseLayout>
+
+<style>
+  .lab-index__header {
+    margin: 3.5rem 0 2.5rem;
+  }
+
+  .lab-index__back {
+    display: inline-block;
+    margin-bottom: 1.25rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color var(--transition);
+  }
+
+  .lab-index__back:hover {
+    color: var(--color-text-main);
+  }
+
+  .lab-index__header h1 {
+    margin: 0 0 0.5rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .lab-index__header p {
+    margin: 0;
+    max-width: 40rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+  }
+
+  .lab-index__grid {
+    list-style: none;
+    margin: 0 0 4rem;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  }
+
+  .lab-index__card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-card-background);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      background var(--transition),
+      border-color var(--transition),
+      transform var(--transition);
+  }
+
+  .lab-index__card:hover {
+    background: var(--color-card-hover);
+    border-color: var(--color-text-muted);
+    transform: translateY(-2px);
+  }
+
+  .lab-index__card h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .lab-index__card p {
+    margin: 0 0 1.25rem;
+    flex: 1;
+    color: var(--color-text-muted);
+    line-height: 1.55;
+    font-size: 0.95rem;
+  }
+
+  .lab-index__go {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-accent);
+  }
+</style>

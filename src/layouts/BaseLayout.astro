@@ -1,0 +1,53 @@
+---
+import '../styles/global.css';
+import '../styles/effects/depth-3d.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Zichao Yang',
+  description = 'Personal homepage of Zichao Yang — researcher and developer.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://unpkg.com/@phosphor-icons/web" is:inline></script>
+
+    <!-- Pre-paint gate for the 3D depth effects: depth-3d.css only
+         hides reveal targets under html.fx3d, so no-JS and
+         reduced-motion visitors get the flat page with no flash. -->
+    <script is:inline>
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('fx3d');
+      }
+    </script>
+  </head>
+
+  <body>
+    <main class="container">
+      <slot />
+    </main>
+    <slot name="body-end" />
+    <script>
+      import { initDepthEffects } from '../scripts/effects/init-depth-effects';
+      initDepthEffects();
+    </script>
+  </body>
+</html>
