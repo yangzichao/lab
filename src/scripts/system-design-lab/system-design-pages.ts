@@ -171,6 +171,106 @@ export const systemDesignLabPages: SystemDesignLabPage[] = [
     metaDescription:
       'Constraint-driven ad click and impression tracking playground: scale from a single collector to a partitioned, streaming, billing-grade pipeline as the workload forces it.',
   },
+  {
+    slug: 'recommendation-system',
+    navLabel: 'Recommender',
+    cardTitle: 'Recommendation System Lab',
+    cardDescription:
+      'Grow a recommender from a popularity list to two-tower ANN retrieval, a ranking model fed by a feature store, and a real-time multi-stage funnel.',
+    pageTitle: 'Recommendation System — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven recommendation system playground with a guided walkthrough: candidate generation, two-tower embeddings, approximate nearest-neighbour retrieval, ranking, and a feature store.',
+  },
+  {
+    slug: 'feature-store',
+    navLabel: 'Feature Store',
+    cardTitle: 'Feature Store Lab',
+    cardDescription:
+      'Split features into online and offline stores with training/serving parity, point-in-time-correct training joins, and streaming freshness at scale.',
+    pageTitle: 'Feature Store — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven feature store playground with a guided walkthrough: online/offline parity, low-latency serving lookups, point-in-time training joins, and streaming features.',
+  },
+  {
+    slug: 'model-serving',
+    navLabel: 'Model Serving',
+    cardTitle: 'Model Serving Lab',
+    cardDescription:
+      'Take a model endpoint from one box to dynamic batching, GPU autoscaling, a versioned registry with canary rollout, and multi-model packing under a p99 budget.',
+    pageTitle: 'Model Serving — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven ML model serving playground with a guided walkthrough: request batching, GPU vs CPU autoscaling, model registry and canary deploys, and p99 latency under load.',
+  },
+  {
+    slug: 'fraud-detection',
+    navLabel: 'Fraud Detection',
+    cardTitle: 'Fraud Detection Lab',
+    cardDescription:
+      'Move from static rules to real-time streaming features and synchronous model scoring inside a tight decision budget, then add a label-feedback retraining loop and graph features.',
+    pageTitle: 'Real-time Fraud Detection — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven real-time fraud detection playground with a guided walkthrough: streaming feature aggregation, synchronous scoring under a latency budget, feedback loops, and graph features.',
+  },
+  {
+    slug: 'ml-training-pipeline',
+    navLabel: 'Training Pipeline',
+    cardTitle: 'ML Training Pipeline Lab',
+    cardDescription:
+      'Turn notebook training into a reproducible pipeline with data versioning, distributed training, experiment tracking, a model registry, and automated retraining.',
+    pageTitle: 'ML Training Pipeline — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven ML training pipeline playground with a guided walkthrough: orchestrated data and training stages, data versioning, distributed training, experiment tracking, and a model registry.',
+  },
+  {
+    slug: 'llm-training-infra',
+    navLabel: 'LLM Training',
+    cardTitle: 'LLM Pretraining Infra Lab',
+    cardDescription:
+      'Scale LLM pretraining from one GPU to data parallelism, then tensor + pipeline (3D) parallelism for a model too big for one GPU, with activation checkpointing and fault-tolerant checkpoints.',
+    pageTitle: 'LLM Pretraining Infrastructure — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven LLM pretraining playground with a guided walkthrough: data, tensor, and pipeline parallelism, gradient collectives over fast interconnect, activation checkpointing, and fault tolerance.',
+  },
+  {
+    slug: 'llm-inference',
+    navLabel: 'LLM Inference',
+    cardTitle: 'LLM Inference Lab',
+    cardDescription:
+      'Serve token generation from a single GPU through KV-cache batching, continuous batching with paged attention, tensor-parallel sharding, and prefill/decode disaggregation.',
+    pageTitle: 'LLM Inference Serving — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven LLM inference playground with a guided walkthrough: KV cache growth, continuous (in-flight) batching, paged attention, tensor parallelism, and prefill/decode disaggregation.',
+  },
+  {
+    slug: 'rag-system',
+    navLabel: 'RAG',
+    cardTitle: 'RAG System Lab',
+    cardDescription:
+      'Replace prompt-stuffing with vector retrieval: chunk and embed documents, ANN top-k search, reranking, hybrid search, caching, and context assembly within the window.',
+    pageTitle: 'RAG System — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven retrieval-augmented generation playground with a guided walkthrough: chunking, embeddings, vector-index ANN retrieval, reranking, hybrid search, and context-window assembly.',
+  },
+  {
+    slug: 'rlhf-pipeline',
+    navLabel: 'RLHF',
+    cardTitle: 'RLHF Pipeline Lab',
+    cardDescription:
+      'Walk the alignment pipeline from supervised fine-tuning to a reward model and a PPO rollout loop where generation throughput bottlenecks, plus the DPO alternative.',
+    pageTitle: 'RLHF / Alignment Pipeline — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven RLHF playground with a guided walkthrough: supervised fine-tuning, reward modelling, the PPO rollout loop with a KL-constrained reference model, and the DPO alternative.',
+  },
+  {
+    slug: 'agent-orchestration',
+    navLabel: 'Agents',
+    cardTitle: 'Agent Orchestration Lab',
+    cardDescription:
+      'Build an LLM agent from a single tool call to a reason-act loop with memory and planning, parallel sandboxed tool execution, and multi-agent orchestration with tracing.',
+    pageTitle: 'LLM Agent Orchestration — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven LLM agent orchestration playground with a guided walkthrough: the reason-act loop, tool registry and sandboxing, short- and long-term memory, context management, and observability.',
+  },
 ];
 
 export const systemDesignLabPagesBySlug: Record<string, SystemDesignLabPage> =

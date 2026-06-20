@@ -34,6 +34,16 @@ they can evolve independently. Lives at **[lab.zichaoyang.com](https://lab.zicha
 | Google Docs Lab | `/system-design/google-docs/` |
 | Online Judge Lab | `/system-design/online-judge/` |
 | Ad Click Tracking Lab | `/system-design/ad-tracking/` |
+| Recommendation System Lab | `/system-design/recommendation-system/` |
+| Feature Store Lab | `/system-design/feature-store/` |
+| Model Serving Lab | `/system-design/model-serving/` |
+| Fraud Detection Lab | `/system-design/fraud-detection/` |
+| ML Training Pipeline Lab | `/system-design/ml-training-pipeline/` |
+| LLM Pretraining Infra Lab | `/system-design/llm-training-infra/` |
+| LLM Inference Lab | `/system-design/llm-inference/` |
+| RAG System Lab | `/system-design/rag-system/` |
+| RLHF Pipeline Lab | `/system-design/rlhf-pipeline/` |
+| Agent Orchestration Lab | `/system-design/agent-orchestration/` |
 
 ## Develop
 
@@ -54,7 +64,8 @@ Pushed to `main` → GitHub Actions builds and publishes to GitHub Pages
 - `src/pages/index.astro` — landing page listing the labs.
 - `src/pages/{geoduck-dig,quaternions}.astro`,
   `src/pages/physics/{double-pendulum,orbit,wave-interference,electric-field,fourier-epicycles,ideal-gas,coupled-oscillators,diffraction,charged-particle,three-body,lens-optics}.astro`, and
-  and `src/pages/system-design/<slug>.astro` (15 labs) — the labs.
+  and `src/pages/system-design/<slug>.astro` (25 labs — core system design,
+  then ML systems, then LLM training/inference/agent infra) — the labs.
 - Each system design lab is its own page; metadata (page title, nav label, index
   card) lives in `src/scripts/system-design-lab/system-design-pages.ts` and the
   cross-lab nav is `src/components/system-design-lab/SystemDesignLabNav.astro`.

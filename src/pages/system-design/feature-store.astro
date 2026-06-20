@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SystemDesignLabNav from '../../components/system-design-lab/SystemDesignLabNav.astro';
+import SystemDesignConstraintLab from '../../components/system-design-lab/SystemDesignConstraintLab.astro';
+import { featureStoreLabDefinition } from '../../scripts/system-design-lab/labs/feature-store-lab';
+import { getSystemDesignLabPage } from '../../scripts/system-design-lab/system-design-pages';
+
+const page = getSystemDesignLabPage('feature-store');
+---
+
+<BaseLayout title={page.pageTitle} description={page.metaDescription}>
+  <SystemDesignLabNav current="feature-store" />
+  <SystemDesignConstraintLab lab={featureStoreLabDefinition} />
+</BaseLayout>
