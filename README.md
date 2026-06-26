@@ -6,7 +6,6 @@ they can evolve independently. Lives at **[lab.zichaoyang.com](https://lab.zicha
 
 | Lab | Path |
 | --- | --- |
-| Geoduck Dig | `/geoduck-dig/` |
 | Quaternion Rotation Lab | `/quaternions/` |
 | Double Pendulum | `/physics/double-pendulum/` |
 | Orbit Lab | `/physics/orbit/` |
@@ -62,7 +61,7 @@ Pushed to `main` → GitHub Actions builds and publishes to GitHub Pages
 ## Layout
 
 - `src/pages/index.astro` — landing page listing the labs.
-- `src/pages/{geoduck-dig,quaternions}.astro`,
+- `src/pages/quaternions.astro`,
   `src/pages/physics/{double-pendulum,orbit,wave-interference,electric-field,fourier-epicycles,ideal-gas,coupled-oscillators,diffraction,charged-particle,three-body,lens-optics}.astro`, and
   and `src/pages/system-design/<slug>.astro` (25 labs — core system design,
   then ML systems, then LLM training/inference/agent infra) — the labs.
