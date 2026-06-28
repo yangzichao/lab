@@ -82,6 +82,30 @@ export type DiagramFlowDefinition = {
   variant?: 'primary' | 'secondary' | 'direct';
 };
 
+/**
+ * Recognizable system-design component types. The diagram renders a distinct
+ * whiteboard silhouette + glyph per kind (cylinder for a database, bucket for
+ * object storage, stack for a scaled pool, browser frame for a client, …).
+ */
+export type ComponentKind =
+  | 'client'
+  | 'cdn'
+  | 'lb'
+  | 'api'
+  | 'service'
+  | 'compute'
+  | 'container'
+  | 'queue'
+  | 'stream'
+  | 'cache'
+  | 'db'
+  | 'nosql'
+  | 'objectstore'
+  | 'search'
+  | 'scheduler'
+  | 'external'
+  | 'gpu';
+
 export type DiagramNodeDefinition = {
   id: string;
   title: string;
@@ -90,6 +114,8 @@ export type DiagramNodeDefinition = {
   y: number;
   width: number;
   height: number;
+  /** Component type that selects the silhouette + glyph; defaults to a plain box. */
+  kind?: ComponentKind;
 };
 
 export type MobileDiagramNodeDefinition = {

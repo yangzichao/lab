@@ -1,6 +1,21 @@
 ---
 import './ad-tracking-constraint-lab.css';
 import type { SystemDesignLabDefinition } from '../../scripts/system-design-lab/lab-types';
+import {
+  nodeDetailMarkup,
+  nodeFillPrimitives,
+  nodeGlyphMarkup,
+  nodeKind,
+  nodeOutlinePrimitives,
+  nodeTextTop,
+} from '../../scripts/system-design-lab/architecture-shapes';
+import {
+  roughFillMarkup,
+  roughFlowMarkup,
+  roughStrokeMarkup,
+  roughZoneMarkup,
+  seedFromString,
+} from '../../scripts/system-design-lab/architecture-rough';
 
 interface Props {
   lab: SystemDesignLabDefinition;
@@ -8,6 +23,30 @@ interface Props {
 
 const { lab } = Astro.props;
 const flowMarkerId = `system-lab-arrow-${lab.id}`;
+
+// Pre-render the hand-drawn (Excalidraw-style) geometry at build time.
+const sketchedZones = lab.diagram.zones.map((zone) => ({
+  ...zone,
+  sketch: roughZoneMarkup(zone.x, zone.y, zone.width, zone.height, seedFromString(`${lab.id}-zone-${zone.id}`)),
+}));
+
+const sketchedFlows = lab.diagram.flows.map((flow) => ({
+  ...flow,
+  sketch: roughFlowMarkup(flow.path, seedFromString(`${lab.id}-flow-${flow.id}`)),
+}));
+
+const sketchedNodes = lab.diagram.nodes.map((node) => {
+  const seed = seedFromString(`${lab.id}-node-${node.id}`);
+  return {
+    node,
+    kind: nodeKind(node),
+    textTop: nodeTextTop(node),
+    fill: roughFillMarkup(nodeFillPrimitives(node), seed),
+    stroke: roughStrokeMarkup(nodeOutlinePrimitives(node), seed),
+    detail: nodeDetailMarkup(node),
+    glyph: nodeGlyphMarkup(node),
+  };
+});
 ---
 
 <section class="system-lab" id={lab.id} data-system-design-constraint-lab data-lab-id={lab.id}>
@@ -175,21 +214,21 @@ const flowMarkerId = `system-lab-arrow-${lab.id}`;
             <marker
               id={flowMarkerId}
               viewBox="0 0 12 12"
-              refX="10"
+              refX="9"
               refY="6"
-              markerWidth="8"
-              markerHeight="8"
+              markerWidth="9"
+              markerHeight="9"
               orient="auto-start-reverse"
             >
-              <path d="M2 2 L10 6 L2 10 Z"></path>
+              <path class="system-lab__arrowhead" d="M2 2 L10 6 L2 10"></path>
             </marker>
           </defs>
 
           {
-            lab.diagram.zones.map((zone) => (
+            sketchedZones.map((zone) => (
               <g class={`system-lab__sketch-zone system-lab__sketch-zone--${zone.variant ?? zone.id}`}>
-                <rect x={zone.x} y={zone.y} width={zone.width} height={zone.height} rx="10"></rect>
-                <text x={zone.x + 18} y={zone.y + 30}>
+                <g class="system-lab__zone-shape" set:html={zone.sketch} />
+                <text x={zone.x + 16} y={zone.y + 28}>
                   {zone.label}
                 </text>
               </g>
@@ -198,26 +237,33 @@ const flowMarkerId = `system-lab-arrow-${lab.id}`;
 
           <g class="system-lab__sketch-flows">
             {
-              lab.diagram.flows.map((flow) => (
-                <path
-                  class={`system-lab__sketch-flow system-lab__sketch-flow--${flow.variant ?? 'primary'}`}
+              sketchedFlows.map((flow) => (
+                <g
+                  class={`system-lab__sketch-flow-group system-lab__sketch-flow-group--${flow.variant ?? 'primary'}`}
                   data-flow={flow.id}
-                  d={flow.path}
-                ></path>
+                  set:html={flow.sketch}
+                />
               ))
             }
           </g>
 
           {
-            lab.diagram.nodes.map((node) => (
-              <g class="system-lab__sketch-node" data-node={node.id}>
-                <rect x={node.x} y={node.y} width={node.width} height={node.height} rx="10"></rect>
-                <text x={node.x + 16} y={node.y + 34} data-node-title={node.id}>
+            sketchedNodes.map(({ node, kind, textTop, fill, stroke, detail, glyph }) => (
+              <g
+                class={`system-lab__sketch-node system-lab__sketch-node--${kind}`}
+                data-node={node.id}
+                data-kind={kind}
+              >
+                <g class="system-lab__rough-fill-group" set:html={fill} />
+                <g class="system-lab__rough-stroke-group" set:html={stroke} />
+                {detail && <g class="system-lab__shape-detail-group" set:html={detail} />}
+                <g set:html={glyph} />
+                <text x={node.x + node.width / 2} y={textTop} data-node-title={node.id}>
                   {node.title}
                 </text>
                 <text
-                  x={node.x + 16}
-                  y={node.y + 56}
+                  x={node.x + node.width / 2}
+                  y={textTop + 18}
                   class="system-lab__sketch-small"
                   data-node-copy={node.id}
                 >

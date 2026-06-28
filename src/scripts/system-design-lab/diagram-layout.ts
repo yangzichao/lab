@@ -8,6 +8,7 @@
  * stays aligned and non-overlapping.
  */
 import type {
+  ComponentKind,
   DiagramDefinition,
   DiagramFlowDefinition,
   DiagramNodeDefinition,
@@ -23,6 +24,8 @@ export type DiagramColumnNode = {
   subtitle: string;
   /** Sentence shown for this node in the stacked mobile flow. */
   summary: string;
+  /** Component type → selects the diagram silhouette + glyph. */
+  kind?: ComponentKind;
 };
 
 export type DiagramColumn = {
@@ -114,6 +117,7 @@ export function buildColumnDiagram(input: ColumnDiagramInput): DiagramDefinition
         y: nodeY,
         width: NODE_WIDTH,
         height: NODE_HEIGHT,
+        kind: node.kind,
       });
     });
 

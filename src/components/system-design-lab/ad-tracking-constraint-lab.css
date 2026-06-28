@@ -1,3 +1,12 @@
+/* Hand-drawn diagram font — Excalidraw's Virgil (OFL-1.1, self-hosted). */
+@font-face {
+  font-family: 'Virgil';
+  src: url('/fonts/Virgil.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 .container:has([data-system-design-lab]),
 .container:has([data-system-design-constraint-lab]) {
   max-width: 1280px;
@@ -486,10 +495,7 @@
   padding: 22px;
   display: grid;
   gap: 16px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(250, 250, 250, 0.95)),
-    repeating-linear-gradient(90deg, transparent 0 42px, rgba(17, 17, 17, 0.035) 42px 43px),
-    repeating-linear-gradient(0deg, transparent 0 42px, rgba(17, 17, 17, 0.035) 42px 43px);
+  background: #ffffff;
 }
 
 .system-lab__diagram-caption {
@@ -521,144 +527,185 @@
 .system-lab__sketch {
   width: 100%;
   display: block;
-  border: 1px solid #d8dde2;
+  border: 1px solid #e7e4db;
   border-radius: var(--radius);
   background:
-    radial-gradient(circle at 16% 18%, rgba(60, 126, 168, 0.08), transparent 28%),
-    radial-gradient(circle at 84% 82%, rgba(63, 123, 84, 0.08), transparent 30%),
-    #fcfcfb;
+    radial-gradient(circle, rgba(30, 30, 30, 0.09) 1.1px, transparent 1.5px) 0 0 / 20px 20px,
+    #fcfcf9;
 }
 
-.system-lab__sketch marker path {
-  fill: #6d7782;
-}
-
-.system-lab__sketch-zone rect {
-  fill: rgba(255, 255, 255, 0.66);
-  stroke: rgba(17, 17, 17, 0.16);
+/* Hand-drawn open chevron arrowhead; matches its connector's colour (SVG2). */
+.system-lab__arrowhead {
+  fill: none;
+  stroke: #1e1e1e;
+  stroke: context-stroke;
   stroke-width: 1.5;
-  stroke-dasharray: 8 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.system-lab__zone-stroke {
+  fill: none;
+  stroke: #b4bac0;
+  stroke-width: 1;
+  opacity: 0.75;
 }
 
 .system-lab__sketch-zone text {
-  fill: #555f68;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: 'Virgil', 'Segoe Print', 'Comic Sans MS', cursive;
+  fill: #9aa0a7;
+  font-size: 13px;
+  letter-spacing: 0;
 }
 
-.system-lab__sketch-zone--edge rect {
-  stroke: #3c7ea8;
+.system-lab__sketch-zone--edge .system-lab__zone-stroke {
+  stroke: #95b8cf;
 }
 
-.system-lab__sketch-zone--backbone rect {
-  stroke: #7c5cc4;
+.system-lab__sketch-zone--backbone .system-lab__zone-stroke {
+  stroke: #b4a3d8;
 }
 
-.system-lab__sketch-zone--processing rect {
-  stroke: #3f7b54;
+.system-lab__sketch-zone--processing .system-lab__zone-stroke {
+  stroke: #98c4a6;
 }
 
-.system-lab__sketch-zone--storage rect {
-  stroke: #b7791f;
+.system-lab__sketch-zone--storage .system-lab__zone-stroke {
+  stroke: #d6bd8a;
 }
 
+/* Sketchy connectors. */
 .system-lab__sketch-flow {
   fill: none;
-  stroke: #687583;
+  stroke: #1e1e1e;
+  stroke-width: 1.5;
   stroke-linecap: round;
-  stroke-width: 2.4;
+}
+
+.system-lab__sketch-flow-group .system-lab__sketch-flow:last-of-type {
   marker-end: var(--system-lab-flow-marker, url('#system-lab-arrow'));
 }
 
-.system-lab__sketch-flow--secondary {
-  stroke: #7d8b98;
-  stroke-dasharray: 7 7;
-  stroke-width: 2;
+.system-lab__sketch-flow-group--secondary .system-lab__sketch-flow {
+  stroke: #868e96;
+  stroke-dasharray: 6 6;
 }
 
-.system-lab__sketch-flow--direct {
-  stroke: #a9aeb4;
-  stroke-dasharray: 4 8;
-  opacity: 0.7;
+.system-lab__sketch-flow-group--direct .system-lab__sketch-flow {
+  stroke: #adb5bd;
+  stroke-dasharray: 3 7;
+  opacity: 0.85;
 }
 
-.system-lab__sketch-flow[data-state='inactive'] {
+.system-lab__sketch-flow-group[data-state='inactive'] {
   opacity: 0.12;
 }
 
-.system-lab__sketch-flow[data-state='active'] {
+.system-lab__sketch-flow-group[data-state='active'] .system-lab__sketch-flow {
+  stroke: #1971c2;
+  stroke-width: 1.9;
+  stroke-dasharray: none;
   opacity: 1;
-  stroke: #2f78a5;
-  stroke-width: 3;
 }
 
-.system-lab__sketch-flow[data-state='warning'] {
+.system-lab__sketch-flow-group[data-state='warning'] .system-lab__sketch-flow {
+  stroke: #f08c00;
+  stroke-width: 1.9;
+  stroke-dasharray: none;
   opacity: 1;
-  stroke: #b7791f;
-  stroke-width: 3;
 }
 
+/* Hand-drawn nodes: hachure fill + sketchy outline, recoloured by state. */
 .system-lab__sketch-node {
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
+  --node-stroke: #1e1e1e;
+  --node-fill-ink: #ced4da;
+  --node-stroke-width: 1.45;
+  transition: opacity 0.2s ease;
 }
 
-.system-lab__sketch-node rect {
-  fill: #ffffff;
-  stroke: #1f2933;
-  stroke-width: 1.8;
-  filter: drop-shadow(0 10px 12px rgba(17, 17, 17, 0.08));
-  transition:
-    fill 0.2s ease,
-    stroke 0.2s ease,
-    stroke-width 0.2s ease;
+.system-lab__rough-fill {
+  fill: none;
+  stroke: var(--node-fill-ink);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  transition: stroke 0.2s ease;
+}
+
+.system-lab__rough-stroke {
+  fill: none;
+  stroke: var(--node-stroke);
+  stroke-width: var(--node-stroke-width);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.2s ease;
+}
+
+.system-lab__rough-stroke-group {
+  filter: drop-shadow(0 7px 9px rgba(17, 17, 17, 0.06));
+}
+
+.system-lab__shape-detail {
+  fill: none;
+  stroke: var(--node-stroke);
+  stroke-width: 1.2;
+  opacity: 0.45;
+}
+
+.system-lab__shape-dot {
+  fill: var(--node-stroke);
+  opacity: 0.4;
+}
+
+.system-lab__shape-glyph {
+  fill: none;
+  stroke: var(--node-stroke);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+
+.system-lab__shape-glyph :is(path, rect, circle, ellipse) {
+  vector-effect: non-scaling-stroke;
 }
 
 .system-lab__sketch-node text {
-  fill: #111111;
-  font-size: 16px;
-  font-weight: 800;
+  font-family: 'Virgil', 'Segoe Print', 'Comic Sans MS', cursive;
+  fill: #1e1e1e;
+  font-size: 15px;
+  font-weight: 400;
+  text-anchor: middle;
 }
 
 .system-lab__sketch-node .system-lab__sketch-small {
-  fill: #5f6872;
-  font-size: 13px;
-  font-weight: 600;
+  fill: #5c636b;
+  font-size: 12px;
 }
 
 .system-lab__sketch-node[data-state='inactive'] {
-  opacity: 0.33;
+  opacity: 0.4;
+  --node-stroke: #adb5bd;
+  --node-fill-ink: transparent;
 }
 
-.system-lab__sketch-node[data-state='inactive'] rect {
-  fill: #f2f2f2;
-  stroke: #c8c8c8;
+.system-lab__sketch-node[data-state='ok'] {
+  --node-stroke: #2f9e44;
+  --node-fill-ink: #b2f2bb;
 }
 
-.system-lab__sketch-node[data-state='ok'] rect {
-  fill: #f6fbf7;
-  stroke: #6e9a74;
+.system-lab__sketch-node[data-state='needed'] {
+  --node-stroke: #1971c2;
+  --node-fill-ink: #a5d8ff;
 }
 
-.system-lab__sketch-node[data-state='warning'] rect {
-  fill: #fff8ef;
-  stroke: #b7791f;
-  stroke-width: 2.2;
+.system-lab__sketch-node[data-state='warning'] {
+  --node-stroke: #f08c00;
+  --node-fill-ink: #ffec99;
 }
 
-.system-lab__sketch-node[data-state='needed'] rect {
-  fill: #f3f9fc;
-  stroke: #2f78a5;
-  stroke-width: 2.4;
-}
-
-.system-lab__sketch-node[data-state='overloaded'] rect {
-  fill: #fff3f3;
-  stroke: #b24b4b;
-  stroke-width: 2.6;
+.system-lab__sketch-node[data-state='overloaded'] {
+  --node-stroke: #e03131;
+  --node-fill-ink: #ffc9c9;
 }
 
 .system-lab__mobile-flow {

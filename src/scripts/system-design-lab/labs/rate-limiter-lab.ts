@@ -239,14 +239,14 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
       { id: 'quotaToEvents', path: 'M760 295 C805 360 840 405 890 420', variant: 'secondary' },
     ],
     nodes: [
-      { id: 'client', title: 'Client', subtitle: 'request burst', x: 48, y: 210, width: 108, height: 92 },
-      { id: 'gateway', title: 'API gateway', subtitle: 'enforce before app', x: 225, y: 120, width: 150, height: 90 },
-      { id: 'localLimiter', title: 'Local check', subtitle: 'cheap prefilter', x: 225, y: 260, width: 150, height: 88 },
-      { id: 'redis', title: 'Redis Lua', subtitle: 'atomic state update', x: 455, y: 175, width: 140, height: 90 },
-      { id: 'shards', title: 'Shard router', subtitle: 'key -> state shard', x: 455, y: 330, width: 140, height: 88 },
-      { id: 'quotaService', title: 'Quota service', subtitle: 'global budgets', x: 685, y: 220, width: 130, height: 92 },
-      { id: 'backend', title: 'Backend', subtitle: 'only allowed traffic', x: 890, y: 125, width: 112, height: 86 },
-      { id: 'events', title: 'Events', subtitle: 'abuse + tuning', x: 890, y: 400, width: 112, height: 82 },
+      { id: 'client', title: 'Client', subtitle: 'request burst', kind: 'client', x: 48, y: 210, width: 108, height: 92 },
+      { id: 'gateway', title: 'API gateway', subtitle: 'enforce before app', kind: 'lb', x: 225, y: 120, width: 150, height: 90 },
+      { id: 'localLimiter', title: 'Local check', subtitle: 'cheap prefilter', kind: 'service', x: 225, y: 260, width: 150, height: 88 },
+      { id: 'redis', title: 'Redis Lua', subtitle: 'atomic state update', kind: 'cache', x: 455, y: 175, width: 140, height: 90 },
+      { id: 'shards', title: 'Shard router', subtitle: 'key -> state shard', kind: 'scheduler', x: 455, y: 330, width: 140, height: 88 },
+      { id: 'quotaService', title: 'Quota service', subtitle: 'global budgets', kind: 'service', x: 685, y: 220, width: 130, height: 92 },
+      { id: 'backend', title: 'Backend', subtitle: 'only allowed traffic', kind: 'api', x: 890, y: 125, width: 112, height: 86 },
+      { id: 'events', title: 'Events', subtitle: 'abuse + tuning', kind: 'stream', x: 890, y: 400, width: 112, height: 82 },
     ],
     mobileStages: [
       {
