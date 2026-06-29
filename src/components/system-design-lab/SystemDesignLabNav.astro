@@ -5,7 +5,6 @@ import {
 import {
   getAlternateSystemDesignLocale,
   getLocalizedSystemDesignPath,
-  getSystemDesignLocaleLabel,
   normalizeSystemDesignLocale,
   type SystemDesignLocale,
 } from '../../scripts/system-design-lab/system-design-i18n';
@@ -22,31 +21,104 @@ const locale = normalizeSystemDesignLocale(Astro.props.locale);
 const alternateLocale = getAlternateSystemDesignLocale(locale);
 const copy = getSystemDesignLabUiCopy(locale);
 const pages = getSystemDesignLabPages(locale);
+const currentLanguageLabel = locale === 'en' ? 'EN' : '中文';
+const alternateLanguageLabel = alternateLocale === 'en' ? 'EN' : '中文';
+const languageToggleLabel =
+  locale === 'en' ? 'Switch language to Chinese' : '切换语言到 English';
 ---
 
-<nav class="system-lab-page-nav" aria-label={copy.navAriaLabel}>
-  <a href="/">{copy.homeLink}</a>
-  {
-    pages.map((page) => (
-      <a
-        href={getLocalizedSystemDesignPath(page.slug, locale)}
-        aria-current={page.slug === current ? 'page' : undefined}
-      >
-        {page.navLabel}
-      </a>
-    ))
-  }
-  <a href={getLocalizedSystemDesignPath(current, alternateLocale)}>
-    {copy.languageSwitchPrefix}: {getSystemDesignLocaleLabel(alternateLocale)}
+<div class="system-lab-page-header">
+  <nav class="system-lab-page-nav" aria-label={copy.navAriaLabel}>
+    <a href="/">{copy.homeLink}</a>
+    {
+      pages.map((page) => (
+        <a
+          href={getLocalizedSystemDesignPath(page.slug, locale)}
+          aria-current={page.slug === current ? 'page' : undefined}
+        >
+          {page.navLabel}
+        </a>
+      ))
+    }
+  </nav>
+
+  <a
+    class="system-lab-language-toggle"
+    href={getLocalizedSystemDesignPath(current, alternateLocale)}
+    aria-label={languageToggleLabel}
+  >
+    <span class="system-lab-language-toggle__active">{currentLanguageLabel}</span>
+    <span class="system-lab-language-toggle__divider" aria-hidden="true">/</span>
+    <span>{alternateLanguageLabel}</span>
   </a>
-</nav>
+</div>
 
 <style>
   /* Base `.system-lab-page-nav` styling ships with the lab CSS that the lab
      component on this page imports globally; only the active state is added. */
+  .system-lab-page-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 14px;
+    margin-bottom: 34px;
+  }
+
+  .system-lab-page-header .system-lab-page-nav {
+    margin-bottom: 0;
+  }
+
   .system-lab-page-nav a[aria-current='page'] {
     background: var(--color-card-hover);
     border-color: #bbbbbb;
     cursor: default;
+  }
+
+  .system-lab-language-toggle {
+    position: sticky;
+    top: 14px;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 8px 12px;
+    border: 1px solid #111111;
+    border-radius: 999px;
+    background: var(--color-text-main);
+    color: var(--color-background);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+    white-space: nowrap;
+    transition: var(--transition);
+  }
+
+  .system-lab-language-toggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+  }
+
+  .system-lab-language-toggle__active {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .system-lab-language-toggle__divider {
+    opacity: 0.55;
+  }
+
+  @media (max-width: 720px) {
+    .system-lab-page-header {
+      grid-template-columns: 1fr;
+    }
+
+    .system-lab-language-toggle {
+      position: static;
+      justify-self: start;
+      order: -1;
+    }
   }
 </style>

@@ -16,7 +16,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 34px;
+  margin: 0 0 34px;
 }
 
 .system-lab-page-nav a {
