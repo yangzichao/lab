@@ -21,16 +21,16 @@ const checkpointWriteSecondsPerGb = 0.04; // store throughput for the checkpoint
 
 export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
   id: 'llm-training-infra',
-  eyebrow: 'System Design Lab',
+  eyebrow: '系统设计 Lab',
   title:
-    'LLM pretraining is bounded by GPU memory and inter-GPU communication; both force you to split the model across many accelerators.',
+    'LLM pretraining 受限于 GPU memory 和 GPU 间的 communication；两者都逼着你把模型切分到很多加速器上。',
   summary:
-    'Scale model parameters, GPU count, global batch, sequence length, interconnect bandwidth, and checkpoint interval. The design moves from a single GPU to data parallelism with all-reduce, to tensor and pipeline parallelism for a model too big for one device, to full 3D parallelism with activation checkpointing, and finally to thousands of GPUs that demand fast collectives plus frequent checkpoint-and-recover.',
+    '调整模型 parameter 数、GPU 数、global batch、sequence length、interconnect 带宽、checkpoint 间隔。设计会从单块 GPU 演进到带 all-reduce 的 data parallelism，再到为装下一个对单设备太大的模型而上的 tensor 和 pipeline parallelism，再到带 activation checkpointing 的完整 3D parallelism，最后到上千块 GPU——它们既要快的 collective，又要频繁的 checkpoint-and-recover。',
   controls: [
     {
       id: 'modelParams',
-      label: 'Model parameters',
-      help: 'Total trainable parameters. Weights + gradients + optimizer state set the per-device memory floor.',
+      label: '模型 parameter 数',
+      help: '总的可训练 parameter 数。weights + gradients + optimizer state 决定了每设备的 memory 下限。',
       min: 0.1,
       max: 1_000,
       defaultValue: 3,
@@ -40,8 +40,8 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'gpuCount',
-      label: 'GPU count',
-      help: 'Accelerators in the training mesh, factored into data x tensor x pipeline parallel groups.',
+      label: 'GPU 数',
+      help: 'training mesh 里的加速器数量，会拆成 data x tensor x pipeline 的并行组。',
       min: 1,
       max: 16_384,
       defaultValue: 8,
@@ -52,7 +52,7 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'globalBatchTokens',
       label: 'Global batch',
-      help: 'Tokens processed per optimizer step across the whole mesh. Larger batches need more activation memory and data throughput.',
+      help: '整个 mesh 上每个 optimizer step 处理的 token 数。batch 越大，需要的 activation memory 和 data throughput 越多。',
       min: 32_768,
       max: 16_000_000,
       defaultValue: 2_000_000,
@@ -63,7 +63,7 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'sequenceLength',
       label: 'Sequence length',
-      help: 'Context window in tokens. Activation memory scales with sequence length.',
+      help: '以 token 计的 context window。activation memory 随 sequence length 增长。',
       min: 512,
       max: 131_072,
       defaultValue: 4_096,
@@ -73,8 +73,8 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'interconnectBandwidth',
-      label: 'Interconnect bandwidth',
-      help: 'Per-GPU collective bandwidth (NVLink within a node, InfiniBand across nodes). Gradient all-reduce and tensor-parallel traffic ride on it.',
+      label: 'Interconnect 带宽',
+      help: '每块 GPU 的 collective 带宽（节点内是 NVLink，跨节点是 InfiniBand）。gradient all-reduce 和 tensor-parallel 流量都跑在它上面。',
       min: 10,
       max: 900,
       defaultValue: 200,
@@ -85,7 +85,7 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'dataThroughput',
       label: 'Data pipeline throughput',
-      help: 'Tokens per second the data loaders can stream (tokenized shards from object storage). Must keep the mesh fed.',
+      help: 'data loader 每秒能 stream 的 token 数（从 object storage 来的 tokenized shard）。必须喂得上整个 mesh。',
       min: 100_000,
       max: 200_000_000,
       defaultValue: 5_000_000,
@@ -94,8 +94,8 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'checkpointIntervalMin',
-      label: 'Checkpoint interval',
-      help: 'Minutes of compute between full checkpoints. Shorter loses less work on a failure but costs more store bandwidth.',
+      label: 'Checkpoint 间隔',
+      help: '两次完整 checkpoint 之间的计算分钟数。间隔越短，故障时丢的工作越少，但花的 store 带宽越多。',
       min: 5,
       max: 240,
       defaultValue: 60,
@@ -107,13 +107,13 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'modelParallel',
       label: 'Tensor + pipeline parallel (3D)',
-      help: 'Split each layer across GPUs (tensor) and split layers into stages (pipeline) so a model larger than one device can train.',
+      help: '把每一层 split 到多块 GPU 上（tensor），再把层切成多个 stage（pipeline），这样一个比单设备大的模型也能训练。',
       defaultValue: false,
     },
     {
       id: 'activationCheckpointing',
       label: 'Activation checkpointing',
-      help: 'Recompute activations in the backward pass instead of storing them, trading extra compute for much lower memory.',
+      help: '在 backward pass 里重算 activation，而不是把它们存下来，用额外计算换大幅更低的 memory。',
       defaultValue: false,
     },
   ],
@@ -122,7 +122,7 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
       id: 'single-gpu',
       step: '01',
       title: 'Single GPU',
-      summary: 'A small model that fits in one accelerator with room to spare.',
+      summary: '一个小模型，装进一块加速器还绰绰有余。',
       values: {
         modelParams: 1.5,
         gpuCount: 1,
@@ -139,7 +139,7 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
       id: 'data-parallel',
       step: '02',
       title: 'Data parallel',
-      summary: 'A model that still fits per device, replicated to train faster on more data.',
+      summary: '模型每设备仍能装下，靠 replicate 在更多 data 上更快训练。',
       values: {
         modelParams: 3,
         gpuCount: 64,
@@ -155,8 +155,8 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'tensor-pipeline',
       step: '03',
-      title: 'Too big for one GPU',
-      summary: 'The model no longer fits on a single device, forcing tensor and pipeline splits.',
+      title: '单块 GPU 装不下',
+      summary: '模型不再能装进单设备，逼着上 tensor 和 pipeline 切分。',
       values: {
         modelParams: 70,
         gpuCount: 512,
@@ -173,7 +173,7 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
       id: 'three-d-parallel',
       step: '04',
       title: '3D parallel + recompute',
-      summary: 'Long context and a large model push memory past the limit even when split.',
+      summary: '长 context 加大模型，即使切分了 memory 也会突破上限。',
       values: {
         modelParams: 175,
         gpuCount: 2_048,
@@ -189,8 +189,8 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'thousands-of-gpus',
       step: '05',
-      title: 'Thousands of GPUs',
-      summary: 'A frontier run where failures are routine and checkpoint-recover dominates resilience.',
+      title: '上千块 GPU',
+      summary: '一次 frontier run，故障是家常便饭，checkpoint-recover 主导 resilience。',
       values: {
         modelParams: 540,
         gpuCount: 12_288,
@@ -205,9 +205,9 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'LLM pretraining infrastructure diagram',
+    title: 'LLM pretraining 基础设施图',
     description:
-      'Whiteboard-style architecture diagram for large-scale LLM pretraining: training dataset in object storage, sharded data loaders, a 3D-parallel training mesh of data, tensor, and pipeline groups, the collective-communication fabric and checkpoint store, and asynchronous metrics and fault recovery.',
+      '大规模 LLM pretraining 的白板风格架构图：放在 object storage 里的训练 dataset、sharded data loader、由 data/tensor/pipeline 组构成的 3D-parallel training mesh、collective-communication fabric 和 checkpoint store，以及异步的 metrics 和 fault recovery。',
     columns: [
       {
         id: 'data',
@@ -219,7 +219,7 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
             title: 'Token corpus',
             subtitle: 'object storage',
             kind: 'objectstore',
-            summary: 'tokenized training shards held in object storage and streamed during the run',
+            summary: '存在 object storage 里的 tokenized 训练 shard，run 期间被 stream 出来',
           },
         ],
       },
@@ -233,7 +233,7 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
             title: 'Data loaders',
             subtitle: 'stream + shuffle',
             kind: 'compute',
-            summary: 'prefetch, shuffle, and pack token batches so GPUs never wait on input',
+            summary: 'prefetch、shuffle 并打包 token batch，让 GPU 永远不会等输入',
           },
         ],
       },
@@ -247,21 +247,21 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
             title: 'Data-parallel',
             subtitle: 'replicas',
             kind: 'gpu',
-            summary: 'replicas each train on a slice of the batch and all-reduce gradients each step',
+            summary: '每个 replica 在 batch 的一片上训练，每步对 gradient 做 all-reduce',
           },
           {
             id: 'tensorParallel',
             title: 'Tensor-parallel',
             subtitle: 'split layers',
             kind: 'gpu',
-            summary: 'splits each layer matrix across GPUs that exchange activations within a node',
+            summary: '把每层矩阵 split 到多块 GPU 上，它们在节点内交换 activation',
           },
           {
             id: 'pipelineParallel',
             title: 'Pipeline-parallel',
             subtitle: 'layer stages',
             kind: 'gpu',
-            summary: 'assigns contiguous layer stages to GPUs and streams micro-batches between them',
+            summary: '把连续的层 stage 分配给各 GPU，在它们之间 stream micro-batch',
           },
         ],
       },
@@ -275,14 +275,14 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
             title: 'Collective fabric',
             subtitle: 'all-reduce',
             kind: 'service',
-            summary: 'NVLink and InfiniBand carry gradient all-reduce and tensor-parallel exchanges',
+            summary: 'NVLink 和 InfiniBand 承载 gradient all-reduce 和 tensor-parallel 交换',
           },
           {
             id: 'checkpointStore',
             title: 'Checkpoint store',
             subtitle: 'sharded state',
             kind: 'objectstore',
-            summary: 'persists sharded weights and optimizer state so a run can resume after a failure',
+            summary: '持久化 sharded 的 weights 和 optimizer state，好让 run 在故障后能恢复',
           },
         ],
       },
@@ -296,14 +296,14 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
             title: 'Metrics',
             subtitle: 'loss + throughput',
             kind: 'service',
-            summary: 'logs loss, throughput, and hardware health off the training hot path',
+            summary: '在训练热路径之外记录 loss、throughput 和硬件健康状况',
           },
           {
             id: 'faultRecovery',
             title: 'Fault recovery',
             subtitle: 'restart mesh',
             kind: 'scheduler',
-            summary: 'detects dead nodes and restarts the mesh from the latest checkpoint',
+            summary: '检测挂掉的节点，并从最新的 checkpoint 重启 mesh',
           },
         ],
       },
@@ -322,14 +322,14 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'deviceMemory', label: 'Per-GPU memory pressure' },
-    { id: 'communication', label: 'Collective comms load' },
-    { id: 'dataPipeline', label: 'Data pipeline load' },
+    { id: 'deviceMemory', label: '每 GPU memory 压力' },
+    { id: 'communication', label: 'Collective comms 负载' },
+    { id: 'dataPipeline', label: 'Data pipeline 负载' },
     { id: 'activationMemory', label: 'Activation memory' },
-    { id: 'checkpointResilience', label: 'Checkpoint / failure exposure' },
+    { id: 'checkpointResilience', label: 'Checkpoint / 故障暴露' },
   ],
   decisions: [
-    { id: 'parallelism', title: 'Parallelism strategy' },
+    { id: 'parallelism', title: 'Parallelism 策略' },
     { id: 'collectives', title: 'Gradient sync / collectives' },
     { id: 'activation', title: 'Activation memory' },
     { id: 'checkpointing', title: 'Checkpoint + fault tolerance' },
@@ -338,94 +338,94 @@ export const llmTrainingInfraLabDefinition: SystemDesignLabDefinition = {
   ],
   sourceBackedRules: [
     {
-      title: 'Tensor parallelism splits each layer across GPUs to train models too big for one device',
+      title: 'Tensor parallelism 把每层 split 到多块 GPU，训练对单设备太大的模型',
       source: 'Megatron-LM',
       url: 'https://github.com/NVIDIA/Megatron-LM',
       summary:
-        'Megatron-LM partitions the attention and MLP matrices across GPUs so a single transformer layer fits in aggregate device memory, exchanging activations over the fast intra-node interconnect.',
+        'Megatron-LM 把 attention 和 MLP 矩阵切分到多块 GPU 上，让单个 transformer 层在合起来的设备 memory 里装得下，并通过快速的节点内 interconnect 交换 activation。',
     },
     {
-      title: 'ZeRO shards optimizer state, gradients, and parameters to cut the per-GPU memory floor',
+      title: 'ZeRO 把 optimizer state、gradient、parameter 都 shard 开，降低每 GPU 的 memory 下限',
       source: 'DeepSpeed ZeRO (arXiv:1910.02054)',
       url: 'https://arxiv.org/abs/1910.02054',
       summary:
-        'Standard data parallelism replicates the full ~16 bytes/param of optimizer state on every GPU; ZeRO partitions that state across data-parallel ranks so memory falls roughly linearly with the number of devices.',
+        '标准 data parallelism 会在每块 GPU 上复制完整的约 16 bytes/param 的 optimizer state；ZeRO 把这份 state 切分到各 data-parallel rank 上，让 memory 随设备数大致线性下降。',
     },
     {
-      title: 'Pipeline parallelism splits layers into stages and overlaps micro-batches to keep GPUs busy',
+      title: 'Pipeline parallelism 把层切成 stage，用 micro-batch 重叠让 GPU 忙起来',
       source: 'GPipe (arXiv:1811.06965)',
       url: 'https://arxiv.org/abs/1811.06965',
       summary:
-        'GPipe assigns contiguous layer stages to different accelerators and pipelines micro-batches through them, with re-materialization (activation recompute) to bound the activation memory per stage.',
+        'GPipe 把连续的层 stage 分配给不同加速器，并让 micro-batch 流水穿过它们，配合 re-materialization（activation recompute）来约束每个 stage 的 activation memory。',
     },
     {
-      title: 'Combining tensor, pipeline, and data parallelism scales transformer training to thousands of GPUs',
+      title: '把 tensor、pipeline、data parallelism 组合起来，能把 transformer 训练扩到上千块 GPU',
       source: 'Megatron-LM scaling (arXiv:1909.08053)',
       url: 'https://arxiv.org/abs/1909.08053',
       summary:
-        'Efficient large-model training composes the three parallelism axes (3D parallelism), placing high-bandwidth tensor-parallel traffic within a node and lower-bandwidth data-parallel all-reduce across nodes.',
+        '高效的大模型训练把这三个 parallelism 维度组合起来（3D parallelism），把高带宽的 tensor-parallel 流量放在节点内，把较低带宽的 data-parallel all-reduce 放到跨节点。',
     },
   ],
   teachingAssumptions: [
-    'Memory is modeled as ~16 bytes/param for weights, gradients, and Adam optimizer state, plus an activation term that grows with batch and sequence length; real frameworks vary with precision and ZeRO sharding.',
-    'Per-GPU memory is a fixed teaching figure (80 GB) and collective/data thresholds are round numbers, not vendor benchmarks.',
-    'Failure rate is approximated as proportional to GPU count, so expected lost work scales with both fleet size and checkpoint interval.',
+    'memory 被建模成约 16 bytes/param（涵盖 weights、gradients、Adam optimizer state），再加一项随 batch 和 sequence length 增长的 activation 项；真实框架会随精度和 ZeRO sharding 变化。',
+    '每 GPU memory 是一个固定的教学数字（80 GB），collective/data 的阈值都是凑整的数，不是 vendor benchmark。',
+    'failure rate 被近似成与 GPU 数成正比，所以预期损失的工作量随 fleet 规模和 checkpoint 间隔一起放大。',
   ],
   teachingWalkthrough: [
     {
       id: 'fits-on-one',
       step: '01',
-      focus: 'Fits on one GPU',
+      focus: '装得进一块 GPU',
       scenarioId: 'single-gpu',
       question:
-        'A 1.5B-parameter model trains on one accelerator. Do you need any parallelism, collectives, or recompute at all?',
+        '一个 1.5B 参数的模型在一块加速器上训练。你需要任何 parallelism、collective 或 recompute 吗？',
       reveal:
-        'No. At ~16 bytes/param, 1.5B parameters need ~24 GB for weights, gradients, and optimizer state — well under an 80 GB device — and there is only one GPU, so there is nothing to all-reduce. Parallelism and activation checkpointing would add complexity and overhead with no constraint to relieve.',
-      takeaway: 'If the model and a batch fit on one GPU, the simplest correct setup is a single device with no collectives.',
+        '不需要。按约 16 bytes/param 算，1.5B 参数的 weights、gradient、optimizer state 需要约 24 GB——远低于一块 80 GB 设备——而且只有一块 GPU，没什么可 all-reduce 的。parallelism 和 activation checkpointing 只会徒增复杂度和开销，却没有任何约束要去缓解。',
+      takeaway: '只要模型和一个 batch 装得进一块 GPU，最简单又正确的配置就是单设备、不要 collective。',
     },
     {
       id: 'replicate-and-reduce',
       step: '02',
-      focus: 'Replicate, all-reduce',
+      focus: 'Replicate，all-reduce',
       scenarioId: 'data-parallel',
       question:
-        'A 3B model still fits per device, but you want to train on far more tokens. How do you use 64 GPUs without changing the model layout?',
+        '一个 3B 模型每设备仍能装下，但你想在多得多的 token 上训练。怎么在不改模型布局的前提下用上 64 块 GPU？',
       reveal:
-        'Data parallelism: replicate the whole model on every GPU, give each a different slice of the global batch, and all-reduce the gradients each step so every replica stays in sync. The binding cost shifts from memory to the gradient all-reduce, whose volume scales with parameter count and is bounded by interconnect bandwidth.',
-      takeaway: 'Data parallelism scales throughput by replicating the model; the new bottleneck is the gradient all-reduce.',
+        'Data parallelism：把整个模型在每块 GPU 上 replicate，给每块一片不同的 global batch，每步对 gradient 做 all-reduce，让所有 replica 保持同步。瓶颈从 memory 转到了 gradient all-reduce，它的流量随 parameter 数增长，并受 interconnect 带宽限制。',
+      takeaway: 'data parallelism 靠 replicate 模型来扩 throughput；新的瓶颈是 gradient all-reduce。',
     },
     {
       id: 'too-big',
       step: '03',
-      focus: 'Split the model',
+      focus: '把模型切开',
       scenarioId: 'tensor-pipeline',
       question:
-        'A 70B model needs ~1.1 TB just for weights and optimizer state — far more than one 80 GB GPU. Can data parallelism alone fix this?',
+        '一个 70B 模型光 weights 和 optimizer state 就要约 1.1 TB——远超一块 80 GB 的 GPU。光靠 data parallelism 能解决吗？',
       reveal:
-        'No. Data parallelism replicates the full model, so it cannot help when one copy does not fit. You must split the model itself: tensor parallelism partitions each layer across GPUs (heavy intra-node traffic, so it rides NVLink), and pipeline parallelism splits layers into stages across nodes. The two combine to make a copy fit in aggregate memory.',
-      takeaway: 'When one model copy will not fit on a device, you must shard the model with tensor and pipeline parallelism.',
+        '不能。data parallelism 复制的是完整模型，所以当一份副本都装不下时它帮不上忙。你必须把模型本身切开：tensor parallelism 把每层切分到多块 GPU 上（节点内流量很重，所以走 NVLink），pipeline parallelism 把层切成 stage 跨节点分布。两者组合起来让一份副本能装进合起来的 memory。',
+      takeaway: '当一份模型副本在单设备上装不下时，你必须用 tensor 和 pipeline parallelism 把模型 shard 开。',
     },
     {
       id: 'recompute',
       step: '04',
-      focus: 'Recompute activations',
+      focus: '重算 activation',
       scenarioId: 'three-d-parallel',
       question:
-        'At 175B params with a 32k-token context, even sharded weights leave little room and activations explode. What memory lever is left before buying more GPUs?',
+        '到了 175B 参数加 32k token 的 context，就算 weights 已经 shard 过，余量也很小，activation 还会爆。在买更多 GPU 之前，还剩什么 memory 杠杆？',
       reveal:
-        'Activation checkpointing (re-materialization): store only a few layer boundaries and recompute the rest during the backward pass, trading ~30% extra compute for a large drop in activation memory. Combined with 3D parallelism (data x tensor x pipeline), it lets long-context, hundred-billion-parameter models fit.',
-      takeaway: 'Activation checkpointing trades compute for memory, the key lever once weights are already sharded.',
+        'Activation checkpointing（re-materialization）：只存少数几个层边界，其余的在 backward pass 里重算，用约 30% 的额外计算换 activation memory 的大幅下降。再配合 3D parallelism（data x tensor x pipeline），就能让长 context、上千亿参数的模型装得下。',
+      takeaway: 'activation checkpointing 用计算换 memory，是 weights 已经 shard 之后的关键杠杆。',
     },
     {
       id: 'fault-tolerance',
       step: '05',
-      focus: 'Failures are routine',
+      focus: '故障是家常便饭',
       scenarioId: 'thousands-of-gpus',
       question:
-        'On 12,000 GPUs a hardware failure happens often. With a 15-minute checkpoint interval, what dominates whether the run finishes on time?',
+        '在 12,000 块 GPU 上，硬件故障频繁发生。在 15 分钟的 checkpoint 间隔下，决定 run 能不能按时跑完的主导因素是什么？',
       reveal:
-        'Checkpoint-and-recover. At thousands of GPUs the mean time between failures drops to hours, so the run constantly restarts from the last checkpoint. Frequent, sharded, fast-to-write checkpoints plus automatic mesh restart bound the lost work; the collective fabric must also sustain all-reduce at this scale without becoming the bottleneck.',
-      takeaway: 'At thousands of GPUs, fault tolerance — frequent checkpoints and fast recovery — governs whether the run completes.',
+        'Checkpoint-and-recover。在上千块 GPU 的规模下，故障间平均时间会降到几个小时，所以 run 会不断从上一个 checkpoint 重启。频繁、sharded、写得快的 checkpoint 再加上自动 mesh restart，能约束损失的工作量；collective fabric 也必须在这个规模下扛住 all-reduce，不能成为瓶颈。',
+      takeaway: '到了上千块 GPU，fault tolerance——频繁 checkpoint 加快速恢复——决定 run 能不能跑完。',
     },
   ],
   analyze: analyzeLlmTrainingWorkload,
@@ -590,36 +590,36 @@ function analyzeLlmTrainingWorkload(workload: WorkloadValues): LabAnalysis {
         ratio: deviceMemoryRatio,
         valueText: `${formatBytesGb(totalBytesPerGpu)} / ${formatBytesGb(bytesPerGpuMemory)}`,
         copy: modelParallel
-          ? `Weights and optimizer state are sharded across ${formatCount(modelParallelDegree)}-way model parallel; each GPU holds about ${formatBytesGb(totalBytesPerGpu)}.`
-          : `A full model copy plus activations needs about ${formatBytesGb(totalBytesPerGpu)} per GPU against an ${formatBytesGb(bytesPerGpuMemory)} device.`,
+          ? `weights 和 optimizer state 被 ${formatCount(modelParallelDegree)}-way model parallel 切分；每块 GPU 大约持有 ${formatBytesGb(totalBytesPerGpu)}。`
+          : `一份完整模型副本加上 activation，每块 GPU 大约需要 ${formatBytesGb(totalBytesPerGpu)}，而设备只有 ${formatBytesGb(bytesPerGpuMemory)}。`,
       },
       communication: {
         ratio: communicationRatio,
         valueText: `${allReduceTimeSeconds.toFixed(2)} s/step`,
         copy: needsCollectives
-          ? `Gradient all-reduce moves about ${gradientGb.toFixed(0)} GB over ${formatCount(interconnectBandwidth)} GB/s links${modelParallel ? ', on top of tensor-parallel exchanges' : ''}.`
-          : 'A single GPU has nothing to synchronize, so there is no collective traffic.',
+          ? `Gradient all-reduce 在 ${formatCount(interconnectBandwidth)} GB/s 的链路上搬运约 ${gradientGb.toFixed(0)} GB${modelParallel ? '，此外还有 tensor-parallel 交换' : ''}。`
+          : '单块 GPU 没什么要同步的，所以没有 collective 流量。',
       },
       dataPipeline: {
         ratio: dataPipelineRatio,
         valueText: `${formatRate(tokensConsumedPerSecond)} / ${formatRate(dataThroughput)} tok/s`,
         copy: dataStarved
-          ? 'The mesh consumes tokens faster than the loaders can stream them; GPUs stall waiting on input.'
-          : 'Data loaders stream tokens fast enough to keep the mesh fed.',
+          ? 'mesh 消费 token 的速度快过 loader 能 stream 的速度；GPU 会卡住等输入。'
+          : 'data loader stream token 的速度足够喂饱整个 mesh。',
       },
       activationMemory: {
         ratio: activationRatio,
         valueText: formatBytesGb(activationBytesPerGpu),
         copy: activationCheckpointing
-          ? 'Activation checkpointing recomputes most activations in the backward pass, cutting this memory by roughly 5x.'
-          : `Activations for a ${formatCount(sequenceLength)}-token context and this batch consume about ${formatBytesGb(activationBytesPerGpu)} per GPU.`,
+          ? 'Activation checkpointing 在 backward pass 里重算大部分 activation，把这部分 memory 砍掉约 5 倍。'
+          : `一个 ${formatCount(sequenceLength)} token 的 context 加上这个 batch，activation 每块 GPU 大约消耗 ${formatBytesGb(activationBytesPerGpu)}。`,
       },
       checkpointResilience: {
         ratio: checkpointResilienceRatio,
         valueText: `~${(lostWorkExposure * 60).toFixed(0)} min lost/restart`,
         copy: needsCheckpointResilience
-          ? `${formatCount(gpuCount)} GPUs fail often; a ${formatCount(checkpointIntervalMin)}-minute interval and a ~${checkpointWriteSeconds.toFixed(0)} s write bound the lost work per restart.`
-          : `Failures are rare at ${formatCount(gpuCount)} GPUs, so a ${formatCount(checkpointIntervalMin)}-minute checkpoint interval is plenty.`,
+          ? `${formatCount(gpuCount)} 块 GPU 经常出故障；${formatCount(checkpointIntervalMin)} 分钟的间隔加上约 ${checkpointWriteSeconds.toFixed(0)} s 的写入，约束了每次重启损失的工作量。`
+          : `在 ${formatCount(gpuCount)} 块 GPU 上故障很少，所以 ${formatCount(checkpointIntervalMin)} 分钟的 checkpoint 间隔绰绰有余。`,
       },
     },
     decisions: buildDecisions({
@@ -695,21 +695,21 @@ function buildReasons(
   if (analysis.modelTooBigUnsharded && !analysis.modelParallel) {
     reasons.push({
       severity: 'danger',
-      text: `A ${formatCount(analysis.modelParams)}B-param model needs about ${formatBytesGb(
+      text: `一个 ${formatCount(analysis.modelParams)}B 参数的模型每块 GPU 需要约 ${formatBytesGb(
         analysis.totalBytesPerGpu,
-      )} per GPU and will not fit on one device; turn on tensor + pipeline parallel to split it.`,
+      )}，在单设备上装不下；打开 tensor + pipeline parallel 把它切开。`,
     });
   } else if (analysis.modelParallel) {
     reasons.push({
       severity: analysis.deviceMemoryRatio > 1 ? 'danger' : analysis.deviceMemoryRatio > 0.7 ? 'warning' : 'ok',
-      text: `Tensor + pipeline parallel shards the model ${formatCount(
+      text: `Tensor + pipeline parallel 把模型 ${formatCount(
         analysis.modelParallelDegree,
-      )} ways so each GPU holds about ${formatBytesGb(analysis.totalBytesPerGpu)}.`,
+      )}-way 切分，让每块 GPU 大约持有 ${formatBytesGb(analysis.totalBytesPerGpu)}。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `A ${formatCount(analysis.modelParams)}B-param copy fits in one device's memory, so no model split is needed yet.`,
+      text: `一份 ${formatCount(analysis.modelParams)}B 参数的副本能装进单设备的 memory，所以还不需要切分模型。`,
     });
   }
 
@@ -718,23 +718,23 @@ function buildReasons(
       severity: analysis.communicationRatio > 1 ? 'danger' : analysis.communicationRatio > 0.7 ? 'warning' : 'ok',
       text: `${formatCount(
         analysis.gpuCount,
-      )} GPUs replicate the model and all-reduce gradients each step over ${formatCount(
+      )} 块 GPU 复制模型，并每步在 ${formatCount(
         analysis.interconnectBandwidth,
-      )} GB/s links.`,
+      )} GB/s 的链路上对 gradient 做 all-reduce。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'A single GPU has no peers to synchronize with, so there are no collectives.',
+      text: '单块 GPU 没有 peer 要同步，所以没有 collective。',
     });
   }
 
   if (analysis.interconnectStrained) {
     reasons.push({
       severity: 'danger',
-      text: `Collective traffic is saturating the ${formatCount(
+      text: `Collective 流量正在打满 ${formatCount(
         analysis.interconnectBandwidth,
-      )} GB/s interconnect; faster NVLink/InfiniBand or a better topology is needed to stop comms dominating each step.`,
+      )} GB/s 的 interconnect；需要更快的 NVLink/InfiniBand 或更好的 topology，才能让 comms 不再主导每一步。`,
     });
   }
 
@@ -742,42 +742,42 @@ function buildReasons(
     reasons.push({
       severity: analysis.activationCheckpointing ? 'ok' : 'warning',
       text: analysis.activationCheckpointing
-        ? `Activation checkpointing trades ~30% extra compute to fit a ${formatCount(
+        ? `Activation checkpointing 用约 30% 的额外计算，把一个 ${formatCount(
             analysis.sequenceLength,
-          )}-token context in memory.`
-        : `A ${formatCount(
+          )} token 的 context 塞进 memory。`
+        : `一个 ${formatCount(
             analysis.sequenceLength,
-          )}-token context pushes activation memory past the device; enable activation checkpointing to recompute instead of store.`,
+          )} token 的 context 把 activation memory 推过了设备上限；打开 activation checkpointing 用重算代替存储。`,
     });
   }
 
   if (analysis.dataStarved) {
     reasons.push({
       severity: analysis.dataPipelineRatio > 1.5 ? 'danger' : 'warning',
-      text: 'The data loaders cannot stream tokens fast enough to keep the mesh fed; scale the input pipeline or GPUs will stall.',
+      text: 'data loader stream token 的速度跟不上喂饱 mesh；扩大输入 pipeline，否则 GPU 会卡住。',
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Data loaders stream tokenized shards fast enough that the GPUs never wait on input.',
+      text: 'data loader stream tokenized shard 的速度够快，GPU 永远不会等输入。',
     });
   }
 
   if (analysis.needsCheckpointResilience) {
     reasons.push({
       severity: 'warning',
-      text: `At ${formatCount(
+      text: `在 ${formatCount(
         analysis.gpuCount,
-      )} GPUs failures are routine; a ${formatCount(
+      )} 块 GPU 上故障是家常便饭；${formatCount(
         analysis.checkpointIntervalMin,
-      )}-minute checkpoint interval plus automatic mesh restart bounds the lost work.`,
+      )} 分钟的 checkpoint 间隔加上自动 mesh restart，约束了损失的工作量。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `Failures are rare at ${formatCount(
+      text: `在 ${formatCount(
         analysis.gpuCount,
-      )} GPUs, so periodic checkpoints are enough for recovery.`,
+      )} 块 GPU 上故障很少，所以定期 checkpoint 就足够恢复了。`,
     });
   }
 
@@ -805,74 +805,74 @@ function buildDecisions(
     parallelism: {
       state: parallelismState,
       copy: flags.modelTooBigUnsharded && !flags.modelParallel
-        ? `A ${formatCount(flags.modelParams)}B model copy will not fit on one device — combine data parallel with tensor + pipeline parallel.`
+        ? `一份 ${formatCount(flags.modelParams)}B 的模型副本在单设备上装不下——把 data parallel 和 tensor + pipeline parallel 组合起来。`
         : flags.modelParallel
-          ? `3D parallelism: ${formatCount(flags.modelParallelDegree)}-way tensor + pipeline holds a copy, data parallel replicates it across the rest.`
+          ? `3D parallelism：${formatCount(flags.modelParallelDegree)}-way 的 tensor + pipeline 持有一份副本，data parallel 在其余 GPU 上把它复制开。`
           : flags.needsDataParallel
-            ? 'Data parallel only: each GPU holds a full copy and trains on a different batch slice.'
-            : 'One GPU trains the whole model; no parallelism is needed yet.',
+            ? 'Data parallel only：每块 GPU 持有一份完整副本，在不同的 batch 切片上训练。'
+            : '一块 GPU 训练整个模型；还不需要任何 parallelism。',
     },
     collectives: {
       state: flags.interconnectStrained ? 'tradeoff' : flags.needsCollectives ? 'needed' : 'not-yet',
       copy: flags.needsCollectives
-        ? `Gradients sync via all-reduce over ${formatCount(flags.interconnectBandwidth)} GB/s links${flags.modelParallel ? '; tensor-parallel exchanges share the same fabric' : ''}.`
-        : 'A single GPU has nothing to all-reduce.',
+        ? `Gradient 在 ${formatCount(flags.interconnectBandwidth)} GB/s 的链路上通过 all-reduce 同步${flags.modelParallel ? '；tensor-parallel 交换共用同一套 fabric' : ''}。`
+        : '单块 GPU 没什么可 all-reduce 的。',
     },
     activation: {
       state: flags.activationCheckpointing ? 'tradeoff' : flags.needsActivationRecompute ? 'needed' : 'not-yet',
       copy: flags.activationCheckpointing
-        ? 'Activation checkpointing recomputes activations in the backward pass to trade compute for memory.'
+        ? 'Activation checkpointing 在 backward pass 里重算 activation，用计算换 memory。'
         : flags.needsActivationRecompute
-          ? 'Activation memory is over budget — enable checkpointing to recompute instead of store.'
-          : 'Activations fit comfortably, so recompute is not worth the extra compute yet.',
+          ? 'Activation memory 超预算了——打开 checkpointing 用重算代替存储。'
+          : 'activation 装得很宽裕，所以暂时不值得为重算多付计算。',
     },
     checkpointing: {
       state: flags.needsCheckpointResilience ? 'needed' : 'useful',
       copy: flags.needsCheckpointResilience
-        ? `Frequent sharded checkpoints (every ${formatCount(flags.checkpointIntervalMin)} min) and automatic mesh restart bound lost work when nodes fail.`
-        : 'Periodic checkpoints are enough; failures are rare at this scale.',
+        ? `频繁的 sharded checkpoint（每 ${formatCount(flags.checkpointIntervalMin)} 分钟一次）加上自动 mesh restart，约束了节点故障时损失的工作量。`
+        : '定期 checkpoint 就够了；在这个规模下故障很少。',
     },
     dataPipeline: {
       state: flags.dataStarved ? 'needed' : flags.needsDataParallel ? 'useful' : 'not-yet',
       copy: flags.dataStarved
-        ? 'Scale data loaders and prefetch so streamed tokens never become the bottleneck.'
-        : 'Loaders stream tokens fast enough to keep the mesh fed.',
+        ? '扩大 data loader 和 prefetch，让 stream 出来的 token 永远不会成为瓶颈。'
+        : 'loader stream token 的速度足够喂饱整个 mesh。',
     },
     interconnect: {
       state: flags.interconnectStrained ? 'needed' : flags.modelParallel ? 'tradeoff' : flags.needsCollectives ? 'useful' : 'not-yet',
       copy: flags.modelParallel
-        ? 'Place tensor-parallel GPUs on the same node (NVLink) and run data-parallel all-reduce across nodes (InfiniBand).'
+        ? '把 tensor-parallel 的 GPU 放在同一节点（NVLink），把 data-parallel all-reduce 跑在跨节点（InfiniBand）。'
         : flags.needsCollectives
-          ? 'A flat all-reduce topology is fine while only gradients cross the fabric.'
-          : 'No interconnect topology to design for a single GPU.',
+          ? '只有 gradient 穿过 fabric 时，一个扁平的 all-reduce topology 就够用。'
+          : '单块 GPU 没有 interconnect topology 要设计。',
     },
   };
 }
 
 function chooseArchitectureTitle(flags: ArchitectureFlags): string {
   if (!flags.needsCollectives) {
-    return 'Single-GPU training';
+    return 'Single-GPU 训练';
   }
   if (flags.needsCheckpointResilience && flags.modelParallel) {
-    return '3D-parallel mesh with checkpoint + fault recovery';
+    return '3D-parallel mesh + checkpoint + fault recovery';
   }
   if (flags.modelParallel) {
     return 'Tensor + pipeline + data parallel mesh';
   }
-  return 'Data-parallel replicas with gradient all-reduce';
+  return '带 gradient all-reduce 的 data-parallel replica';
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (!flags.needsCollectives) {
-    return 'One GPU holds the whole model and optimizer state and trains directly. No parallelism, collectives, or recompute is justified yet.';
+    return '一块 GPU 持有整个模型和 optimizer state，直接训练。还不需要任何 parallelism、collective 或 recompute。';
   }
   if (flags.needsCheckpointResilience && flags.modelParallel) {
-    return 'A full 3D-parallel mesh shards each copy with tensor and pipeline parallelism and replicates it data-parallel, while frequent sharded checkpoints and automatic mesh restart keep a thousands-of-GPU run alive through routine failures.';
+    return '一套完整的 3D-parallel mesh 用 tensor 和 pipeline parallelism 把每份副本 shard 开，再 data-parallel 地复制它，同时频繁的 sharded checkpoint 加自动 mesh restart 让一次上千块 GPU 的 run 能在家常便饭般的故障中存活。';
   }
   if (flags.modelParallel) {
-    return 'The model is too big for one device, so tensor and pipeline parallelism split a copy across GPUs and data parallelism replicates that copy, with collectives carrying both gradient all-reduce and tensor-parallel exchanges.';
+    return '模型对单设备来说太大，所以 tensor 和 pipeline parallelism 把一份副本切分到多块 GPU 上，再由 data parallelism 复制这份副本，collective 同时承载 gradient all-reduce 和 tensor-parallel 交换。';
   }
-  return 'Each GPU holds a full model copy and trains on a different batch slice, synchronizing gradients with an all-reduce every step over the interconnect.';
+  return '每块 GPU 持有一份完整模型副本，在不同的 batch 切片上训练，每步通过 interconnect 上的 all-reduce 同步 gradient。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {

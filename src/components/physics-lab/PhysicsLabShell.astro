@@ -13,14 +13,14 @@ const { entry } = Astro.props;
   <header class="plab__head">
     <a class="plab__back" href="/">
       <i class="ph ph-arrow-left" aria-hidden="true"></i>
-      <span>All labs</span>
+      <span>所有 lab</span>
     </a>
 
     <p class="plab__eyebrow">{entry.eyebrow}</p>
     <h1 class="plab__title">{entry.title}</h1>
     <p class="plab__lede">{entry.description}</p>
 
-    <nav class="plab__switcher" aria-label="Physics labs">
+    <nav class="plab__switcher" aria-label="物理 lab">
       {
         physicsLabCatalog.map((lab) => (
           <a
@@ -44,7 +44,7 @@ const { entry } = Astro.props;
           width="900"
           height="560"
           data-stage-canvas
-          aria-label={`${entry.title} simulation canvas`}></canvas>
+          aria-label={`${entry.title} 仿真画布`}></canvas>
       </div>
       <div class="plab__readouts">
         <slot name="readouts" />

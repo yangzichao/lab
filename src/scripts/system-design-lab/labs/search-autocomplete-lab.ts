@@ -17,16 +17,16 @@ const comfortableFanoutShards = 8; // shards a single coordinator can scatter/ga
 
 export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
   id: 'search-autocomplete',
-  eyebrow: 'System Design Lab',
+  eyebrow: '系统设计 Lab',
   title:
-    'Search autocomplete is a read-only top-k prefix lookup on a tight latency budget, fed by a separate aggregation pipeline — not a live write path.',
+    'Search autocomplete 是在紧绷 latency 预算下的只读 top-k prefix 查询，由一条独立的聚合 pipeline 喂养 —— 而不是一条实时写路径。',
   summary:
-    'Change keystroke query rate, vocabulary size, how many suggestions you return, the p99 latency budget, how fresh completions must be, and regions. The design moves from one in-memory trie to caching the hottest prefixes, sharding the trie by prefix, a streaming log-aggregation pipeline for freshness, and per-region personalization.',
+    '调节按键查询速率、词表大小、返回多少条建议、p99 latency 预算、completion 要多新鲜，以及 region 数。设计会从单个内存 trie 演进到 cache 最热的 prefix、按 prefix 给 trie 分片、用一条流式 log 聚合 pipeline 保新鲜，再到 per-region 个性化。',
   controls: [
     {
       id: 'prefixQps',
-      label: 'Prefix query rate',
-      help: 'Reads: every keystroke fires a lookup for the current prefix. This is the dominant traffic.',
+      label: 'Prefix 查询速率',
+      help: '读：每次按键都会为当前 prefix 发起一次查询。这是主导流量。',
       min: 10,
       max: 5_000_000,
       defaultValue: 2_000,
@@ -35,30 +35,30 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'vocabularySize',
-      label: 'Vocabulary size',
-      help: 'Distinct queries kept in the trie. More distinct queries means a larger, deeper prefix tree.',
+      label: '词表大小',
+      help: '存在 trie 里的去重查询数。去重查询越多，prefix 树就越大越深。',
       min: 10_000,
       max: 50_000_000_000,
       defaultValue: 5_000_000,
       scale: 'log',
-      unit: 'queries',
+      unit: '条',
       format: 'count',
     },
     {
       id: 'topKSuggestions',
-      label: 'Suggestions returned',
-      help: 'Top-k completions precomputed and stored at each trie node and returned per lookup.',
+      label: '返回的建议数',
+      help: '在每个 trie 节点预计算并存好的 top-k completion，每次查询返回这么多条。',
       min: 3,
       max: 20,
       defaultValue: 10,
       scale: 'linear',
-      unit: 'suggestions',
+      unit: '条',
       format: 'count',
     },
     {
       id: 'latencyBudgetMs',
-      label: 'p99 latency budget',
-      help: 'How fast a prefix lookup must return before the suggestion feels laggy mid-typing.',
+      label: 'p99 latency 预算',
+      help: 'prefix 查询得多快返回，建议在打字中途才不会显得卡。',
       min: 5,
       max: 300,
       defaultValue: 100,
@@ -67,8 +67,8 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'freshnessMinutes',
-      label: 'Update freshness',
-      help: 'Acceptable lag between a query trending and it appearing in completions. Lower means a tighter pipeline.',
+      label: '更新新鲜度',
+      help: '一个查询开始火起来到它出现在 completion 里之间可接受的滞后。越低意味着 pipeline 越紧。',
       min: 1,
       max: 1_440,
       defaultValue: 60,
@@ -77,27 +77,27 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'globalRegions',
-      label: 'Regions',
-      help: 'Regions that should serve completions close to the user within the latency budget.',
+      label: 'Region 数',
+      help: '应在 latency 预算内、就近为用户提供 completion 的 region。',
       min: 1,
       max: 20,
       defaultValue: 1,
       scale: 'linear',
-      unit: 'regions',
+      unit: '个',
       format: 'count',
     },
   ],
   toggles: [
     {
       id: 'personalization',
-      label: 'Personalize suggestions',
-      help: 'Blend per-user history into ranking; rules out one shared global top-k per prefix.',
+      label: '个性化建议',
+      help: '把 per-user 历史混进 ranking；这就排除了每个 prefix 一份共享的全局 top-k。',
       defaultValue: false,
     },
     {
       id: 'typoTolerance',
-      label: 'Typo / fuzzy tolerance',
-      help: 'Match prefixes with small edits; widens each lookup beyond an exact trie walk.',
+      label: '错字 / fuzzy 容忍',
+      help: '允许带少量编辑的 prefix 匹配；让每次查询超出一次精确的 trie 行走、范围更宽。',
       defaultValue: false,
     },
   ],
@@ -105,8 +105,8 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'in-memory-trie',
       step: '01',
-      title: 'One in-memory trie',
-      summary: 'A small box answers every prefix from one trie.',
+      title: '单个内存 trie',
+      summary: '一台小机器用一个 trie 回答每个 prefix。',
       values: {
         prefixQps: 200,
         vocabularySize: 200_000,
@@ -121,8 +121,8 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'cache-hot-prefixes',
       step: '02',
-      title: 'Cache the hot prefixes',
-      summary: 'Keystroke traffic explodes, but few prefixes dominate.',
+      title: 'Cache 热门 prefix',
+      summary: '按键流量暴涨，但少数 prefix 占了大头。',
       values: {
         prefixQps: 150_000,
         vocabularySize: 2_000_000,
@@ -137,8 +137,8 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'shard-the-trie',
       step: '03',
-      title: 'Shard the trie',
-      summary: 'A huge vocabulary no longer fits in one box.',
+      title: '给 trie 分片',
+      summary: '庞大的词表在一台机器里装不下了。',
       values: {
         prefixQps: 600_000,
         vocabularySize: 2_000_000_000,
@@ -153,8 +153,8 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'streaming-freshness',
       step: '04',
-      title: 'Streaming freshness',
-      summary: 'Trends must surface in minutes, not hours.',
+      title: '流式新鲜度',
+      summary: '趋势必须几分钟内浮现，而不是几小时。',
       values: {
         prefixQps: 1_200_000,
         vocabularySize: 8_000_000_000,
@@ -169,8 +169,8 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'global-personalized',
       step: '05',
-      title: 'Global + personalized',
-      summary: 'Per-user ranking near every user, single-digit ms.',
+      title: '全球 + 个性化',
+      summary: '在每个用户身边做 per-user ranking，个位数 ms。',
       values: {
         prefixQps: 3_000_000,
         vocabularySize: 20_000_000_000,
@@ -184,20 +184,20 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'Search autocomplete architecture diagram',
+    title: 'Search autocomplete 架构图',
     description:
-      'Whiteboard-style architecture diagram for search autocomplete: clients firing per-keystroke lookups, an edge/API layer with a hot-prefix cache, a prefix-sharded trie service holding precomputed top-k, an aggregation pipeline that rebuilds top-k from the query log, and the query-log store.',
+      'search autocomplete 的白板风格架构图：每次按键发起查询的 client、带 hot-prefix cache 的 edge/API 层、持有预计算 top-k 的 prefix-sharded trie service、从 query log 重建 top-k 的聚合 pipeline，以及 query-log 存储。',
     columns: [
       {
         id: 'clients',
-        label: 'Clients',
+        label: 'Client',
         variant: 'clients',
         nodes: [
           {
             id: 'client',
             title: 'Client',
-            subtitle: 'per keystroke',
-            summary: 'fires a prefix lookup on every keystroke and logs the chosen query',
+            subtitle: '每次按键',
+            summary: '每次按键发起一次 prefix 查询，并记录被选中的 query',
             kind: 'client',
           },
         ],
@@ -210,15 +210,15 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'apiGateway',
             title: 'API gateway',
-            subtitle: 'lookup + log',
-            summary: 'fans prefix lookups to the trie and forwards chosen queries to the log',
+            subtitle: '查询 + 记录',
+            summary: '把 prefix 查询分发给 trie，并把被选中的 query 转发到 log',
             kind: 'api',
           },
           {
             id: 'prefixCache',
             title: 'Prefix cache',
-            subtitle: 'hot prefixes',
-            summary: 'serves completions for the most common prefixes without touching the trie',
+            subtitle: '热门 prefix',
+            summary: '为最常见的 prefix 提供 completion，不碰 trie',
             kind: 'cache',
           },
         ],
@@ -231,36 +231,36 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'trieService',
             title: 'Trie service',
-            subtitle: 'precomputed top-k',
-            summary: 'walks the prefix tree and returns the top-k stored at the matched node',
+            subtitle: '预计算 top-k',
+            summary: '行走 prefix 树，返回匹配节点上存好的 top-k',
             kind: 'search',
           },
           {
             id: 'trieShards',
-            title: 'Trie shards',
-            subtitle: 'partition by prefix',
-            summary: 'split the prefix tree across nodes so a huge vocabulary fits and scales',
+            title: 'Trie shard',
+            subtitle: '按 prefix 分片',
+            summary: '把 prefix 树拆到多个节点上，让庞大词表既装得下又能扩展',
             kind: 'search',
           },
         ],
       },
       {
         id: 'aggregation',
-        label: 'Aggregation',
+        label: '聚合',
         variant: 'processing',
         nodes: [
           {
             id: 'aggregator',
             title: 'Aggregator',
-            subtitle: 'rebuild top-k',
-            summary: 'counts query frequencies and recomputes the top-k written back into the trie',
+            subtitle: '重建 top-k',
+            summary: '统计 query 频率，重新算出 top-k 并写回 trie',
             kind: 'compute',
           },
           {
             id: 'streamProcessor',
             title: 'Stream processor',
-            subtitle: 'fresh updates',
-            summary: 'incrementally updates counts from the live log so trends surface within minutes',
+            subtitle: '新鲜更新',
+            summary: '从实时 log 增量更新计数，让趋势在几分钟内浮现',
             kind: 'compute',
           },
         ],
@@ -273,8 +273,8 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'queryLog',
             title: 'Query log',
-            subtitle: 'raw searches',
-            summary: 'durably records every chosen query as the source of truth for ranking',
+            subtitle: '原始搜索',
+            summary: '持久记录每个被选中的 query，作为 ranking 的 source of truth',
             kind: 'stream',
           },
         ],
@@ -294,110 +294,110 @@ export const searchAutocompleteLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'readPath', label: 'Lookup vs latency budget' },
-    { id: 'trieMemory', label: 'Trie memory' },
-    { id: 'cachePressure', label: 'Hot-prefix cache pressure' },
-    { id: 'updateLag', label: 'Update / freshness lag' },
+    { id: 'readPath', label: '查询 vs latency 预算' },
+    { id: 'trieMemory', label: 'Trie 内存' },
+    { id: 'cachePressure', label: 'Hot-prefix cache 压力' },
+    { id: 'updateLag', label: '更新 / 新鲜度滞后' },
     { id: 'fanout', label: 'Shard fan-out' },
   ],
   decisions: [
-    { id: 'trie', title: 'Trie + precomputed top-k' },
+    { id: 'trie', title: 'Trie + 预计算 top-k' },
     { id: 'cache', title: 'Hot-prefix cache' },
     { id: 'sharding', title: 'Prefix sharding' },
-    { id: 'pipeline', title: 'Update pipeline' },
-    { id: 'personalization', title: 'Personalized ranking' },
-    { id: 'ranking', title: 'Ranking / typo tolerance' },
+    { id: 'pipeline', title: '更新 pipeline' },
+    { id: 'personalization', title: '个性化 ranking' },
+    { id: 'ranking', title: 'Ranking / 错字容忍' },
   ],
   sourceBackedRules: [
     {
-      title: 'A trie answers prefix queries in time proportional to the prefix length',
+      title: 'trie 回答 prefix 查询的耗时与 prefix 长度成正比',
       source: 'NIST Dictionary of Algorithms and Data Structures',
       url: 'https://xlinux.nist.gov/dads/HTML/trie.html',
       summary:
-        'A trie keys on the characters of the prefix, so a completion lookup is O(prefix length) and independent of how many queries are stored, unlike scanning the vocabulary.',
+        'trie 以 prefix 的字符为 key，所以一次 completion 查询是 O(prefix 长度)，与存了多少 query 无关 —— 不像扫描整个词表那样。',
     },
     {
-      title: 'Query popularity is heavily skewed, so a small cache covers most lookups',
+      title: 'query 热度高度倾斜，所以一个小 cache 就能覆盖大多数查询',
       source: 'Baeza-Yates et al., "The Impact of Caching on Search Engines" (SIGIR)',
       url: 'https://dl.acm.org/doi/10.1145/1277741.1277775',
       summary:
-        'Search query streams follow a power-law: a small set of popular queries accounts for a large fraction of traffic, so caching the hottest prefixes absorbs most reads.',
+        '搜索 query 流服从幂律：一小撮热门 query 占了很大一部分流量，所以 cache 最热的 prefix 就能吸收大多数读。',
     },
     {
-      title: 'Precompute and store top-k at each node instead of ranking at query time',
+      title: '在每个节点预计算并存好 top-k，而不是在查询时才 ranking',
       source: 'Redis Docs — autocomplete with sorted sets',
       url: 'https://redis.io/docs/latest/develop/use/patterns/',
       summary:
-        'Maintaining the ranked completions ahead of time (e.g. in a sorted set per prefix) turns a lookup into a read of an already-sorted top-k rather than an on-the-fly aggregation.',
+        '提前把排好序的 completion 维护好（比如每个 prefix 一个 sorted set），就把一次查询变成读取一份已排序的 top-k，而不是临时聚合。',
     },
     {
-      title: 'Streaming aggregation produces low-latency updates from an unbounded log',
+      title: '流式聚合能从一条无界 log 产出低延迟更新',
       source: 'Apache Flink Documentation',
       url: 'https://nightlies.apache.org/flink/flink-docs-stable/docs/concepts/stateful-stream-processing/',
       summary:
-        'A stateful stream processor maintains running aggregates over the query log so updated top-k counts are available within seconds-to-minutes instead of waiting for a batch rebuild.',
+        '一个有状态的 stream processor 在 query log 上维护滚动聚合，让更新后的 top-k 计数在数秒到数分钟内可用，而不用等一次批量重建。',
     },
   ],
   teachingAssumptions: [
-    'Completions are modeled as cacheable prefix lookups; cache coverage is approximated from query-popularity skew, not a measured hit rate.',
-    'Single-node read throughput and in-memory trie capacity are conservative teaching numbers, not vendor limits.',
-    'The trie is read-only on the hot path; freshness comes only from the separate aggregation pipeline, so search latency and update lag are independent budgets.',
+    'completion 被建模成可缓存的 prefix 查询；cache 覆盖率是从 query 热度倾斜近似出来的，不是实测的命中率。',
+    '单节点读 throughput 和内存 trie 容量都是保守的教学数字，不是厂商上限。',
+    '在热路径上 trie 是只读的；新鲜度只来自那条独立的聚合 pipeline，所以搜索 latency 和更新滞后是各自独立的预算。',
   ],
   teachingWalkthrough: [
     {
       id: 'one-trie',
       step: '01',
-      focus: 'One in-memory trie',
+      focus: '单个内存 trie',
       scenarioId: 'in-memory-trie',
       question:
-        'A small site does ~200 prefix lookups/s over 200k distinct queries. Do you need a cache, shards, or a streaming pipeline yet?',
+        '一个小站点在 200k 条去重 query 上做约每秒 200 次 prefix 查询。你现在需要 cache、shard 或流式 pipeline 吗？',
       reveal:
-        'No. The whole trie fits in memory on one box, a lookup is O(prefix length) regardless of vocabulary size, and 200 reads/s is trivial. Refreshing top-k once or twice a day with a batch job over the query log is plenty. Everything else is premature.',
-      takeaway: 'Start with one in-memory trie holding precomputed top-k; freshness can lag by hours.',
+        '不需要。整个 trie 在一台机器的内存里就装得下，一次查询是 O(prefix 长度)、与词表大小无关，每秒 200 次读微不足道。每天用一个批量作业在 query log 上刷新一两次 top-k 就绰绰有余。其余一切都为时过早。',
+      takeaway: '从单个持有预计算 top-k 的内存 trie 起步；新鲜度可以滞后几个小时。',
     },
     {
       id: 'cache-hot',
       step: '02',
-      focus: 'Hot prefixes dominate',
+      focus: '热门 prefix 占大头',
       scenarioId: 'cache-hot-prefixes',
       question:
-        'Traffic jumps to 150k lookups/s, but a handful of prefixes get most of them. What is the cheapest way to protect the trie?',
+        '流量跳到每秒 150k 次查询，但其中大多数落在少数几个 prefix 上。保护 trie 最便宜的办法是什么？',
       reveal:
-        'Cache the completions for the hottest prefixes. Query popularity is power-law skewed, so a small cache serves the bulk of lookups at memory speed and the trie only sees the long tail of misses — no need to shard yet.',
-      takeaway: 'Skewed prefix popularity lets a small cache absorb most read traffic.',
+        'cache 最热那几个 prefix 的 completion。query 热度呈幂律倾斜，所以一个小 cache 能以内存速度服务大部分查询，trie 只看到那条 miss 的长尾 —— 暂时不用分片。',
+      takeaway: '倾斜的 prefix 热度让一个小 cache 就能吸收大多数读流量。',
     },
     {
       id: 'shard',
       step: '03',
-      focus: 'Vocabulary outgrows one box',
+      focus: '词表超出一台机器',
       scenarioId: 'shard-the-trie',
       question:
-        'The vocabulary grows to ~2 billion distinct queries. The cache still helps reads, but what breaks now?',
+        '词表涨到约 20 亿条去重 query。cache 对读还有帮助，但现在什么会撑不住？',
       reveal:
-        'The trie no longer fits in one machine’s memory. Partition it by prefix across shards so each holds a slice of the tree; a lookup is routed by its leading characters. Fan-out stays small because one prefix lives on one shard.',
-      takeaway: 'When the vocabulary outgrows one box, shard the trie by prefix so each lookup hits one shard.',
+        'trie 在一台机器的内存里装不下了。按 prefix 把它分到各个 shard 上，每个持有树的一片；一次查询按它的起始字符路由。fan-out 仍很小，因为一个 prefix 只住在一个 shard 上。',
+      takeaway: '当词表超出一台机器时，按 prefix 给 trie 分片，让每次查询只命中一个 shard。',
     },
     {
       id: 'streaming',
       step: '04',
-      focus: 'Freshness in minutes',
+      focus: '分钟级新鲜度',
       scenarioId: 'streaming-freshness',
       question:
-        'A breaking-news query must appear in suggestions within ~2 minutes. Can an hourly batch rebuild deliver that?',
+        '一个突发新闻 query 必须在约 2 分钟内出现在建议里。每小时一次的批量重建能做到吗？',
       reveal:
-        'No — an hourly batch is far too slow. Replace (or augment) it with a stream processor that maintains running top-k counts from the live query log and writes incremental updates into the trie, so trends surface within minutes. Lookup latency is unaffected because the hot path stays read-only.',
-      takeaway: 'Freshness is a pipeline property: stream the query log to update top-k in minutes, not hours.',
+        '做不到 —— 每小时一次太慢了。用一个 stream processor 来替换（或增强）它：从实时 query log 维护滚动的 top-k 计数，并把增量更新写进 trie，让趋势在几分钟内浮现。查询 latency 不受影响，因为热路径仍是只读的。',
+      takeaway: '新鲜度是 pipeline 的属性：把 query log 流式处理，几分钟而非几小时就能更新 top-k。',
     },
     {
       id: 'global',
       step: '05',
-      focus: 'Global + personalized',
+      focus: '全球 + 个性化',
       scenarioId: 'global-personalized',
       question:
-        'Now users worldwide expect sub-10 ms, personalized completions. Is one shared global top-k per prefix, served from one region, enough?',
+        '现在全球用户都期待 10 ms 以内的个性化 completion。每个 prefix 一份共享的全局 top-k、只从一个 region 提供，够吗？',
       reveal:
-        'No on both counts. Sub-10 ms across continents needs the cache and trie replicated near users in each region, and personalization means ranking can no longer be a single shared top-k — you blend a global base ranking with per-user signals at request time. Personalization also dilutes cache effectiveness because results vary per user.',
-      takeaway: 'Global low latency pushes the trie to the edge; personalization trades a shared cache for per-user ranking.',
+        '两点都不够。跨洲做到 10 ms 以内，需要把 cache 和 trie 复制到每个 region 里用户身边；而个性化意味着 ranking 不再能是单一共享的 top-k —— 你要在请求时把一份全局基准 ranking 和 per-user 信号混合。个性化还会稀释 cache 效果，因为结果因人而异。',
+      takeaway: '全球低延迟把 trie 推到 edge；个性化则拿共享 cache 换来 per-user ranking。',
     },
   ],
   analyze: analyzeSearchAutocompleteWorkload,
@@ -490,50 +490,50 @@ function analyzeSearchAutocompleteWorkload(workload: WorkloadValues): LabAnalysi
         ratio: effectiveTrieReads / comfortableTrieReadsPerSecond,
         valueText: `${formatRate(effectiveTrieReads)}/s`,
         copy: needsCache
-          ? `The hot-prefix cache absorbs most lookups; the trie still serves about ${formatRate(
+          ? `hot-prefix cache 吸收了大多数查询；trie 仍要在 ${Math.round(latencyBudgetMs)} ms 预算内服务约 ${formatRate(
               effectiveTrieReads,
-            )}/s within a ${Math.round(latencyBudgetMs)} ms budget.`
-          : `Every keystroke hits the trie directly — about ${formatRate(
+            )}/s。`
+          : `每次按键都直接命中 trie —— 在 ${Math.round(latencyBudgetMs)} ms 预算内约 ${formatRate(
               effectiveTrieReads,
-            )}/s within a ${Math.round(latencyBudgetMs)} ms budget.`,
+            )}/s。`,
       },
       trieMemory: {
         ratio: trieMemoryGigabytes / comfortableTrieMemoryGigabytes,
         valueText: formatStorageGigabytes(trieMemoryGigabytes),
-        copy: `${formatCount(vocabularySize)} distinct queries with top-${Math.round(
+        copy: `${formatCount(vocabularySize)} 条去重 query、每个节点存 top-${Math.round(
           topKSuggestions,
-        )} stored per node take roughly ${formatStorageGigabytes(trieMemoryGigabytes)} in memory.`,
+        )}，在内存里大约占 ${formatStorageGigabytes(trieMemoryGigabytes)}。`,
       },
       cachePressure: {
         ratio: cachePressureRatio,
-        valueText: needsCache ? `${Math.round(cacheServedShare * 100)}% served` : 'no cache',
+        valueText: needsCache ? `${Math.round(cacheServedShare * 100)}% 由 cache 命中` : '无 cache',
         copy: needsCache
           ? personalization
-            ? 'Personalized results vary per user, so the hot-prefix cache covers far fewer lookups and pressure rises.'
-            : 'Skewed prefix popularity lets a small cache cover the bulk of lookups at memory speed.'
-          : 'Read volume is low enough that the trie answers every prefix directly without a cache.',
+            ? '个性化结果因人而异，所以 hot-prefix cache 能覆盖的查询少得多，压力随之上升。'
+            : '倾斜的 prefix 热度让一个小 cache 就能以内存速度覆盖大部分查询。'
+          : '读量足够低，trie 不用 cache 就能直接回答每个 prefix。',
       },
       updateLag: {
         ratio: updateLagRatio,
         valueText: needsStreaming
-          ? `~${formatLagMinutes(effectiveLagMinutes)} lag`
-          : `~${formatLagMinutes(batchRebuildLagMinutes)} batch`,
+          ? `约 ${formatLagMinutes(effectiveLagMinutes)} 滞后`
+          : `约 ${formatLagMinutes(batchRebuildLagMinutes)} 批量`,
         copy: needsStreaming
-          ? `A ${formatLagMinutes(
+          ? `${formatLagMinutes(
               freshnessMinutes,
-            )} freshness target needs streaming aggregation; an hourly batch rebuild is far too slow.`
-          : `A ${formatLagMinutes(
+            )} 的新鲜度目标需要流式聚合；每小时一次的批量重建太慢了。`
+          : `${formatLagMinutes(
               freshnessMinutes,
-            )} freshness target is comfortably met by a periodic batch rebuild of top-k.`,
+            )} 的新鲜度目标，靠周期性批量重建 top-k 就能轻松满足。`,
       },
       fanout: {
         ratio: fanoutPressure,
         valueText: needsSharding
-          ? `${shardCount} ${pluralize('shard', shardCount)}`
-          : '1 shard',
+          ? `${shardCount} 个 shard`
+          : '1 个 shard',
         copy: needsSharding
-          ? `The trie is split into ${shardCount} prefix shards; each lookup is routed by its leading characters to one shard.`
-          : 'The whole trie fits on one node, so a lookup never fans out across shards.',
+          ? `trie 被拆成 ${shardCount} 个 prefix shard；每次查询按其起始字符路由到一个 shard。`
+          : '整个 trie 在一个节点上就装得下，所以一次查询从不跨 shard 做 fan-out。',
       },
     },
     decisions: buildDecisions({
@@ -587,12 +587,12 @@ function buildReasons(
       severity: analysis.effectiveTrieReads > comfortableTrieReadsPerSecond ? 'danger' : 'warning',
       text: `${formatRate(
         analysis.prefixQps,
-      )}/s of per-keystroke lookups should be served from a hot-prefix cache; only the long-tail misses reach the trie.`,
+      )}/s 的逐键查询应当由一个 hot-prefix cache 来服务；只有长尾 miss 才会打到 trie。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Read volume is low enough that one in-memory trie answers every prefix without a cache.',
+      text: '读量足够低，一个内存 trie 不用 cache 就能回答每个 prefix。',
     });
   }
 
@@ -602,56 +602,53 @@ function buildReasons(
         analysis.trieMemoryGigabytes > comfortableTrieMemoryGigabytes * 2 ? 'danger' : 'warning',
       text: `${formatCount(
         analysis.vocabularySize,
-      )} distinct queries (~${formatStorageGigabytes(
+      )} 条去重 query（约 ${formatStorageGigabytes(
         analysis.trieMemoryGigabytes,
-      )}) exceed one box; partition the trie into ${analysis.shardCount} prefix shards.`,
+      )}）超出了一台机器；把 trie 分成 ${analysis.shardCount} 个 prefix shard。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `The whole trie (~${formatStorageGigabytes(
+      text: `整个 trie（约 ${formatStorageGigabytes(
         analysis.trieMemoryGigabytes,
-      )}) fits in one machine’s memory, so no sharding is justified yet.`,
+      )}）在一台机器的内存里就装得下，所以暂时不必分片。`,
     });
   }
 
   if (analysis.needsStreaming) {
     reasons.push({
       severity: 'warning',
-      text: `A ${formatLagMinutes(
+      text: `${formatLagMinutes(
         analysis.freshnessMinutes,
-      )} freshness target needs streaming log aggregation; a periodic batch rebuild cannot keep up.`,
+      )} 的新鲜度目标需要流式 log 聚合；周期性的批量重建跟不上。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Completions can lag by hours, so a periodic batch rebuild of top-k from the query log is enough.',
+      text: 'completion 可以滞后几个小时，所以从 query log 周期性批量重建 top-k 就够了。',
     });
   }
 
   if (analysis.needsCdn) {
     reasons.push({
       severity: 'warning',
-      text: `${formatCount(analysis.globalRegions)} ${pluralize(
-        'region',
-        analysis.globalRegions,
-      )} with a ${Math.round(
+      text: `${formatCount(analysis.globalRegions)} 个 region 加上 ${Math.round(
         analysis.latencyBudgetMs,
-      )} ms budget push the cache and trie to replicas near each user.`,
+      )} ms 的预算，把 cache 和 trie 推到每个用户身边的副本上。`,
     });
   }
 
   if (analysis.personalization) {
     reasons.push({
       severity: 'warning',
-      text: 'Personalization replaces one shared global top-k with per-user ranking at request time, which also dilutes the hot-prefix cache.',
+      text: '个性化用请求时的 per-user ranking 取代了单一共享的全局 top-k，这也会稀释 hot-prefix cache。',
     });
   }
 
   if (analysis.typoTolerance) {
     reasons.push({
       severity: 'ok',
-      text: 'Typo / fuzzy tolerance widens each lookup beyond an exact trie walk, raising per-query cost on the read path.',
+      text: '错字 / fuzzy 容忍让每次查询超出一次精确的 trie 行走，抬高了读路径上每条 query 的成本。',
     });
   }
 
@@ -672,121 +669,117 @@ function buildDecisions(
     trie: {
       // The trie + precomputed top-k is the core decision and is always the right base design.
       state: 'needed',
-      copy: 'Serve completions from a trie with top-k precomputed and stored at each node, so a lookup is O(prefix length), not a scan.',
+      copy: '用一个在每个节点都预计算并存好 top-k 的 trie 来提供 completion，这样一次查询是 O(prefix 长度)，而不是扫描。',
     },
     cache: {
       state: flags.needsCache ? (flags.personalization ? 'tradeoff' : 'needed') : 'not-yet',
       copy: flags.needsCache
         ? flags.personalization
-          ? 'Cache the hottest non-personalized prefixes, but per-user ranking means the cache covers fewer lookups.'
-          : 'Cache the completions for the hottest prefixes; skewed popularity lets a small cache serve most lookups.'
-        : 'No cache yet — the trie serves the modest lookup volume directly.',
+          ? 'cache 最热的非个性化 prefix，但 per-user ranking 意味着 cache 能覆盖的查询变少。'
+          : 'cache 最热那些 prefix 的 completion；倾斜的热度让一个小 cache 就能服务大多数查询。'
+        : '暂时不用 cache —— trie 直接服务这点不大的查询量。',
     },
     sharding: {
       state: flags.needsSharding ? 'needed' : 'not-yet',
       copy: flags.needsSharding
-        ? `Partition the trie into ${flags.shardCount} shards by prefix so a huge vocabulary fits and each lookup hits one shard.`
-        : 'One box holds the whole trie until the vocabulary or memory proves otherwise.',
+        ? `按 prefix 把 trie 分成 ${flags.shardCount} 个 shard，让庞大词表既装得下、又让每次查询只命中一个 shard。`
+        : '在词表或内存证明不行之前，一台机器就持有整个 trie。',
     },
     pipeline: {
       state: flags.needsStreaming ? 'needed' : 'useful',
       copy: flags.needsStreaming
-        ? `Stream the query log to update top-k incrementally so trends surface within ${formatLagMinutes(
+        ? `把 query log 流式处理来增量更新 top-k，让趋势在 ${formatLagMinutes(
             flags.freshnessMinutes,
-          )}.`
-        : 'A periodic batch job rebuilds top-k from the query log; freshness can lag by hours.',
+          )} 内浮现。`
+        : '一个周期性批量作业从 query log 重建 top-k；新鲜度可以滞后几个小时。',
     },
     personalization: {
       state: flags.personalization ? 'tradeoff' : 'not-yet',
       copy: flags.personalization
-        ? 'Blend a global base ranking with per-user signals at request time; this trades a shared cache for relevance.'
-        : 'A single shared global top-k per prefix serves everyone, which keeps the cache maximally effective.',
+        ? '在请求时把一份全局基准 ranking 和 per-user 信号混合；这是拿共享 cache 换相关性。'
+        : '每个 prefix 一份共享的全局 top-k 服务所有人，让 cache 保持最大效果。',
     },
     ranking: {
       state: flags.typoTolerance ? 'useful' : 'not-yet',
       copy: flags.typoTolerance
-        ? 'Rank by historical frequency and tolerate small typos with fuzzy prefix matching at extra read cost.'
-        : 'Rank completions by historical frequency with exact-prefix matching only.',
+        ? '按历史频率 ranking，并用 fuzzy prefix 匹配容忍少量错字，代价是额外的读成本。'
+        : '只用精确 prefix 匹配，按历史频率给 completion 做 ranking。',
     },
   };
 }
 
 function chooseArchitectureTitle(flags: ArchitectureFlags): string {
   if (!flags.needsCache && !flags.needsSharding && !flags.needsStreaming && !flags.needsCdn) {
-    return 'Single in-memory trie';
+    return '单个内存 trie';
   }
   if (flags.needsCdn && (flags.needsSharding || flags.needsStreaming)) {
-    return 'Global edge trie + streaming top-k';
+    return '全球 edge trie + 流式 top-k';
   }
   if (flags.needsSharding && flags.needsStreaming) {
-    return 'Sharded trie + streaming aggregation';
+    return '分片 trie + 流式聚合';
   }
   if (flags.needsSharding) {
-    return 'Cached reads + prefix-sharded trie';
+    return '缓存读 + prefix-sharded trie';
   }
   if (flags.needsCache) {
-    return 'Hot-prefix cache + single trie';
+    return 'Hot-prefix cache + 单个 trie';
   }
-  return 'Single in-memory trie';
+  return '单个内存 trie';
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (!flags.needsCache && !flags.needsSharding && !flags.needsStreaming && !flags.needsCdn) {
-    return 'One in-memory trie holding precomputed top-k answers every prefix, refreshed by an occasional batch rebuild. Nothing else is justified yet.';
+    return '一个持有预计算 top-k 的内存 trie 回答每个 prefix，靠偶尔一次批量重建来刷新。此外的东西暂时都不值当。';
   }
   if (flags.needsCdn && (flags.needsSharding || flags.needsStreaming)) {
-    return 'Hot prefixes and the sharded trie are replicated near each user for single-digit-ms lookups, while a streaming pipeline keeps top-k fresh and ranking can fold in per-user signals.';
+    return '热门 prefix 和分片后的 trie 被复制到每个用户身边，做到个位数 ms 的查询，同时一条流式 pipeline 让 top-k 保持新鲜，ranking 还能折入 per-user 信号。';
   }
   if (flags.needsSharding && flags.needsStreaming) {
-    return 'A cache absorbs the skewed reads, the trie is sharded by prefix for the huge vocabulary, and a stream processor keeps top-k fresh within minutes.';
+    return '一个 cache 吸收倾斜的读，trie 按 prefix 为庞大词表分片，一个 stream processor 让 top-k 在几分钟内保持新鲜。';
   }
   if (flags.needsSharding) {
-    return 'A hot-prefix cache serves the bulk of lookups and the trie is partitioned by prefix so a large vocabulary fits across nodes.';
+    return '一个 hot-prefix cache 服务大部分查询，trie 按 prefix 分区，让大词表能跨多个节点装下。';
   }
   if (flags.needsCache) {
-    return 'A hot-prefix cache serves the popular lookups so a single in-memory trie only handles the long tail of misses.';
+    return '一个 hot-prefix cache 服务热门查询，让单个内存 trie 只处理那条 miss 的长尾。';
   }
-  return 'One in-memory trie still covers the workload.';
+  return '一个内存 trie 仍能覆盖这份负载。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {
   if (!flags.needsCache && !flags.needsSharding && !flags.needsStreaming && !flags.needsCdn) {
-    return 'Keystroke -> API -> trie';
+    return '按键 -> API -> trie';
   }
   if (flags.needsCdn && (flags.needsSharding || flags.needsStreaming)) {
-    return 'Keystroke -> edge cache -> sharded trie (miss); stream -> top-k';
+    return '按键 -> edge cache -> 分片 trie（miss）；stream -> top-k';
   }
   if (flags.needsSharding && flags.needsStreaming) {
-    return 'Keystroke -> cache -> sharded trie (miss); stream -> top-k';
+    return '按键 -> cache -> 分片 trie（miss）；stream -> top-k';
   }
   if (flags.needsSharding) {
-    return 'Keystroke -> cache -> sharded trie (miss)';
+    return '按键 -> cache -> 分片 trie（miss）';
   }
   if (flags.needsCache) {
-    return 'Keystroke -> cache -> trie (miss)';
+    return '按键 -> cache -> trie（miss）';
   }
-  return 'Keystroke -> API -> trie';
+  return '按键 -> API -> trie';
 }
 
 function formatLagMinutes(minutes: number): string {
   if (minutes >= 1_440) {
-    return `${Math.round(minutes / 1_440)} day${Math.round(minutes / 1_440) === 1 ? '' : 's'}`;
+    return `${Math.round(minutes / 1_440)} 天`;
   }
   if (minutes >= 60) {
     const hours = Math.round(minutes / 60);
-    return `${hours} hr${hours === 1 ? '' : 's'}`;
+    return `${hours} 小时`;
   }
   if (minutes >= 1) {
-    return `${Math.round(minutes)} min`;
+    return `${Math.round(minutes)} 分钟`;
   }
-  return `${Math.round(minutes * 60)} sec`;
+  return `${Math.round(minutes * 60)} 秒`;
 }
 
 function numericValue(workload: WorkloadValues, key: string): number {
   const value = workload[key];
   return typeof value === 'number' ? value : 0;
-}
-
-function pluralize(unit: string, value: number): string {
-  return Math.round(value) === 1 ? unit : `${unit}s`;
 }

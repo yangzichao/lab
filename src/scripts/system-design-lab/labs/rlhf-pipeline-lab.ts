@@ -21,38 +21,38 @@ const rolloutLoopThreshold = 64;
 
 export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
   id: 'rlhf-pipeline',
-  eyebrow: 'System Design Lab',
+  eyebrow: '系统设计 Lab',
   title:
-    'An RLHF pipeline is a training loop where rollout generation, reward scoring, and policy updates fight over the same GPUs.',
+    'RLHF pipeline 是一个训练循环，rollout generation、reward scoring 和 policy update 在抢同一批 GPU。',
   summary:
-    'Change the preference dataset, how many rollouts each PPO step generates, the policy and reward-model sizes, the PPO epochs per batch, the KL penalty, and how often you eval. The design moves from SFT-only, to adding a reward model, to a full PPO rollout loop, to scaling rollout generation (the usual bottleneck), to eval gates and a DPO alternative that drops the RL loop entirely.',
+    '调节 preference 数据集、每个 PPO step 生成多少 rollout、policy 和 reward model 的规模、每个 batch 的 PPO epoch 数、KL penalty，以及多久 eval 一次。设计会从只有 SFT，演进到加上 reward model，再到完整的 PPO rollout loop，再到扩展 rollout generation（通常的瓶颈），最后到 eval gate 和一条把 RL loop 整个砍掉的 DPO 路线。',
   controls: [
     {
       id: 'preferencePairs',
       label: 'Preference pairs',
-      help: 'Human comparison pairs (chosen vs rejected) used to train the reward model or, under DPO, the policy directly.',
+      help: '人类比较出来的成对数据（chosen vs rejected），用来训练 reward model，或在 DPO 下直接训练 policy。',
       min: 1_000,
       max: 10_000_000,
       defaultValue: 50_000,
       scale: 'log',
-      unit: 'pairs',
+      unit: '对',
       format: 'count',
     },
     {
       id: 'rolloutsPerStep',
       label: 'Rollouts per step',
-      help: 'Completions the policy generates each PPO step; every one must be scored by the reward model and the reference model.',
+      help: 'policy 在每个 PPO step 生成的 completion 数；每一个都要被 reward model 和 reference model 打分。',
       min: 8,
       max: 8_192,
       defaultValue: 256,
       scale: 'log',
-      unit: 'rollouts',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'policyParams',
       label: 'Policy model size',
-      help: 'Parameters in the policy being optimized; it must run both generation (inference) and gradient updates.',
+      help: '正在被优化的 policy 的参数量；它既要跑 generation（inference）也要做 gradient update。',
       min: 100_000_000,
       max: 700_000_000_000,
       defaultValue: 7_000_000_000,
@@ -63,7 +63,7 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'rewardModelParams',
       label: 'Reward model size',
-      help: 'Parameters in the reward model that scores each rollout; runs as an inference forward pass in the loop.',
+      help: '给每个 rollout 打分的 reward model 的参数量；在 loop 里作为一次 inference forward pass 运行。',
       min: 100_000_000,
       max: 700_000_000_000,
       defaultValue: 7_000_000_000,
@@ -74,7 +74,7 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'ppoEpochs',
       label: 'PPO epochs per batch',
-      help: 'Optimization passes the policy takes over each batch of scored rollouts before generating again.',
+      help: 'policy 在重新生成之前，对每一批打过分的 rollout 做多少轮优化遍历。',
       min: 1,
       max: 16,
       defaultValue: 4,
@@ -85,7 +85,7 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'klCoefficient',
       label: 'KL penalty coefficient',
-      help: 'Strength of the KL constraint pulling the policy back toward the frozen reference model; too low and the policy reward-hacks.',
+      help: 'KL 约束把 policy 往冻结的 reference model 拉回去的强度；太低 policy 就会 reward-hack。',
       min: 0.001,
       max: 1,
       defaultValue: 0.05,
@@ -95,7 +95,7 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'evalFrequency',
       label: 'Eval frequency',
-      help: 'How often a held-out eval and safety check runs, measured in steps between evals (lower means more frequent).',
+      help: '一次 held-out eval 加 safety check 多久跑一次，以两次 eval 之间相隔的 step 数计（越小越频繁）。',
       min: 1,
       max: 1_000,
       defaultValue: 100,
@@ -108,13 +108,13 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'useDpo',
       label: 'Use DPO (no RL loop)',
-      help: 'Direct Preference Optimization trains the policy straight from preference pairs, removing the rollout-generation loop and online reward model.',
+      help: 'Direct Preference Optimization 直接从 preference pair 训练 policy，去掉了 rollout-generation loop 和在线的 reward model。',
       defaultValue: false,
     },
     {
       id: 'separateRewardModel',
       label: 'Separate reward model',
-      help: 'Host the reward model on its own devices instead of co-locating it with the policy; isolates scoring throughput.',
+      help: '把 reward model 放在自己的设备上，而不是和 policy 共置；把 scoring throughput 隔离开。',
       defaultValue: true,
     },
   ],
@@ -123,7 +123,7 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
       id: 'sft-only',
       step: '01',
       title: 'SFT only',
-      summary: 'Supervised fine-tuning on demonstrations, no reward model or RL yet.',
+      summary: '在 demonstration 上做 supervised fine-tuning，还没有 reward model 或 RL。',
       values: {
         preferencePairs: 1_000,
         rolloutsPerStep: 8,
@@ -139,8 +139,8 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'add-reward-model',
       step: '02',
-      title: 'Add a reward model',
-      summary: 'Train a reward model from preference comparisons before any RL.',
+      title: '加一个 reward model',
+      summary: '在做任何 RL 之前，先从 preference 比较里训练一个 reward model。',
       values: {
         preferencePairs: 50_000,
         rolloutsPerStep: 32,
@@ -157,7 +157,7 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
       id: 'ppo-loop',
       step: '03',
       title: 'PPO rollout loop',
-      summary: 'Policy generates rollouts, the reward model scores them, KL holds it to the reference.',
+      summary: 'policy 生成 rollout，reward model 给它们打分，KL 把它拽在 reference 附近。',
       values: {
         preferencePairs: 200_000,
         rolloutsPerStep: 256,
@@ -173,8 +173,8 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'scale-rollouts',
       step: '04',
-      title: 'Scale rollout generation',
-      summary: 'Many rollouts per step on a large policy; generation throughput is the bottleneck.',
+      title: '扩展 rollout generation',
+      summary: '大 policy 上每个 step 跑大量 rollout；generation throughput 成了瓶颈。',
       values: {
         preferencePairs: 1_000_000,
         rolloutsPerStep: 2_048,
@@ -190,8 +190,8 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'dpo-at-scale',
       step: '05',
-      title: 'DPO alternative at scale',
-      summary: 'Drop the RL loop: optimize a frontier policy directly on a huge preference set with tight eval gates.',
+      title: '规模化的 DPO 路线',
+      summary: '砍掉 RL loop：在巨大的 preference 数据集上直接优化一个 frontier policy，配上严格的 eval gate。',
       values: {
         preferencePairs: 5_000_000,
         rolloutsPerStep: 8,
@@ -206,27 +206,27 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'RLHF pipeline architecture diagram',
+    title: 'RLHF pipeline 架构图',
     description:
-      'Whiteboard-style architecture diagram for an RLHF post-training pipeline: training data, an SFT stage with preference data, a reward model, the RL loop of rollout generation, policy update, and a frozen reference model, and finally eval, a model registry, and async logging.',
+      'RLHF 后训练 pipeline 的白板式架构图：训练数据、带 preference 数据的 SFT 阶段、一个 reward model、由 rollout generation、policy update 和冻结的 reference model 组成的 RL loop，最后是 eval、一个 model registry 和异步 logging。',
     columns: [
       {
         id: 'data',
-        label: 'Data',
+        label: '数据 Data',
         variant: 'clients',
         nodes: [
           {
             id: 'demoData',
             title: 'Demonstrations',
             subtitle: 'SFT corpus',
-            summary: 'human-written prompts and ideal responses used for supervised fine-tuning',
+            summary: '人工写的 prompt 和理想回答，用于 supervised fine-tuning',
             kind: 'objectstore',
           },
           {
             id: 'prefData',
             title: 'Preference data',
             subtitle: 'chosen vs rejected',
-            summary: 'human comparison pairs that define which responses are better',
+            summary: '人类比较出来的成对数据，定义哪个回答更好',
             kind: 'objectstore',
           },
         ],
@@ -239,8 +239,8 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'sftTrainer',
             title: 'SFT trainer',
-            subtitle: 'base to policy',
-            summary: 'fine-tunes the base model on demonstrations to seed the policy',
+            subtitle: 'base 到 policy',
+            summary: '在 demonstration 上 fine-tune base model，给 policy 打底',
             kind: 'gpu',
           },
         ],
@@ -253,15 +253,15 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'rmTrainer',
             title: 'RM trainer',
-            subtitle: 'fit preferences',
-            summary: 'trains a reward model to score responses from preference pairs',
+            subtitle: '拟合 preference',
+            summary: '从 preference pair 训练一个 reward model 来给回答打分',
             kind: 'gpu',
           },
           {
             id: 'rewardModel',
             title: 'Reward model',
-            subtitle: 'scores rollouts',
-            summary: 'serves a scalar reward for each generated rollout in the loop',
+            subtitle: '给 rollout 打分',
+            summary: '在 loop 里为每个生成的 rollout 给出一个标量 reward',
             kind: 'gpu',
           },
         ],
@@ -275,21 +275,21 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
             id: 'rolloutGen',
             title: 'Rollout gen',
             subtitle: 'policy inference',
-            summary: 'the policy generates many completions per step; usually the bottleneck',
+            summary: 'policy 每个 step 生成大量 completion；通常是瓶颈',
             kind: 'gpu',
           },
           {
             id: 'policyUpdate',
             title: 'Policy update',
             subtitle: 'PPO / DPO',
-            summary: 'gradient step that pushes the policy toward higher reward',
+            summary: '把 policy 推向更高 reward 的 gradient step',
             kind: 'gpu',
           },
           {
             id: 'refModel',
             title: 'Reference model',
-            subtitle: 'KL anchor',
-            summary: 'frozen reference whose KL divergence keeps the policy from drifting',
+            subtitle: 'KL 锚点',
+            summary: '冻结的 reference，用 KL divergence 防止 policy 漂移',
             kind: 'gpu',
           },
         ],
@@ -302,22 +302,22 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'evalHarness',
             title: 'Eval harness',
-            subtitle: 'safety + quality',
-            summary: 'runs held-out and safety evals to gate checkpoints',
+            subtitle: 'safety + 质量',
+            summary: '跑 held-out 和 safety eval 来给 checkpoint 把关',
             kind: 'service',
           },
           {
             id: 'registry',
             title: 'Model registry',
-            subtitle: 'versioned checkpoints',
-            summary: 'stores and versions promoted policy checkpoints',
+            subtitle: '带版本的 checkpoint',
+            summary: '存储并管理已晋升的 policy checkpoint 的版本',
             kind: 'objectstore',
           },
           {
             id: 'logStream',
             title: 'Metrics log',
-            subtitle: 'async telemetry',
-            summary: 'collects reward, KL, and rollout metrics off the training path',
+            subtitle: '异步 telemetry',
+            summary: '在训练路径之外收集 reward、KL 和 rollout 指标',
             kind: 'stream',
           },
         ],
@@ -339,110 +339,110 @@ export const rlhfPipelineLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'rolloutThroughput', label: 'Rollout generation load' },
+    { id: 'rolloutThroughput', label: 'Rollout generation 负载' },
     { id: 'scoringLoad', label: 'Reward + reference scoring' },
-    { id: 'policyMemory', label: 'Policy training memory' },
-    { id: 'klStability', label: 'KL drift risk' },
-    { id: 'evalCoverage', label: 'Eval / safety coverage demand' },
+    { id: 'policyMemory', label: 'Policy 训练显存' },
+    { id: 'klStability', label: 'KL 漂移风险' },
+    { id: 'evalCoverage', label: 'Eval / safety 覆盖需求' },
   ],
   decisions: [
     { id: 'sftVsPref', title: 'SFT vs preference data' },
     { id: 'rewardModel', title: 'Reward model vs DPO' },
     { id: 'rolloutScaling', title: 'Rollout-generation throughput' },
-    { id: 'distributedPolicy', title: 'Distributed policy training' },
-    { id: 'klControl', title: 'KL / reference control' },
-    { id: 'evalSafety', title: 'Eval + safety gating' },
+    { id: 'distributedPolicy', title: '分布式 policy 训练' },
+    { id: 'klControl', title: 'KL / reference 控制' },
+    { id: 'evalSafety', title: 'Eval + safety 把关' },
   ],
   sourceBackedRules: [
     {
-      title: 'InstructGPT: SFT, then a reward model, then PPO against a KL-penalized reference',
+      title: 'InstructGPT：先 SFT，再 reward model，再用 PPO 对着一个带 KL penalty 的 reference 优化',
       source: 'Ouyang et al., 2022 (InstructGPT)',
       url: 'https://arxiv.org/abs/2203.02155',
       summary:
-        'The canonical RLHF recipe fine-tunes on demonstrations, trains a reward model from comparisons, and optimizes the policy with PPO using a per-token KL penalty against the SFT reference.',
+        '经典的 RLHF 配方：在 demonstration 上 fine-tune，从比较数据训练一个 reward model，再用 PPO 优化 policy，并对 SFT reference 施加 per-token 的 KL penalty。',
     },
     {
-      title: 'DPO removes the explicit reward model and RL rollout loop',
+      title: 'DPO 去掉了显式的 reward model 和 RL rollout loop',
       source: 'Rafailov et al., 2023 (DPO)',
       url: 'https://arxiv.org/abs/2305.18290',
       summary:
-        'Direct Preference Optimization shows the RLHF objective can be optimized with a simple classification loss on preference pairs, eliminating online sampling and a separate reward model.',
+        'Direct Preference Optimization 证明 RLHF 目标可以用 preference pair 上一个简单的 classification loss 来优化，从而省掉了在线采样和单独的 reward model。',
     },
     {
-      title: 'PPO is the clipped policy-gradient algorithm used in the RL stage',
+      title: 'PPO 是 RL 阶段用的 clipped policy-gradient 算法',
       source: 'Schulman et al., 2017 (PPO)',
       url: 'https://arxiv.org/abs/1707.06347',
       summary:
-        'Proximal Policy Optimization takes several optimization epochs over each batch of sampled trajectories with a clipped objective, which is why rollouts are reused across PPO epochs.',
+        'Proximal Policy Optimization 用一个 clipped objective 对每一批采样出的 trajectory 做几轮优化 epoch，这正是 rollout 会在多个 PPO epoch 间被复用的原因。',
     },
     {
-      title: 'Online RLHF couples generation and training; generation throughput dominates',
+      title: 'Online RLHF 把 generation 和 training 耦合在一起；generation throughput 是主导',
       source: 'vLLM docs',
       url: 'https://docs.vllm.ai/',
       summary:
-        'High-throughput batched inference engines are used to generate rollouts because, in the online RL loop, sampling completions from the policy is the throughput bottleneck.',
+        '之所以用高吞吐的 batched inference engine 来生成 rollout，是因为在 online RL loop 里，从 policy 采样 completion 才是 throughput 瓶颈。',
     },
   ],
   teachingAssumptions: [
-    'Single-GPU rollout-generation throughput and memory budgets are conservative teaching numbers, not vendor limits.',
-    'Reward and reference scoring cost is modeled as one inference forward pass per rollout each; PPO reuses each rollout for the chosen number of epochs.',
-    'KL drift risk is approximated from the KL coefficient and rollout volume; real runs also track measured KL and reward-hacking signals directly.',
+    '单 GPU 的 rollout-generation throughput 和显存预算都是保守的教学数字，不是厂商上限。',
+    'reward 和 reference 的 scoring 成本各建模成每个 rollout 一次 inference forward pass；PPO 会把每个 rollout 复用所选的 epoch 数。',
+    'KL 漂移风险由 KL coefficient 和 rollout 量近似得出；真实训练还会直接跟踪实测的 KL 和 reward-hacking 信号。',
   ],
   teachingWalkthrough: [
     {
       id: 'sft-step',
       step: '01',
-      focus: 'Start with SFT',
+      focus: '从 SFT 起步',
       scenarioId: 'sft-only',
       question:
-        'You have demonstrations and a base model. Before any reward model or RL, why fine-tune supervised first instead of going straight to preference optimization?',
+        '你手上有 demonstration 和一个 base model。在上任何 reward model 或 RL 之前，为什么要先做 supervised fine-tune，而不是直接上 preference optimization？',
       reveal:
-        'SFT gives the policy a competent starting point that already follows the instruction format, so later preference signal can refine behavior instead of teaching it from scratch. With no rollouts, reward model, or reference model in play, this stage is just ordinary supervised training on one model.',
-      takeaway: 'SFT seeds a usable policy; the alignment loop refines it, it does not bootstrap it.',
+        'SFT 给 policy 一个像样的起点，让它已经会遵循指令格式，这样后面的 preference 信号是去打磨行为，而不是从零教起。这一阶段没有 rollout、reward model 或 reference model 参与，就是对单个模型做普通的 supervised 训练。',
+      takeaway: 'SFT 给出一个能用的 policy；alignment loop 是去打磨它，而不是从头 bootstrap 它。',
     },
     {
       id: 'rm-step',
       step: '02',
-      focus: 'Train a reward model',
+      focus: '训练一个 reward model',
       scenarioId: 'add-reward-model',
       question:
-        'You now have 50k human comparison pairs. Why train a separate reward model from them instead of hand-writing a reward function?',
+        '你现在有 5 万对人类比较数据。为什么要从它们训练一个单独的 reward model，而不是手写一个 reward function？',
       reveal:
-        'Human preferences over full responses are hard to express as a rule, so you fit a reward model that generalizes the comparisons to a scalar score. It is trained offline here, but in the RL loop it will run as an inference service scoring every rollout, so its size directly costs throughput.',
-      takeaway: 'A learned reward model turns sparse human comparisons into a dense score the RL loop can optimize.',
+        '人类对整段回答的偏好很难写成规则，所以你拟合一个 reward model，把这些比较泛化成一个标量分数。这里它是离线训练的，但在 RL loop 里它会作为一个 inference service 给每个 rollout 打分，所以它的规模直接吃掉 throughput。',
+      takeaway: '一个学出来的 reward model 把稀疏的人类比较变成 RL loop 能优化的 dense 分数。',
     },
     {
       id: 'ppo-step',
       step: '03',
-      focus: 'Close the PPO loop',
+      focus: '闭合 PPO loop',
       scenarioId: 'ppo-loop',
       question:
-        'The policy now generates rollouts, the reward model scores them, and PPO updates the policy. With KL low and four PPO epochs per batch, what new failure modes appear that SFT never had?',
+        '现在 policy 生成 rollout、reward model 给它们打分、PPO 更新 policy。在 KL 偏低、每个 batch 四个 PPO epoch 的情况下，会冒出哪些 SFT 从来没有过的新失败模式？',
       reveal:
-        'Three models are now live at once (policy, reward model, reference) and the loop is online. Two risks emerge: reward hacking when the KL penalty is too weak to hold the policy near the reference, and that every rollout must be both generated and scored, so generation throughput starts gating step time.',
-      takeaway: 'The RL loop couples generation, scoring, and training; KL is the leash that keeps reward optimization honest.',
+        '现在同时有三个模型在线（policy、reward model、reference），而且 loop 是在线的。两个风险随之出现：当 KL penalty 太弱、拽不住 policy 靠近 reference 时会出现 reward hacking；以及每个 rollout 都既要生成又要打分，于是 generation throughput 开始卡住 step time。',
+      takeaway: 'RL loop 把 generation、scoring、training 耦合在一起；KL 是那根让 reward optimization 不跑偏的牵绳。',
     },
     {
       id: 'scale-step',
       step: '04',
-      focus: 'Rollouts dominate',
+      focus: 'Rollout 成为主导',
       scenarioId: 'scale-rollouts',
       question:
-        '2,048 rollouts per step on a 70B policy. Which part of the loop saturates first, and what do you scale to fix it?',
+        '一个 70B policy 上每个 step 跑 2,048 个 rollout。loop 里哪一部分最先打满，你要扩展什么来修它？',
       reveal:
-        'Rollout generation saturates first: sampling thousands of completions from a 70B policy is far more expensive than the gradient step. You scale generation with batched, distributed inference (and the policy itself needs tensor/pipeline parallelism to fit and train), often on dedicated inference replicas separate from the trainer.',
-      takeaway: 'In online RLHF, generation throughput is the bottleneck, so you scale rollout inference before anything else.',
+        'rollout generation 最先打满：从一个 70B policy 采样几千个 completion，远比 gradient step 贵。你用 batched、distributed inference 来扩展 generation（而 policy 本身也需要 tensor/pipeline parallelism 才能装下并训练），通常放在和 trainer 分开的专用 inference replica 上。',
+      takeaway: '在 online RLHF 里，generation throughput 是瓶颈，所以你要优先扩展 rollout inference。',
     },
     {
       id: 'dpo-step',
       step: '05',
-      focus: 'DPO drops the loop',
+      focus: 'DPO 砍掉 loop',
       scenarioId: 'dpo-at-scale',
       question:
-        'A frontier-size policy on 5M preference pairs. If rollout generation is the bottleneck, what does switching to DPO buy you, and what do you give up?',
+        '一个 frontier 规模的 policy，配 500 万对 preference pair。如果 rollout generation 是瓶颈，换成 DPO 能换来什么，又要放弃什么？',
       reveal:
-        'DPO optimizes the policy directly from preference pairs with a classification-style loss, so there is no rollout generation, no online reward model, and no separate reference serving in the loop, removing the dominant cost. You give up the flexibility of online exploration and an explicit reward signal, and you lean harder on dataset quality and tight eval gates.',
-      takeaway: 'DPO trades the expensive online RL loop for a simpler offline objective bounded by preference-data quality.',
+        'DPO 用一个 classification 式的 loss 直接从 preference pair 优化 policy，所以 loop 里没有 rollout generation、没有在线的 reward model、也不用单独 serve reference，把那个主导成本拿掉了。代价是放弃了在线探索的灵活性和一个显式的 reward 信号，转而更依赖数据集质量和严格的 eval gate。',
+      takeaway: 'DPO 用一个更简单、上限由 preference 数据质量决定的离线目标，换掉了昂贵的 online RL loop。',
     },
   ],
   analyze: analyzeRlhfPipelineWorkload,
@@ -561,64 +561,64 @@ function analyzeRlhfPipelineWorkload(workload: WorkloadValues): LabAnalysis {
         valueText: hasRlLoop
           ? `${formatCount(rolloutsPerStep)} rollouts/step`
           : useDpo
-            ? `no rollout loop (${formatCount(rolloutsPerStep)} rollouts/step idle)`
-            : 'no rollout loop',
+            ? `无 rollout loop（${formatCount(rolloutsPerStep)} rollouts/step 闲置）`
+            : '无 rollout loop',
         copy: hasRlLoop
-          ? `Generating ${formatCount(rolloutsPerStep)} rollouts (~${formatRate(
+          ? `每个 step 从一个 ${formatCount(policyParams)} 参数的 policy 生成 ${formatCount(rolloutsPerStep)} 个 rollout（约 ${formatRate(
               rolloutTokensPerStep,
-            )} tokens) from a ${formatCount(policyParams)}-param policy each step; this usually gates step time.`
+            )} token）；这通常会卡住 step time。`
           : useDpo
-            ? `DPO removes the online rollout loop, so the ${formatCount(rolloutsPerStep)} rollouts/step setting is inert — there is no online generation cost per step.`
-            : 'No online RL loop yet — generation only starts once PPO rollouts run at scale.',
+            ? `DPO 去掉了在线的 rollout loop，所以 ${formatCount(rolloutsPerStep)} rollouts/step 这个设置是失效的 —— 每个 step 没有在线 generation 成本。`
+            : '还没有 online RL loop —— generation 要等 PPO rollout 规模化跑起来才开始。',
       },
       scoringLoad: {
         ratio: scoringRatio,
         valueText: hasRlLoop
           ? `${formatCount(scoringPasses)} passes/step`
           : useDpo
-            ? `${formatCount(preferencePairs)} pairs direct (${formatCount(rewardModelParams)} RM${separateRewardModel ? ', isolated' : ', co-located'} idle)`
-            : 'no online scoring',
+            ? `${formatCount(preferencePairs)} 对直接用（${formatCount(rewardModelParams)} RM${separateRewardModel ? '，隔离' : '，共置'}闲置）`
+            : '无在线 scoring',
         copy: hasRlLoop
-          ? `Each rollout needs a reward-model and reference forward pass; a ${formatCount(
+          ? `每个 rollout 都需要一次 reward-model 和一次 reference 的 forward pass；一个 ${formatCount(
               rewardModelParams,
-            )}-param reward model${separateRewardModel ? ' on its own devices' : ' co-located with the policy'} carries the scoring load.`
+            )} 参数的 reward model${separateRewardModel ? '（在自己的设备上）' : '（和 policy 共置）'}承担这份 scoring 负载。`
           : useDpo
-            ? `No reward model runs in the loop under DPO; the ${formatCount(rewardModelParams)}-param reward-model${separateRewardModel ? ' (on its own devices)' : ' (co-located)'} setting is inert because preference pairs are consumed directly.`
+            ? `DPO 下没有 reward model 在 loop 里跑；${formatCount(rewardModelParams)} 参数的 reward model${separateRewardModel ? '（在自己的设备上）' : '（共置）'}这个设置是失效的，因为 preference pair 被直接消费了。`
             : needsRewardModel
-              ? 'The reward model is trained offline here; online scoring load appears once the RL loop runs.'
-              : 'No reward model yet — the pipeline is still supervised fine-tuning only.',
+              ? '这里 reward model 是离线训练的；在线 scoring 负载要等 RL loop 跑起来才出现。'
+              : '还没有 reward model —— pipeline 仍然只是 supervised fine-tuning。',
       },
       policyMemory: {
         ratio: policyMemoryRatio,
-        valueText: `${formatCount(policyParams)} params, ${modelsResident} model${modelsResident === 1 ? '' : 's'}`,
+        valueText: `${formatCount(policyParams)} params，${modelsResident} 个 model`,
         copy: useDpo
-          ? `DPO keeps just ${modelsResident} model resident (the policy, with an implicit reference term) instead of PPO's 2-3, but a ${formatCount(policyParams)}-param policy is still very large in absolute terms and must be sharded to fit and train.`
+          ? `DPO 只让 ${modelsResident} 个 model 常驻（policy，加一个隐式的 reference 项），而不是 PPO 的 2-3 个，但一个 ${formatCount(policyParams)} 参数的 policy 绝对体量上仍然很大，必须 shard 才能装下并训练。`
           : hasRlLoop
-            ? `PPO holds ${modelsResident} large models in the loop across ${Math.round(ppoEpochs)} epochs per batch.`
-            : `Training a single ${formatCount(policyParams)}-param model so far; the RL loop will add the reward and reference models.`,
+            ? `PPO 在 loop 里同时持有 ${modelsResident} 个大模型，每个 batch 跨 ${Math.round(ppoEpochs)} 个 epoch。`
+            : `目前只在训练单个 ${formatCount(policyParams)} 参数的模型；RL loop 会再加上 reward 和 reference 模型。`,
       },
       klStability: {
         ratio: klStabilityRatio,
         valueText: hasRlLoop
           ? `KL coef ${klCoefficient.toFixed(3)}`
           : useDpo
-            ? `implicit beta ${klCoefficient.toFixed(3)}`
-            : 'no online KL',
+            ? `隐式 beta ${klCoefficient.toFixed(3)}`
+            : '无在线 KL',
         copy: hasRlLoop
           ? klStabilityRatio > 0.7
-            ? 'A weak KL penalty against the reference invites reward hacking as rollout volume grows.'
-            : 'The KL penalty holds the policy close enough to the reference to keep reward optimization honest.'
+            ? '对 reference 的 KL penalty 偏弱，随着 rollout 量增长会招来 reward hacking。'
+            : 'KL penalty 把 policy 拽得离 reference 足够近，让 reward optimization 不跑偏。'
           : useDpo
-            ? `DPO bakes the reference into its loss as an implicit beta (set here from the ${klCoefficient.toFixed(3)} coefficient), so there is no separate online KL term to tune in a loop.`
-            : 'No online RL loop yet, so there is no reference KL penalty to manage.',
+            ? `DPO 把 reference 作为一个隐式 beta 烤进了它的 loss（这里由 ${klCoefficient.toFixed(3)} 这个系数设定），所以没有单独的在线 KL 项要在 loop 里调。`
+            : '还没有 online RL loop，所以没有 reference KL penalty 要管理。',
       },
       evalCoverage: {
         ratio: evalRiskRatio,
-        valueText: `every ${formatCount(evalFrequency)} step${Math.round(evalFrequency) === 1 ? '' : 's'}`,
+        valueText: `每 ${formatCount(evalFrequency)} 个 step`,
         copy:
           evalRiskRatio > 0.7
-            ? `A ${formatCount(policyParams)}-param policy${useDpo ? ' optimized by DPO' : hasRlLoop ? ' in an online RL loop' : ''} demands heavy eval coverage; evaluating every ${formatCount(evalFrequency)} steps still leaves a gap — gate checkpoints more often.`
-            : `Eval demand at this scale is comfortably met: gating every ${formatCount(evalFrequency)} steps catches regressions before promotion.`,
+            ? `一个 ${formatCount(policyParams)} 参数的 policy${useDpo ? '（由 DPO 优化）' : hasRlLoop ? '（处在 online RL loop 中）' : ''}需要很重的 eval 覆盖；每 ${formatCount(evalFrequency)} 个 step eval 一次仍留有缺口 —— 更频繁地给 checkpoint 把关。`
+            : `这个规模下的 eval 需求被轻松满足：每 ${formatCount(evalFrequency)} 个 step 把关一次，能在晋升前抓住回退。`,
       },
     },
     decisions: buildDecisions({
@@ -677,28 +677,28 @@ function buildReasons(
   if (analysis.useDpo) {
     priority.push({
       severity: 'ok',
-      text: `DPO optimizes the policy directly from ${formatCount(
+      text: `DPO 直接从 ${formatCount(
         analysis.preferencePairs,
-      )} preference pairs, removing rollout generation and the online reward model entirely.`,
+      )} 对 preference pair 优化 policy，把 rollout generation 和在线的 reward model 整个去掉了。`,
     });
   } else if (analysis.hasRlLoop) {
     priority.push({
       severity: 'ok',
-      text: `PPO runs an online loop: the policy generates ${formatCount(
+      text: `PPO 跑一个在线 loop：policy 每个 step 生成 ${formatCount(
         analysis.rolloutsPerStep,
-      )} rollouts per step, scored by a reward model and anchored by a frozen reference.`,
+      )} 个 rollout，由 reward model 打分、被一个冻结的 reference 锚住。`,
     });
   } else if (analysis.needsRewardModel) {
     priority.push({
       severity: 'ok',
-      text: `A reward model is being trained from ${formatCount(
+      text: `正在从 ${formatCount(
         analysis.preferencePairs,
-      )} preference pairs; the online RL loop has not started yet.`,
+      )} 对 preference pair 训练一个 reward model；online RL loop 还没开始。`,
     });
   } else {
     priority.push({
       severity: 'ok',
-      text: 'Supervised fine-tuning only: no preference data, reward model, or RL loop is in play yet.',
+      text: '只有 supervised fine-tuning：还没有 preference 数据、reward model 或 RL loop 参与。',
     });
   }
 
@@ -706,90 +706,90 @@ function buildReasons(
   if (analysis.needsRolloutScaling) {
     priority.push({
       severity: analysis.rolloutThroughputRatio > 2 ? 'danger' : 'warning',
-      text: `Generating ${formatCount(
-        analysis.rolloutsPerStep,
-      )} rollouts from a ${formatCount(
+      text: `每个 step 从一个 ${formatCount(
         analysis.policyParams,
-      )}-param policy each step dominates step time; scale rollout generation with batched, distributed inference.`,
+      )} 参数的 policy 生成 ${formatCount(
+        analysis.rolloutsPerStep,
+      )} 个 rollout，主导了 step time；用 batched、distributed inference 扩展 rollout generation。`,
     });
   }
   if (analysis.needsKlControl) {
     priority.push({
       severity: 'danger',
-      text: `A KL coefficient of ${analysis.klCoefficient.toFixed(
+      text: `${analysis.klCoefficient.toFixed(
         3,
-      )} is too weak for this rollout volume; the policy can reward-hack away from the reference.`,
+      )} 的 KL coefficient 对这个 rollout 量来说太弱了；policy 可能 reward-hack 漂离 reference。`,
     });
   }
   if (analysis.needsDistributedPolicy) {
     priority.push({
       severity: 'warning',
-      text: `A ${formatCount(
+      text: `一个 ${formatCount(
         analysis.policyParams,
-      )}-param policy must be sharded with tensor/pipeline parallelism to fit and train across GPUs.`,
+      )} 参数的 policy 必须用 tensor/pipeline parallelism 做 shard，才能跨 GPU 装下并训练。`,
     });
   }
   if (analysis.needsTightEval) {
     priority.push({
       severity: 'warning',
-      text: `A ${formatCount(
+      text: `一个 ${formatCount(
         analysis.policyParams,
-      )}-param policy demands heavy eval coverage; evaluating only every ${formatCount(
+      )} 参数的 policy 需要很重的 eval 覆盖；每 ${formatCount(
         analysis.evalFrequency,
-      )} steps still leaves a gap — tighten safety gates before promotion.`,
+      )} 个 step 才 eval 一次仍留有缺口 —— 晋升前收紧 safety gate。`,
     });
   }
   if (analysis.hasRlLoop) {
     priority.push({
       severity: analysis.rewardModelParams > comfortableRewardModelParams ? 'warning' : 'ok',
-      text: `A ${formatCount(
+      text: `一个 ${formatCount(
         analysis.rewardModelParams,
-      )}-param reward model scores every rollout${analysis.separateRewardModel ? ' on dedicated devices' : ' co-located with the policy'}; its size is part of the per-step cost.`,
+      )} 参数的 reward model${analysis.separateRewardModel ? '在专用设备上' : '和 policy 共置'}给每个 rollout 打分；它的规模是每个 step 成本的一部分。`,
     });
   }
 
   // --- always-applicable context so every scenario clears the 4-reason floor ---
   context.push({
     severity: 'ok',
-    text: 'SFT on demonstrations seeds a competent policy first; preference signal then refines that policy rather than teaching it from scratch.',
+    text: '先在 demonstration 上做 SFT，给出一个像样的 policy；preference 信号随后去打磨这个 policy，而不是从零教它。',
   });
   if (analysis.usesPreferenceData) {
     context.push({
       severity: 'ok',
       text: analysis.useDpo
-        ? `${formatCount(
+        ? `DPO 下 ${formatCount(
             analysis.preferencePairs,
-          )} preference pairs are the sole training signal under DPO, so data quality and coverage bound the result.`
+          )} 对 preference pair 是唯一的训练信号，所以数据质量和覆盖面决定了结果的上限。`
         : `${formatCount(
             analysis.preferencePairs,
-          )} preference comparisons train the reward model that the RL loop optimizes against.`,
+          )} 组 preference 比较训练出 RL loop 要对着优化的那个 reward model。`,
     });
   } else {
     context.push({
       severity: 'ok',
-      text: 'No preference comparisons are collected yet, so the pipeline cannot train a reward model or run preference optimization.',
+      text: '还没收集任何 preference 比较，所以 pipeline 既训练不了 reward model，也跑不了 preference optimization。',
     });
   }
   context.push({
     severity: 'ok',
     text: analysis.useDpo
-      ? `DPO keeps one model resident instead of PPO's two-to-three, easing the model count even though a ${formatCount(
+      ? `DPO 只让一个 model 常驻，而不是 PPO 的两到三个，缓解了模型数量，尽管一个 ${formatCount(
           analysis.policyParams,
-        )}-param policy stays large in absolute memory.`
+        )} 参数的 policy 在绝对显存上仍然很大。`
       : analysis.hasRlLoop
-        ? `The online loop holds the policy, reward model, and frozen reference at once over ${Math.round(
+        ? `在线 loop 同时持有 policy、reward model 和冻结的 reference，每个 batch 跨 ${Math.round(
             analysis.ppoEpochs,
-          )} PPO epochs per batch.`
-        : `Only a single ${formatCount(
+          )} 个 PPO epoch。`
+        : `目前只有单个 ${formatCount(
             analysis.policyParams,
-          )}-param model is resident so far; the RL loop would add the reward and reference models.`,
+          )} 参数的模型常驻；RL loop 会再加上 reward 和 reference 模型。`,
   });
   if (!analysis.useDpo && analysis.ppoEpochs > 1) {
     context.push({
       severity: 'ok',
-      text: `PPO reuses each batch of rollouts for ${Math.round(
+      text: `PPO 把每一批 rollout 复用 ${Math.round(
         analysis.ppoEpochs,
-      )} optimization epochs, amortizing the expensive generation step.`,
+      )} 个优化 epoch，摊薄那个昂贵的 generation step。`,
     });
   }
 
@@ -811,94 +811,94 @@ function buildDecisions(
     sftVsPref: {
       state: flags.usesPreferenceData ? 'needed' : 'useful',
       copy: flags.usesPreferenceData
-        ? `SFT seeds the policy on demonstrations; ${formatCount(
+        ? `SFT 在 demonstration 上给 policy 打底；${formatCount(
             flags.preferencePairs,
-          )} preference pairs then drive ${flags.useDpo ? 'DPO directly' : 'the reward model'}.`
-        : 'Only supervised fine-tuning so far; preference data is not yet collected or used.',
+          )} 对 preference pair 随后驱动${flags.useDpo ? '直接的 DPO' : ' reward model'}。`
+        : '目前只有 supervised fine-tuning；preference 数据还没收集或使用。',
     },
     rewardModel: {
       state: flags.useDpo ? 'tradeoff' : flags.needsRewardModel ? 'needed' : 'not-yet',
       copy: flags.useDpo
-        ? 'DPO removes the explicit reward model, trading online flexibility for a simpler offline objective.'
+        ? 'DPO 去掉显式的 reward model，用一个更简单的离线目标换掉在线的灵活性。'
         : flags.needsRewardModel
-          ? `Train and serve a ${formatCount(
+          ? `训练并 serve 一个 ${formatCount(
               flags.rewardModelParams,
-            )}-param reward model to score rollouts in the PPO loop.`
-          : 'No reward model yet; the pipeline stops at supervised fine-tuning.',
+            )} 参数的 reward model，在 PPO loop 里给 rollout 打分。`
+          : '还没有 reward model；pipeline 止步于 supervised fine-tuning。',
     },
     rolloutScaling: {
       state: !flags.hasRlLoop ? 'not-yet' : flags.needsRolloutScaling ? 'needed' : 'useful',
       copy: !flags.hasRlLoop
         ? flags.useDpo
-          ? 'DPO has no rollout loop, so there is nothing to scale on the generation side.'
-          : 'No online RL loop yet, so there is no rollout generation to scale.'
+          ? 'DPO 没有 rollout loop，所以 generation 这一侧没什么可扩展的。'
+          : '还没有 online RL loop，所以没有 rollout generation 要扩展。'
         : flags.needsRolloutScaling
-          ? `Generating ${formatCount(
+          ? `每个 step 生成 ${formatCount(
               flags.rolloutsPerStep,
-            )} rollouts per step is the bottleneck; use batched, distributed inference replicas.`
-          : 'Rollout volume is modest enough that one generation worker keeps up.',
+            )} 个 rollout 是瓶颈；用 batched、distributed 的 inference replica。`
+          : 'rollout 量还算适中，一个 generation worker 就跟得上。',
     },
     distributedPolicy: {
       state: flags.needsDistributedPolicy ? 'needed' : 'not-yet',
       copy: flags.needsDistributedPolicy
-        ? `A ${formatCount(
+        ? `一个 ${formatCount(
             flags.policyParams,
-          )}-param policy needs tensor/pipeline parallelism to fit and update across devices.`
-        : 'The policy fits on a single accelerator, so no model sharding is required yet.',
+          )} 参数的 policy 需要 tensor/pipeline parallelism 才能跨设备装下并更新。`
+        : 'policy 装得进单个 accelerator，所以暂时不需要 model sharding。',
     },
     klControl: {
       state: !flags.hasRlLoop ? 'not-yet' : flags.needsKlControl ? 'needed' : 'useful',
       copy: !flags.hasRlLoop
         ? flags.useDpo
-          ? 'DPO folds the reference into its loss, so there is no separate online KL term to manage.'
-          : 'No online RL loop yet, so the KL / reference constraint is not active.'
+          ? 'DPO 把 reference 折进它的 loss，所以没有单独的在线 KL 项要管理。'
+          : '还没有 online RL loop，所以 KL / reference 约束没有启用。'
         : flags.needsKlControl
-          ? `Raise the KL coefficient (now ${flags.klCoefficient.toFixed(
+          ? `调高 KL coefficient（现在是 ${flags.klCoefficient.toFixed(
               3,
-            )}) to keep the policy near the reference and prevent reward hacking.`
-          : 'The KL penalty against the frozen reference is holding the policy in a safe region.',
+            )}），把 policy 拽在 reference 附近、防止 reward hacking。`
+          : '对冻结 reference 的 KL penalty 正把 policy 守在一个安全区域里。',
     },
     evalSafety: {
       state: flags.needsTightEval ? 'needed' : 'useful',
       copy: flags.needsTightEval
-        ? `Evaluating every ${formatCount(
+        ? `每 ${formatCount(
             flags.evalFrequency,
-          )} steps is too sparse here; gate checkpoints on held-out and safety evals more often.`
-        : 'Eval and safety checks run frequently enough to catch regressions before a checkpoint is promoted.',
+          )} 个 step eval 一次在这里太稀了；更频繁地用 held-out 和 safety eval 给 checkpoint 把关。`
+        : 'eval 和 safety check 跑得够勤，能在 checkpoint 晋升前抓住回退。',
     },
   };
 }
 
 function chooseArchitectureTitle(flags: ArchitectureFlags): string {
   if (flags.useDpo) {
-    return 'DPO: direct preference optimization, no RL loop';
+    return 'DPO：direct preference optimization，无 RL loop';
   }
   if (!flags.needsRewardModel) {
     return 'SFT only';
   }
   if (!flags.hasRlLoop) {
-    return 'SFT + reward model (RL loop not started)';
+    return 'SFT + reward model（RL loop 未启动）';
   }
   if (flags.needsRolloutScaling || flags.needsDistributedPolicy) {
-    return 'PPO with scaled, distributed rollout generation';
+    return '带扩展、分布式 rollout generation 的 PPO';
   }
-  return 'PPO RLHF loop with reward + reference models';
+  return '带 reward + reference 模型的 PPO RLHF loop';
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (flags.useDpo) {
-    return 'The policy is optimized directly from preference pairs with a classification-style loss; there is no rollout generation, no online reward model, and no separate reference serving in the loop.';
+    return 'policy 用一个 classification 式的 loss 直接从 preference pair 优化；loop 里没有 rollout generation、没有在线 reward model、也不用单独 serve reference。';
   }
   if (!flags.needsRewardModel) {
-    return 'Supervised fine-tuning on demonstrations only. No reward model, rollout loop, or reference model is justified yet.';
+    return '只在 demonstration 上做 supervised fine-tuning。还不需要 reward model、rollout loop 或 reference model。';
   }
   if (!flags.hasRlLoop) {
-    return 'A reward model is trained offline from preference comparisons, but the online PPO rollout loop has not started; this stage is still ordinary supervised-style training.';
+    return '从 preference 比较离线训练出一个 reward model，但在线的 PPO rollout loop 还没开始；这一阶段仍是普通的 supervised 式训练。';
   }
   if (flags.needsRolloutScaling || flags.needsDistributedPolicy) {
-    return 'A sharded policy generates rollouts on distributed inference replicas, a reward model scores them, and a KL-penalized reference keeps the PPO updates honest; generation throughput is the dominant cost.';
+    return '一个 shard 过的 policy 在 distributed inference replica 上生成 rollout，一个 reward model 给它们打分，一个带 KL penalty 的 reference 让 PPO 更新不跑偏；generation throughput 是主导成本。';
   }
-  return 'The policy generates rollouts, a reward model scores each one, and PPO updates the policy under a KL penalty against the frozen reference model.';
+  return 'policy 生成 rollout，一个 reward model 给每个打分，PPO 在对冻结 reference model 的 KL penalty 约束下更新 policy。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {

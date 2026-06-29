@@ -16,12 +16,20 @@ import {
   roughZoneMarkup,
   seedFromString,
 } from '../../scripts/system-design-lab/architecture-rough';
+import { getSystemDesignLabUiCopy } from '../../scripts/system-design-lab/system-design-lab-copy';
+import {
+  normalizeSystemDesignLocale,
+  type SystemDesignLocale,
+} from '../../scripts/system-design-lab/system-design-i18n';
 
 interface Props {
   lab: SystemDesignLabDefinition;
+  locale?: SystemDesignLocale;
 }
 
 const { lab } = Astro.props;
+const locale = normalizeSystemDesignLocale(Astro.props.locale);
+const copy = getSystemDesignLabUiCopy(locale);
 const flowMarkerId = `system-lab-arrow-${lab.id}`;
 
 // Pre-render the hand-drawn (Excalidraw-style) geometry at build time.
@@ -49,7 +57,13 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
 });
 ---
 
-<section class="system-lab" id={lab.id} data-system-design-constraint-lab data-lab-id={lab.id}>
+<section
+  class="system-lab"
+  id={lab.id}
+  data-system-design-constraint-lab
+  data-lab-id={lab.id}
+  data-locale={locale}
+>
   <div class="system-lab__intro">
     <p class="system-lab__eyebrow">{lab.eyebrow}</p>
     <h1 class="system-lab__title">{lab.title}</h1>
@@ -57,7 +71,7 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
     {
       lab.articleHref && (
         <div class="system-lab__intro-actions">
-          <a href={lab.articleHref}>Read the source article</a>
+          <a href={lab.articleHref}>{copy.readSourceArticle}</a>
         </div>
       )
     }
@@ -68,12 +82,12 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
       <section
         class="system-lab__walkthrough"
         data-walkthrough
-        aria-label={`${lab.title} guided walkthrough`}
+        aria-label={copy.guidedWalkthroughAriaLabel(lab.title)}
       >
         <div class="system-lab__walkthrough-header">
           <div>
-            <p class="system-lab__eyebrow">Guided walkthrough</p>
-            <h2>Reason about it one step at a time</h2>
+            <p class="system-lab__eyebrow">{copy.guidedWalkthroughEyebrow}</p>
+            <h2>{copy.guidedWalkthroughTitle}</h2>
           </div>
           <div class="system-lab__walkthrough-progress">
             <span data-walkthrough-position />
@@ -95,12 +109,12 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
             class="system-lab__walkthrough-reveal-btn"
             data-walkthrough-reveal-btn
           >
-            Reveal the reasoning
+            {copy.revealReasoning}
           </button>
           <div class="system-lab__walkthrough-reveal" data-walkthrough-reveal hidden>
             <p data-walkthrough-reveal-text />
             <p class="system-lab__walkthrough-takeaway">
-              <span>Takeaway</span>
+              <span>{copy.takeaway}</span>
               <strong data-walkthrough-takeaway />
             </p>
           </div>
@@ -108,14 +122,14 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
 
         <div class="system-lab__walkthrough-footer">
           <p class="system-lab__walkthrough-hint">
-            Each step sets the workload below — watch the diagram, meters, and decisions react.
+            {copy.walkthroughHint}
           </p>
           <div class="system-lab__walkthrough-nav">
             <button type="button" data-walkthrough-prev>
-              &larr; Prev
+              &larr; {copy.previousStep}
             </button>
             <button type="button" data-walkthrough-next>
-              Next &rarr;
+              {copy.nextStep} &rarr;
             </button>
           </div>
         </div>
@@ -123,10 +137,10 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
     )
   }
 
-  <section class="system-lab__scenarios" aria-label={`${lab.title} scenarios`}>
+  <section class="system-lab__scenarios" aria-label={copy.scenariosAriaLabel(lab.title)}>
     <div class="system-lab__scenarios-header">
-      <h2>Normal evolution scenarios</h2>
-      <p>Click left to right for the intended demo path. Each card changes the workload inputs.</p>
+      <h2>{copy.scenariosTitle}</h2>
+      <p>{copy.scenariosDescription}</p>
     </div>
     <div class="system-lab__scenario-grid">
       {
@@ -148,10 +162,10 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
   </section>
 
   <div class="system-lab__workspace">
-    <form class="system-lab__controls" aria-label={`${lab.title} workload controls`}>
+    <form class="system-lab__controls" aria-label={copy.controlsAriaLabel(lab.title)}>
       <div class="system-lab__controls-header">
         <h2>Workload</h2>
-        <p>These are inputs, not preset architecture stages.</p>
+        <p>{copy.controlsDescription}</p>
       </div>
 
       {
@@ -189,14 +203,14 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
 
     <div class="system-lab__main">
       <div class="system-lab__verdict">
-        <p class="system-lab__eyebrow">Recommended shape</p>
+        <p class="system-lab__eyebrow">{copy.recommendedShape}</p>
         <h2 data-architecture-title></h2>
         <p data-architecture-summary></p>
       </div>
 
-      <div class="system-lab__diagram" aria-label="Calculated architecture diagram">
+      <div class="system-lab__diagram" aria-label={copy.diagramAriaLabel}>
         <div class="system-lab__diagram-caption">
-          <span>Current architecture path</span>
+          <span>{copy.architecturePath}</span>
           <strong data-architecture-path></strong>
         </div>
 
@@ -274,7 +288,7 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
           }
         </svg>
 
-        <div class="system-lab__mobile-flow" aria-label="Calculated mobile architecture flow">
+        <div class="system-lab__mobile-flow" aria-label={copy.mobileFlowAriaLabel}>
           {
             lab.diagram.mobileStages.map((stage) => (
               <div class="system-lab__mobile-stage">
@@ -293,7 +307,7 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
 
       <div class="system-lab__analysis-grid">
         <section class="system-lab__panel">
-          <h3>Bottlenecks</h3>
+          <h3>{copy.bottlenecks}</h3>
           <div class="system-lab__meters">
             {
               lab.meters.map((meter) => (
@@ -313,13 +327,13 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
         </section>
 
         <section class="system-lab__panel">
-          <h3>Why this changes</h3>
+          <h3>{copy.whyThisChanges}</h3>
           <ul class="system-lab__reasons" data-reasons></ul>
         </section>
       </div>
 
       <section class="system-lab__panel">
-        <h3>Decision tradeoffs</h3>
+        <h3>{copy.decisionTradeoffs}</h3>
         <div class="system-lab__decision-grid">
           {
             lab.decisions.map((decision) => (
@@ -334,18 +348,15 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
 
       <section class="system-lab__panel system-lab__knowledge">
         <div class="system-lab__knowledge-header">
-          <h3>Source-backed rules</h3>
-          <p>
-            These are the durable system-design claims behind the model. The exact slider
-            thresholds are deliberately labeled as teaching assumptions.
-          </p>
+          <h3>{copy.sourceBackedRules}</h3>
+          <p>{copy.sourceBackedRulesDescription}</p>
         </div>
 
         <div class="system-lab__rule-grid">
           {
             lab.sourceBackedRules.map((rule) => (
               <article class="system-lab__rule-card">
-                <span>Verified rule</span>
+                <span>{copy.verifiedRule}</span>
                 <h4>{rule.title}</h4>
                 <p>{rule.summary}</p>
                 <a href={rule.url} target="_blank" rel="noreferrer">
@@ -357,7 +368,7 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
         </div>
 
         <div class="system-lab__assumptions">
-          <h4>Teaching assumptions</h4>
+          <h4>{copy.teachingAssumptions}</h4>
           <ul>
             {lab.teachingAssumptions.map((assumption) => <li>{assumption}</li>)}
           </ul>

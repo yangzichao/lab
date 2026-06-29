@@ -1,26 +1,44 @@
 ---
-import { systemDesignLabPages } from '../../scripts/system-design-lab/system-design-pages';
+import {
+  getSystemDesignLabPages,
+} from '../../scripts/system-design-lab/system-design-pages';
+import {
+  getAlternateSystemDesignLocale,
+  getLocalizedSystemDesignPath,
+  getSystemDesignLocaleLabel,
+  normalizeSystemDesignLocale,
+  type SystemDesignLocale,
+} from '../../scripts/system-design-lab/system-design-i18n';
+import { getSystemDesignLabUiCopy } from '../../scripts/system-design-lab/system-design-lab-copy';
 
 interface Props {
   /** Slug of the page currently being viewed; highlighted in the nav. */
   current: string;
+  locale?: SystemDesignLocale;
 }
 
 const { current } = Astro.props;
+const locale = normalizeSystemDesignLocale(Astro.props.locale);
+const alternateLocale = getAlternateSystemDesignLocale(locale);
+const copy = getSystemDesignLabUiCopy(locale);
+const pages = getSystemDesignLabPages(locale);
 ---
 
-<nav class="system-lab-page-nav" aria-label="System Design Lab navigation">
-  <a href="/">Home</a>
+<nav class="system-lab-page-nav" aria-label={copy.navAriaLabel}>
+  <a href="/">{copy.homeLink}</a>
   {
-    systemDesignLabPages.map((page) => (
+    pages.map((page) => (
       <a
-        href={`/system-design/${page.slug}/`}
+        href={getLocalizedSystemDesignPath(page.slug, locale)}
         aria-current={page.slug === current ? 'page' : undefined}
       >
         {page.navLabel}
       </a>
     ))
   }
+  <a href={getLocalizedSystemDesignPath(current, alternateLocale)}>
+    {copy.languageSwitchPrefix}: {getSystemDesignLocaleLabel(alternateLocale)}
+  </a>
 </nav>
 
 <style>

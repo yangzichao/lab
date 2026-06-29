@@ -18,16 +18,16 @@ const comfortableStateGigabytes = 4;
 
 export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
   id: 'rate-limiter',
-  eyebrow: 'System Design Lab',
-  title: 'Rate limiter design is a latency-sensitive atomic state problem.',
+  eyebrow: '系统设计 Lab',
+  title: 'Rate limiter 设计本质是一个对 latency 敏感的 atomic state 问题。',
   summary:
-    'Change request volume, quota, burst tolerance, key cardinality, hot-key skew, regions, and latency target. The architecture shifts from a local counter to Redis/Lua, sharded state, local pre-checks, and a quota service when global correctness matters.',
+    '调节请求量、quota、burst 容忍度、key cardinality、hot-key 倾斜、region 数量和 latency 目标。架构会从本地 counter 逐步演进到 Redis/Lua、sharded state、本地 pre-check，当全局正确性变得重要时再加上一个 quota service。',
   articleHref: '/blog/system-design/rate-limiter/',
   controls: [
     {
       id: 'requestsPerSecond',
-      label: 'Request rate',
-      help: 'Synchronous allow/deny checks on the enforcement path.',
+      label: '请求速率',
+      help: 'enforcement 路径上同步的 allow/deny 判定。',
       min: 10,
       max: 1_000_000,
       defaultValue: 500,
@@ -36,8 +36,8 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'quotaPerMinute',
-      label: 'Quota per key',
-      help: 'Allowed requests for one enforcement key in a one-minute window.',
+      label: '每个 key 的 quota',
+      help: '一个 enforcement key 在一分钟窗口内允许的请求数。',
       min: 1,
       max: 100_000,
       defaultValue: 60,
@@ -46,8 +46,8 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'burstAllowanceSeconds',
-      label: 'Burst allowance',
-      help: 'How much short burst above the steady quota should be tolerated.',
+      label: 'Burst 容忍度',
+      help: '在稳态 quota 之上，能容忍多少短时 burst。',
       min: 0,
       max: 300,
       defaultValue: 10,
@@ -56,30 +56,30 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'apiServerCount',
-      label: 'API servers',
-      help: 'Independent servers making allow/deny decisions.',
+      label: 'API server 数',
+      help: '各自独立做 allow/deny 判定的 server。',
       min: 1,
       max: 500,
       defaultValue: 4,
       scale: 'log',
-      unit: 'servers',
+      unit: '台',
       format: 'count',
     },
     {
       id: 'keyCardinality',
-      label: 'Active keys',
-      help: 'Distinct users, IPs, API keys, devices, or advertiser accounts with limiter state.',
+      label: '活跃 key 数',
+      help: '带 limiter state 的不同用户、IP、API key、设备或广告主账户数。',
       min: 100,
       max: 50_000_000,
       defaultValue: 25_000,
       scale: 'log',
-      unit: 'keys',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'hottestKeyShare',
-      label: 'Hottest key share',
-      help: 'How much total traffic one abusive or popular key can own.',
+      label: '最热 key 占比',
+      help: '一个滥用或热门 key 能占据多少总流量。',
       min: 0.1,
       max: 80,
       defaultValue: 3,
@@ -88,19 +88,19 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'globalRegions',
-      label: 'Regions',
-      help: 'Regions that must participate in enforcement.',
+      label: 'Region 数',
+      help: '必须参与 enforcement 的 region 数量。',
       min: 1,
       max: 20,
       defaultValue: 1,
       scale: 'linear',
-      unit: 'regions',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'decisionLatencyMs',
-      label: 'Decision latency target',
-      help: 'Budget for the limiter check before the backend request continues.',
+      label: 'Decision latency 目标',
+      help: '在 backend 请求继续之前，limiter 判定的时间预算。',
       min: 1,
       max: 200,
       defaultValue: 10,
@@ -111,14 +111,14 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
   toggles: [
     {
       id: 'strictGlobalQuota',
-      label: 'Strict global quota',
-      help: 'Every region should share one precise quota instead of approximate regional budgets.',
+      label: '严格全局 quota',
+      help: '所有 region 共享一个精确 quota，而不是各 region 大致分配预算。',
       defaultValue: false,
     },
     {
       id: 'failClosedOnStoreError',
-      label: 'Fail closed on store errors',
-      help: 'Deny requests when limiter state is unavailable; safer for abuse, riskier for availability.',
+      label: 'store 出错时 fail closed',
+      help: 'limiter state 不可用时拒绝请求；对滥用更安全，但对可用性更冒险。',
       defaultValue: false,
     },
   ],
@@ -126,8 +126,8 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'single-process',
       step: '01',
-      title: 'Single process',
-      summary: 'Local memory is enough for a small service.',
+      title: '单进程',
+      summary: '对小服务来说，本地内存就够了。',
       values: {
         requestsPerSecond: 80,
         quotaPerMinute: 60,
@@ -144,8 +144,8 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'api-fleet',
       step: '02',
-      title: 'API fleet',
-      summary: 'Multiple servers need one atomic check-and-update path.',
+      title: 'API 集群',
+      summary: '多台 server 需要一条 atomic 的 check-and-update 路径。',
       values: {
         requestsPerSecond: 5_000,
         quotaPerMinute: 600,
@@ -162,8 +162,8 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'bursty-api',
       step: '03',
-      title: 'Bursty public API',
-      summary: 'Token bucket behavior and local pre-checks reduce latency.',
+      title: '突发型公开 API',
+      summary: 'token bucket 行为加本地 pre-check 降低 latency。',
       values: {
         requestsPerSecond: 80_000,
         quotaPerMinute: 1_200,
@@ -180,8 +180,8 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'hot-key-abuse',
       step: '04',
-      title: 'Hot key abuse',
-      summary: 'One key can overload a shard unless it is isolated or bucketed.',
+      title: 'Hot key 滥用',
+      summary: '一个 key 若不隔离或分桶，就能把一个 shard 压垮。',
       values: {
         requestsPerSecond: 140_000,
         quotaPerMinute: 120,
@@ -198,8 +198,8 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'global-strict',
       step: '05',
-      title: 'Global strict quota',
-      summary: 'Exact cross-region enforcement trades latency for correctness.',
+      title: '全局严格 quota',
+      summary: '精确的跨 region enforcement，用 latency 换正确性。',
       values: {
         requestsPerSecond: 300_000,
         quotaPerMinute: 600,
@@ -215,15 +215,15 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: {
-    title: 'Rate limiter architecture diagram',
+    title: 'Rate limiter 架构图',
     description:
-      'Whiteboard-style architecture diagram for synchronous rate-limit enforcement, local pre-checks, Redis Lua state, sharding, quota service, backend forwarding, and analytics events.',
+      '白板风格的架构图，展示同步的 rate-limit enforcement、本地 pre-check、Redis Lua state、sharding、quota service、转发到 backend，以及 analytics event。',
     viewBox: '0 0 1040 560',
     zones: [
-      { id: 'clients', label: 'Clients', x: 20, y: 70, width: 150, height: 360, variant: 'clients' },
+      { id: 'clients', label: 'Client', x: 20, y: 70, width: 150, height: 360, variant: 'clients' },
       { id: 'edge', label: 'Edge / API', x: 210, y: 45, width: 190, height: 410, variant: 'edge' },
       { id: 'state', label: 'Limiter state', x: 440, y: 70, width: 190, height: 385, variant: 'backbone' },
-      { id: 'quota', label: 'Coordination', x: 670, y: 70, width: 165, height: 385, variant: 'processing' },
+      { id: 'quota', label: '协调', x: 670, y: 70, width: 165, height: 385, variant: 'processing' },
       { id: 'service', label: 'Service + analytics', x: 875, y: 45, width: 145, height: 440, variant: 'storage' },
     ],
     flows: [
@@ -239,152 +239,152 @@ export const rateLimiterLabDefinition: SystemDesignLabDefinition = {
       { id: 'quotaToEvents', path: 'M760 295 C805 360 840 405 890 420', variant: 'secondary' },
     ],
     nodes: [
-      { id: 'client', title: 'Client', subtitle: 'request burst', kind: 'client', x: 48, y: 210, width: 108, height: 92 },
-      { id: 'gateway', title: 'API gateway', subtitle: 'enforce before app', kind: 'lb', x: 225, y: 120, width: 150, height: 90 },
-      { id: 'localLimiter', title: 'Local check', subtitle: 'cheap prefilter', kind: 'service', x: 225, y: 260, width: 150, height: 88 },
-      { id: 'redis', title: 'Redis Lua', subtitle: 'atomic state update', kind: 'cache', x: 455, y: 175, width: 140, height: 90 },
+      { id: 'client', title: 'Client', subtitle: '请求 burst', kind: 'client', x: 48, y: 210, width: 108, height: 92 },
+      { id: 'gateway', title: 'API gateway', subtitle: '在 app 之前 enforce', kind: 'lb', x: 225, y: 120, width: 150, height: 90 },
+      { id: 'localLimiter', title: 'Local check', subtitle: '廉价预过滤', kind: 'service', x: 225, y: 260, width: 150, height: 88 },
+      { id: 'redis', title: 'Redis Lua', subtitle: 'atomic state 更新', kind: 'cache', x: 455, y: 175, width: 140, height: 90 },
       { id: 'shards', title: 'Shard router', subtitle: 'key -> state shard', kind: 'scheduler', x: 455, y: 330, width: 140, height: 88 },
-      { id: 'quotaService', title: 'Quota service', subtitle: 'global budgets', kind: 'service', x: 685, y: 220, width: 130, height: 92 },
-      { id: 'backend', title: 'Backend', subtitle: 'only allowed traffic', kind: 'api', x: 890, y: 125, width: 112, height: 86 },
-      { id: 'events', title: 'Events', subtitle: 'abuse + tuning', kind: 'stream', x: 890, y: 400, width: 112, height: 82 },
+      { id: 'quotaService', title: 'Quota service', subtitle: '全局预算', kind: 'service', x: 685, y: 220, width: 130, height: 92 },
+      { id: 'backend', title: 'Backend', subtitle: '只放行允许的流量', kind: 'api', x: 890, y: 125, width: 112, height: 86 },
+      { id: 'events', title: 'Events', subtitle: '滥用 + 调优', kind: 'stream', x: 890, y: 400, width: 112, height: 82 },
     ],
     mobileStages: [
       {
-        label: 'Clients',
-        nodes: [{ id: 'client', title: 'Client', summary: 'sends traffic that must receive a synchronous allow or deny' }],
+        label: 'Client',
+        nodes: [{ id: 'client', title: 'Client', summary: '发出必须得到同步 allow 或 deny 的流量' }],
       },
       {
         label: 'Edge / API',
         nodes: [
-          { id: 'gateway', title: 'API gateway', summary: 'runs enforcement before the backend call' },
-          { id: 'localLimiter', title: 'Local pre-check', summary: 'fast in-process check for low-risk or cached state' },
+          { id: 'gateway', title: 'API gateway', summary: '在调用 backend 之前执行 enforcement' },
+          { id: 'localLimiter', title: 'Local pre-check', summary: '对低风险或已缓存 state 的快速进程内检查' },
         ],
       },
       {
         label: 'Limiter state',
         nodes: [
-          { id: 'redis', title: 'Redis Lua', summary: 'atomic check-and-update for distributed servers' },
-          { id: 'shards', title: 'Shard router', summary: 'spreads key state and isolates hot keys' },
+          { id: 'redis', title: 'Redis Lua', summary: '为分布式 server 提供 atomic 的 check-and-update' },
+          { id: 'shards', title: 'Shard router', summary: '分散 key state 并隔离 hot key' },
         ],
       },
       {
-        label: 'Coordination',
-        nodes: [{ id: 'quotaService', title: 'Quota service', summary: 'coordinates strict global or regional budgets' }],
+        label: '协调',
+        nodes: [{ id: 'quotaService', title: 'Quota service', summary: '协调严格全局或各 region 的预算' }],
       },
       {
         label: 'Service + analytics',
         nodes: [
-          { id: 'backend', title: 'Backend', summary: 'receives only allowed traffic' },
-          { id: 'events', title: 'Events', summary: 'records decisions for abuse analysis and tuning' },
+          { id: 'backend', title: 'Backend', summary: '只接收允许的流量' },
+          { id: 'events', title: 'Events', summary: '记录判定结果，供滥用分析和调优' },
         ],
       },
     ],
   },
   meters: [
-    { id: 'atomicPath', label: 'Atomic path load' },
-    { id: 'hotKey', label: 'Hot-key pressure' },
-    { id: 'stateMemory', label: 'State memory' },
-    { id: 'crossRegion', label: 'Cross-region correctness' },
-    { id: 'latencyBudget', label: 'Latency budget' },
+    { id: 'atomicPath', label: 'Atomic 路径负载' },
+    { id: 'hotKey', label: 'Hot-key 压力' },
+    { id: 'stateMemory', label: 'State 内存' },
+    { id: 'crossRegion', label: '跨 region 正确性' },
+    { id: 'latencyBudget', label: 'Latency 预算' },
   ],
   decisions: [
-    { id: 'algorithm', title: 'Limiter algorithm' },
-    { id: 'localMemory', title: 'Local memory' },
+    { id: 'algorithm', title: 'Limiter 算法' },
+    { id: 'localMemory', title: '本地内存' },
     { id: 'redisLua', title: 'Redis + Lua' },
     { id: 'sharding', title: 'State sharding' },
-    { id: 'globalQuota', title: 'Global quota' },
-    { id: 'failMode', title: 'Fail mode' },
+    { id: 'globalQuota', title: '全局 quota' },
+    { id: 'failMode', title: 'Fail 模式' },
   ],
   sourceBackedRules: [
     {
-      title: 'Atomic increment plus expiry is the simple rate-limiter baseline',
+      title: 'atomic 自增加上过期是最简单的 rate-limiter 基线',
       source: 'Redis Docs',
       url: 'https://redis.io/docs/latest/commands/incr/',
       summary:
-        'Redis documents counter-based rate limiter patterns using INCR and key expiry, which matches the single-window baseline.',
+        'Redis 文档用 INCR 和 key 过期描述了基于 counter 的 rate limiter 模式，正好对应单窗口的基线。',
     },
     {
-      title: 'Lua scripts make check-and-update atomic on one Redis shard',
+      title: 'Lua 脚本让 check-and-update 在单个 Redis shard 上 atomic',
       source: 'Redis Docs',
       url: 'https://redis.io/docs/latest/develop/programmability/eval-intro/',
       summary:
-        'A limiter should not perform read, compute, and write as separate network operations when many API servers are racing.',
+        '当很多 API server 在竞争时，limiter 不应该把读、算、写做成各自独立的网络操作。',
     },
     {
-      title: 'Production rate limiting is usually enforced before the origin',
+      title: '生产环境的 rate limiting 通常在 origin 之前执行',
       source: 'Cloudflare Docs',
       url: 'https://developers.cloudflare.com/waf/rate-limiting-rules/',
       summary:
-        'Edge enforcement protects the backend by deciding whether a request may continue before origin resources are spent.',
+        'edge enforcement 在花费 origin 资源之前就判定请求能否继续，从而保护 backend。',
     },
     {
-      title: 'Distributed rate limiting has an explicit local versus global tradeoff',
+      title: '分布式 rate limiting 有明确的 local 对 global 权衡',
       source: 'Envoy Docs',
       url: 'https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/other_features/global_rate_limiting',
       summary:
-        'Global rate limiting centralizes decisions, while local checks are faster but less exact across many instances or regions.',
+        'global rate limiting 把判定集中起来，而 local 检查更快，但跨多 instance 或多 region 时不够精确。',
     },
   ],
   teachingAssumptions: [
-    'The lab models the synchronous enforcement path; Kafka-style event streams are for analytics, abuse investigation, and tuning.',
-    'Hot-key thresholds are intentionally conservative because one abusive key can dominate a shard even when total QPS looks safe.',
-    'Strict global quotas across regions are modeled as a correctness choice that spends latency and availability budget.',
+    '这个 lab 建模的是同步 enforcement 路径；Kafka 风格的 event stream 用于 analytics、滥用调查和调优。',
+    'Hot-key 阈值刻意保守，因为即使总 QPS 看起来安全，一个滥用 key 也可能主导一个 shard。',
+    '跨 region 的严格全局 quota 被建模成一种正确性选择，它会花掉 latency 和可用性预算。',
   ],
   teachingWalkthrough: [
     {
       id: 'single',
       step: '01',
-      focus: 'One server',
+      focus: '一台 server',
       scenarioId: 'single-process',
       question:
-        'A single service does ~80 checks/s against 500 keys. Where do you keep the counters, and is anything else needed?',
+        '一个单服务对 500 个 key 做约 80 checks/s。counter 放哪里？还需要别的吗？',
       reveal:
-        'An in-process map is correct and fastest while one process owns every decision — there is no cross-instance race, so Redis, sharding, and a quota service would all be premature.',
-      takeaway: 'With one decision-maker, a local in-memory counter is the correct baseline.',
+        '只要每个判定都由一个进程独占，进程内的 map 既正确又最快——没有跨 instance 的竞态，所以 Redis、sharding 和 quota service 在这里都太超前。',
+      takeaway: '只有一个决策者时，本地 in-memory counter 就是正确的基线。',
     },
     {
       id: 'fleet',
       step: '02',
-      focus: 'Many servers race',
+      focus: '多台 server 在竞争',
       scenarioId: 'api-fleet',
       question:
-        'Now 12 servers enforce the same key. Why do per-process counters give the wrong answer, and what is the minimum fix?',
+        '现在有 12 台 server 对同一个 key 做 enforcement。为什么各进程的 counter 会给出错误答案，最小的修复是什么？',
       reveal:
-        'Independent counters each allow the full quota, so the real limit is multiplied by the fleet size. You need one shared atomic check-and-update — Redis with a Lua script makes read-decide-write a single operation instead of a race.',
-      takeaway: 'Distributed enforcement needs one atomic check-and-update, not per-process state.',
+        '各自独立的 counter 每个都放行完整 quota，于是真实上限被集群规模乘了一遍。你需要一份共享的 atomic check-and-update——Redis 配 Lua 脚本把读-判定-写变成单个操作，而不是一场竞态。',
+      takeaway: '分布式 enforcement 需要一份 atomic 的 check-and-update，而不是各进程各自的 state。',
     },
     {
       id: 'bursty',
       step: '03',
-      focus: 'Bursts + tight latency',
+      focus: 'Burst + 紧 latency',
       scenarioId: 'bursty-api',
       question:
-        'A public API allows short bursts and wants single-digit-ms decisions. What changes about the algorithm and the path?',
+        '一个公开 API 允许短时 burst，并希望个位数 ms 的判定。算法和路径要变什么？',
       reveal:
-        'A token bucket tolerates bursts up to a refill cap, and a tight latency budget favors a local pre-check (or cached grant) before the remote store, so most requests never pay the network round trip.',
-      takeaway: 'Tight latency pushes work local; burst tolerance picks the algorithm (token bucket).',
+        'token bucket 能容忍 burst 直到 refill 上限；而紧的 latency 预算倾向于在访问远端 store 之前先做一次本地 pre-check（或缓存的授权），让大部分请求都不用付那次网络往返。',
+      takeaway: '紧 latency 把工作推到本地；burst 容忍度决定算法（token bucket）。',
     },
     {
       id: 'hot-key',
       step: '04',
-      focus: 'One key gets hammered',
+      focus: '一个 key 被狂打',
       scenarioId: 'hot-key-abuse',
       question:
-        'Total QPS looks safe, but one abusive key takes 40% of it. Does sharding by key solve the problem?',
+        '总 QPS 看起来安全，但一个滥用 key 占了其中的 40%。按 key 做 sharding 能解决这个问题吗？',
       reveal:
-        'Sharding spreads total load, but a single hot key still maps to one shard and can overload it. Hot keys need isolation, local pre-filtering, or per-key bucketing on top of sharding.',
-      takeaway: 'Sharding scales totals, not skew; hot keys need their own handling.',
+        'sharding 分散的是总负载，但单个 hot key 仍然映射到一个 shard，照样能把它压垮。hot key 需要在 sharding 之上再加隔离、本地预过滤，或按 key 分桶。',
+      takeaway: 'sharding 扩展的是总量，不是倾斜；hot key 需要自己的处理方式。',
     },
     {
       id: 'global',
       step: '05',
-      focus: 'Exact global quota',
+      focus: '精确的全局 quota',
       scenarioId: 'global-strict',
       question:
-        'Six regions must share one precise quota. Why is this the most expensive option, and when is it worth it?',
+        '六个 region 必须共享一个精确 quota。为什么这是最贵的选项，什么时候才值得？',
       reveal:
-        'Exact global counting needs cross-region coordination (or pre-allocated regional budgets), which spends latency and availability. It is only worth it when overshoot is costly; otherwise approximate regional enforcement is faster and more available.',
-      takeaway: 'Strict global correctness trades latency and availability — choose it deliberately.',
+        '精确的全局计数需要跨 region 协调（或预先分配各 region 的预算），这会花掉 latency 和可用性。只有当超额代价高昂时才值得；否则各 region 的近似 enforcement 更快、也更可用。',
+      takeaway: '严格的全局正确性是用 latency 和可用性换来的——要有意识地选择它。',
     },
   ],
   analyze: analyzeRateLimiterWorkload,
@@ -474,29 +474,29 @@ function analyzeRateLimiterWorkload(workload: WorkloadValues): LabAnalysis {
       atomicPath: {
         ratio: requestsPerSecond / atomicStoreBudgetPerSecond,
         valueText: `${formatRate(requestsPerSecond)}/s`,
-        copy: 'Every request needs a synchronous decision; a remote atomic store can become the critical path.',
+        copy: '每个请求都需要一次同步判定；远端的 atomic store 可能成为 critical path。',
       },
       hotKey: {
         ratio: hotKeyRequestsPerSecond / Math.max(hotKeyComfortableRps, allowedPerKeySecond),
         valueText: `${formatRate(hotKeyRequestsPerSecond)}/s`,
-        copy: `${hottestKeyShare.toFixed(1)}% of total traffic maps to one enforcement key.`,
+        copy: `${hottestKeyShare.toFixed(1)}% 的总流量都映射到一个 enforcement key 上。`,
       },
       stateMemory: {
         ratio: stateGigabytes / comfortableStateGigabytes,
         valueText: formatStorageGigabytes(stateGigabytes),
-        copy: `${formatCount(keyCardinality)} active keys at roughly ${stateBytesPerKey} bytes of limiter state each.`,
+        copy: `${formatCount(keyCardinality)} 个活跃 key，每个约 ${stateBytesPerKey} bytes 的 limiter state。`,
       },
       crossRegion: {
         ratio: crossRegionPressure,
-        valueText: `${formatCount(globalRegions)} ${pluralize('region', globalRegions)}`,
+        valueText: `${formatCount(globalRegions)} 个 region`,
         copy: strictGlobalQuota
-          ? 'Strict global quota requires cross-region coordination or pre-allocated regional budgets.'
-          : 'Approximate regional enforcement is faster but can temporarily exceed the global quota.',
+          ? '严格全局 quota 需要跨 region 协调，或预先分配各 region 的预算。'
+          : '各 region 的近似 enforcement 更快，但可能短暂超过全局 quota。',
       },
       latencyBudget: {
         ratio: latencyPressure,
         valueText: `${Math.round(decisionLatencyMs)} ms`,
-        copy: 'Lower latency targets push toward local pre-checks, colocated Redis shards, or approximate enforcement.',
+        copy: '更低的 latency 目标会推向本地 pre-check、就近部署的 Redis shard，或近似 enforcement。',
       },
     },
     decisions: buildDecisions({
@@ -553,14 +553,14 @@ function buildReasons(analysis: {
   if (analysis.needsLocalOnly) {
     reasons.push({
       severity: 'ok',
-      text: 'One API server can keep limiter state in memory because there is no cross-instance race yet.',
+      text: '一台 API server 可以把 limiter state 放在内存里，因为目前还没有跨 instance 的竞态。',
     });
   } else {
     reasons.push({
       severity: 'warning',
       text: `${formatCount(
         analysis.apiServerCount,
-      )} API servers need a shared atomic check-and-update path; per-process counters would disagree.`,
+      )} 台 API server 需要一条共享的 atomic check-and-update 路径；各进程的 counter 会各执一词。`,
     });
   }
 
@@ -569,25 +569,25 @@ function buildReasons(analysis: {
       severity: analysis.requestsPerSecond > atomicStoreBudgetPerSecond ? 'danger' : 'warning',
       text: `${formatRate(
         analysis.requestsPerSecond,
-      )} limiter checks/s should be one atomic operation, not separate read and write calls that race under concurrency.`,
+      )} limiter checks/s 应该是一个 atomic 操作，而不是在并发下相互竞态的独立读、写调用。`,
     });
   }
 
   if (analysis.needsSharding) {
     reasons.push({
       severity: analysis.hotKeyRequestsPerSecond > hotKeyComfortableRps ? 'danger' : 'warning',
-      text: `The hottest key receives about ${formatRate(
+      text: `最热的 key 大约收到 ${formatRate(
         analysis.hotKeyRequestsPerSecond,
-      )}/s. Sharding by key helps total throughput, but hot keys may still need isolation, bucketing, or special policy.`,
+      )}/s。按 key 做 sharding 有助于总 throughput，但 hot key 可能仍需隔离、分桶或特殊策略。`,
     });
   }
 
   if (analysis.needsLocalPrecheck) {
     reasons.push({
       severity: 'warning',
-      text: `A ${Math.round(
+      text: `${Math.round(
         analysis.decisionLatencyMs,
-      )} ms decision budget favors local pre-checks or cached quota grants before touching the remote state store.`,
+      )} ms 的判定预算倾向于在访问远端 state store 之前先做本地 pre-check 或用缓存的 quota 授权。`,
     });
   }
 
@@ -596,19 +596,19 @@ function buildReasons(analysis: {
       severity: 'danger',
       text: `${formatCount(
         analysis.globalRegions,
-      )} regions with strict global quota trade latency and availability for exact enforcement.`,
+      )} 个 region 加严格全局 quota，用 latency 和可用性换取精确的 enforcement。`,
     });
   }
 
   if (analysis.failClosedOnStoreError) {
     reasons.push({
       severity: 'warning',
-      text: 'Fail-closed protects abuse-sensitive surfaces but can deny legitimate traffic during limiter-store outages.',
+      text: 'fail-closed 保护对滥用敏感的接口，但在 limiter store 故障期间可能拒绝正常流量。',
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Fail-open favors product availability, but the system should emit events so abuse and quota overshoot can be corrected later.',
+      text: 'fail-open 偏向产品可用性，但系统应该发出 event，让滥用和 quota 超额事后能被纠正。',
     });
   }
 
@@ -628,10 +628,10 @@ function buildDecisions(flags: {
   burstTokens: number;
 }): Record<string, { state: DecisionState; copy: string }> {
   const algorithmCopy = flags.needsSlidingWindow
-    ? 'Use a sliding-window counter or log when smoothness and precise window semantics matter more than burst tolerance.'
-    : `Use token bucket to allow short bursts; this scenario grants about ${formatCount(
+    ? '当平滑度和精确的窗口语义比 burst 容忍度更重要时，用 sliding-window counter 或 log。'
+    : `用 token bucket 来允许短时 burst；这个场景下每个 key 大约给 ${formatCount(
         flags.burstTokens,
-      )} burst tokens per key.`;
+      )} 个 burst token。`;
 
   return {
     algorithm: {
@@ -641,36 +641,36 @@ function buildDecisions(flags: {
     localMemory: {
       state: flags.needsLocalOnly || flags.needsLocalPrecheck ? 'needed' : 'not-yet',
       copy: flags.needsLocalOnly
-        ? 'A local map is the simplest correct design while a single process owns all decisions.'
+        ? '只要所有判定都由一个进程独占，本地 map 就是最简单的正确设计。'
         : flags.needsLocalPrecheck
-          ? 'Use local pre-checks or cached quota grants to protect latency, but reconcile against shared state.'
-          : 'Local counters alone are incorrect once multiple servers enforce the same key.',
+          ? '用本地 pre-check 或缓存的 quota 授权来保护 latency，但要和共享 state 对账。'
+          : '一旦多台 server 对同一个 key 做 enforcement，单靠本地 counter 就不正确了。',
     },
     redisLua: {
       state: flags.needsRedisLua ? 'needed' : 'not-yet',
       copy: flags.needsRedisLua
-        ? 'Use Redis plus a Lua script so check and update happen atomically on one shard.'
-        : 'Redis is unnecessary while one process can own the full limiter state.',
+        ? '用 Redis 加 Lua 脚本，让 check 和 update 在单个 shard 上 atomic 完成。'
+        : '只要一个进程能独占完整的 limiter state，就不需要 Redis。',
     },
     sharding: {
       state: flags.needsSharding ? 'needed' : 'not-yet',
       copy: flags.needsSharding
-        ? 'Shard limiter state by enforcement key; watch for hot keys that still overload one shard.'
-        : 'One state store is enough until QPS, key count, or hot-key skew proves otherwise.',
+        ? '按 enforcement key 把 limiter state 做 shard；留意那些仍会压垮单个 shard 的 hot key。'
+        : '在 QPS、key 数量或 hot-key 倾斜证明不够之前，一个 state store 就够了。',
     },
     globalQuota: {
       state: flags.needsGlobalQuotaService ? 'needed' : flags.strictGlobalQuota ? 'tradeoff' : 'not-yet',
       copy: flags.needsGlobalQuotaService
-        ? 'Use a quota service or regional budget allocator when exact global limits outweigh latency.'
+        ? '当精确的全局上限比 latency 更重要时，用 quota service 或各 region 预算分配器。'
         : flags.strictGlobalQuota
-          ? 'Strict global correctness is requested, but one region can still enforce it locally.'
-          : 'Prefer regional or approximate enforcement when availability and latency matter more than exact global totals.',
+          ? '虽然要求严格全局正确性，但单个 region 仍可在本地完成 enforcement。'
+          : '当可用性和 latency 比精确的全局总量更重要时，优先用各 region 或近似的 enforcement。',
     },
     failMode: {
       state: flags.failClosedOnStoreError ? 'tradeoff' : 'useful',
       copy: flags.failClosedOnStoreError
-        ? 'Fail closed for abuse-sensitive actions; the cost is false denials during state-store incidents.'
-        : 'Fail open for availability; emit limiter events so abuse and overshoot can be analyzed after recovery.',
+        ? '对滥用敏感的操作选 fail closed；代价是 state store 出事时会有误拒。'
+        : '为可用性选 fail open；发出 limiter event，让滥用和超额在恢复后能被分析。',
     },
   };
 }
@@ -683,19 +683,19 @@ function chooseArchitectureTitle(flags: {
   needsGlobalQuotaService: boolean;
 }): string {
   if (flags.needsLocalOnly) {
-    return 'In-process limiter map';
+    return '进程内 limiter map';
   }
   if (flags.needsGlobalQuotaService) {
-    return 'Regional enforcement + global quota service';
+    return '各 region enforcement + 全局 quota service';
   }
   if (flags.needsSharding && flags.needsLocalPrecheck) {
-    return 'Local pre-checks + sharded Redis Lua state';
+    return '本地 pre-check + sharded Redis Lua state';
   }
   if (flags.needsSharding) {
     return 'Sharded Redis Lua limiter';
   }
   if (flags.needsRedisLua) {
-    return 'Shared Redis Lua limiter';
+    return '共享 Redis Lua limiter';
   }
   return 'Gateway limiter';
 }
@@ -708,21 +708,21 @@ function chooseArchitectureSummary(flags: {
   needsGlobalQuotaService: boolean;
 }): string {
   if (flags.needsLocalOnly) {
-    return 'A single service instance can keep per-key counters or buckets in memory. This is simple and correct until multiple instances race.';
+    return '单个服务 instance 可以把每个 key 的 counter 或 bucket 放在内存里。在多 instance 开始竞态之前，这既简单又正确。';
   }
   if (flags.needsGlobalQuotaService) {
-    return 'Each region needs fast local enforcement, but strict global quota requires a coordinating service or pre-allocated regional budgets.';
+    return '每个 region 都需要快速的本地 enforcement，但严格全局 quota 需要一个协调 service，或预先分配各 region 的预算。';
   }
   if (flags.needsSharding && flags.needsLocalPrecheck) {
-    return 'The limiter combines fast local checks with sharded atomic state so latency stays low while distributed servers agree on quota.';
+    return 'limiter 把快速的本地检查和 sharded 的 atomic state 结合起来，让 latency 保持低，同时分布式 server 对 quota 达成一致。';
   }
   if (flags.needsSharding) {
-    return 'Limiter state is partitioned by enforcement key. This scales total QPS and memory, but hot keys need special handling.';
+    return 'limiter state 按 enforcement key 分区。这扩展了总 QPS 和内存，但 hot key 需要特殊处理。';
   }
   if (flags.needsRedisLua) {
-    return 'Multiple API servers share Redis state and use Lua so allow/deny plus counter update is atomic.';
+    return '多台 API server 共享 Redis state 并用 Lua，让 allow/deny 加 counter 更新是 atomic 的。';
   }
-  return 'The gateway can enforce limits before passing allowed traffic to the backend.';
+  return 'gateway 可以在把允许的流量传给 backend 之前先执行限流。';
 }
 
 function chooseArchitecturePath(flags: {
@@ -753,8 +753,4 @@ function chooseArchitecturePath(flags: {
 function numericValue(workload: WorkloadValues, key: string): number {
   const value = workload[key];
   return typeof value === 'number' ? value : 0;
-}
-
-function pluralize(unit: string, value: number): string {
-  return Math.round(value) === 1 ? unit : `${unit}s`;
 }

@@ -28,16 +28,16 @@ const streamingFreshnessSeconds = 3_600; // tighter than this and batch rebuilds
 
 export const ragSystemLabDefinition: SystemDesignLabDefinition = {
   id: 'rag-system',
-  eyebrow: 'System Design Lab',
+  eyebrow: '系统设计 Lab',
   title:
-    'A RAG system is two pipelines — offline ingestion and an online retrieve-then-generate query path — and each force scales a different stage.',
+    'RAG system 其实是两条 pipeline —— 离线的 ingestion，和在线的 retrieve-then-generate 查询路径 —— 每一个负载都会撑大不同的 stage。',
   summary:
-    'Change query rate, corpus size, chunk size, how many chunks you retrieve, the model context window, and embedding dimensions, then toggle reranking and hybrid search. The design moves from stuffing the prompt to a vector index with ANN retrieval, to chunking and reranking, to hybrid search plus caching, and finally a multi-tenant, continuously-ingesting platform.',
+    '调节 query rate、corpus 规模、chunk size、每次 retrieve 多少 chunk、模型的 context window、以及 embedding 维度，再切换 reranking 和 hybrid search。设计会从直接 stuff prompt，演进到带 ANN retrieval 的 vector index，再到 chunking 加 reranking，再到 hybrid search 配 caching，最后变成多租户、持续 ingest 的平台。',
   controls: [
     {
       id: 'queriesPerSecond',
       label: 'Query rate',
-      help: 'Online questions per second hitting the retrieve-then-generate path.',
+      help: '每秒打到 retrieve-then-generate 路径上的在线提问数。',
       min: 0.1,
       max: 20_000,
       defaultValue: 20,
@@ -47,18 +47,18 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'documentsIndexed',
       label: 'Documents indexed',
-      help: 'Source documents in the corpus; each is chunked and embedded into the vector index.',
+      help: 'corpus 里的源文档数；每篇都会被 chunk 切分并 embed 进 vector index。',
       min: 5,
       max: 1_000_000_000,
       defaultValue: 100_000,
       scale: 'log',
-      unit: 'docs',
+      unit: '篇',
       format: 'count',
     },
     {
       id: 'chunkSizeTokens',
       label: 'Chunk size',
-      help: 'Tokens per chunk. Smaller chunks sharpen retrieval but multiply vectors and shrink context coverage.',
+      help: '每个 chunk 多少 token。chunk 越小 retrieval 越精准，但 vector 数量翻倍、context 覆盖面缩小。',
       min: 64,
       max: 2_048,
       defaultValue: 512,
@@ -69,18 +69,18 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'topK',
       label: 'Top-k retrieved',
-      help: 'Chunks pulled from the vector index per query before assembly and (optional) reranking.',
+      help: '每次 query 从 vector index 拉出、在 assemble 和（可选）reranking 之前的 chunk 数。',
       min: 1,
       max: 200,
       defaultValue: 8,
       scale: 'log',
-      unit: 'chunks',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'contextWindowTokens',
       label: 'Context window',
-      help: 'Model context budget in tokens; retrieved chunks plus the prompt must fit inside it.',
+      help: '模型的 context 预算（以 token 计）；retrieve 到的 chunk 加上 prompt 必须塞得进去。',
       min: 2_048,
       max: 1_000_000,
       defaultValue: 16_000,
@@ -91,7 +91,7 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'embeddingDimensions',
       label: 'Embedding dimensions',
-      help: 'Vector width. Higher dimensions can lift recall but enlarge the index and slow ANN search.',
+      help: 'vector 的宽度。维度越高 recall 可能越好，但 index 变大、ANN search 变慢。',
       min: 128,
       max: 4_096,
       defaultValue: 768,
@@ -102,7 +102,7 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'indexFreshnessSeconds',
       label: 'Index freshness target',
-      help: 'How quickly a newly written document must become retrievable; tighter targets force streaming ingestion.',
+      help: '一篇刚写入的文档要多快变得可被 retrieve；目标越紧，就越逼着上 streaming ingestion。',
       min: 1,
       max: 604_800,
       defaultValue: 86_400,
@@ -114,13 +114,13 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'reranking',
       label: 'Rerank retrieved chunks',
-      help: 'Run a cross-encoder over the top-k to reorder by relevance; higher quality, real latency and GPU cost.',
+      help: '用 cross-encoder 跑一遍 top-k，按 relevance 重排；质量更高，但有实打实的 latency 和 GPU 开销。',
       defaultValue: false,
     },
     {
       id: 'hybridSearch',
       label: 'Hybrid (keyword + vector) search',
-      help: 'Combine BM25 keyword matches with vector similarity to catch exact terms dense vectors miss.',
+      help: '把 BM25 关键词匹配和 vector similarity 结合起来，抓住 dense vector 漏掉的精确词。',
       defaultValue: false,
     },
   ],
@@ -128,8 +128,8 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'prompt-stuffing',
       step: '01',
-      title: 'Stuff the prompt',
-      summary: 'A handful of docs pasted straight into the context window.',
+      title: '直接 stuff prompt',
+      summary: '寥寥几篇文档，直接贴进 context window。',
       values: {
         queriesPerSecond: 0.5,
         documentsIndexed: 8,
@@ -145,8 +145,8 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'vector-retrieval',
       step: '02',
-      title: 'Vector DB retrieval',
-      summary: 'The corpus no longer fits the window, so retrieve top-k by similarity.',
+      title: 'Vector DB 检索',
+      summary: 'corpus 已经塞不进 window 了，于是按 similarity 取 top-k。',
       values: {
         queriesPerSecond: 20,
         documentsIndexed: 100_000,
@@ -163,7 +163,7 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
       id: 'chunk-and-rerank',
       step: '03',
       title: 'Chunk + rerank',
-      summary: 'Tighter chunks and a reranker lift answer quality.',
+      summary: '更细的 chunk 加上一个 reranker，把答案质量拉上去。',
       values: {
         queriesPerSecond: 200,
         documentsIndexed: 5_000_000,
@@ -180,7 +180,7 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
       id: 'hybrid-and-cache',
       step: '04',
       title: 'Hybrid search + caching',
-      summary: 'Keyword recall plus caching tame cost at higher load.',
+      summary: '关键词 recall 加上 caching，在更高负载下把成本压住。',
       values: {
         queriesPerSecond: 2_000,
         documentsIndexed: 50_000_000,
@@ -196,8 +196,8 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'multi-tenant-fresh',
       step: '05',
-      title: 'Multi-tenant, fresh, at scale',
-      summary: 'Billions of chunks, near-real-time freshness, isolated tenants.',
+      title: '多租户、新鲜、规模化',
+      summary: '数十亿 chunk、近实时的 freshness、彼此隔离的租户。',
       values: {
         queriesPerSecond: 12_000,
         documentsIndexed: 500_000_000,
@@ -212,9 +212,9 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'Retrieval-augmented generation architecture diagram',
+    title: 'Retrieval-augmented generation 架构图',
     description:
-      'Whiteboard-style architecture diagram for a RAG system: clients, a RAG API, a retrieval stage embedding the query and searching a vector index, a rerank and context-assembly stage, LLM generation with a response cache, and an asynchronous ingestion pipeline that chunks and embeds documents.',
+      'RAG system 的白板式架构图：clients、一个 RAG API、负责把 query 做 embed 并在 vector index 上搜索的 retrieval 阶段、rerank 与 context-assembly 阶段、带 response cache 的 LLM generation，以及一条异步的 ingestion pipeline 来对文档做 chunk 和 embed。',
     columns: [
       {
         id: 'clients',
@@ -224,9 +224,9 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'client',
             title: 'Client',
-            subtitle: 'asks questions',
+            subtitle: '发起提问',
             kind: 'client',
-            summary: 'sends natural-language questions and renders grounded answers',
+            summary: '发送自然语言提问，并渲染有出处支撑的答案',
           },
         ],
       },
@@ -238,50 +238,50 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'ragApi',
             title: 'RAG API',
-            subtitle: 'orchestrates query',
+            subtitle: '编排 query',
             kind: 'api',
-            summary: 'orchestrates embed, retrieve, rerank, assemble, and generate per query',
+            summary: '为每次 query 编排 embed、retrieve、rerank、assemble 和 generate',
           },
           {
             id: 'responseCache',
             title: 'Response cache',
-            subtitle: 'repeat queries',
+            subtitle: '重复 query',
             kind: 'cache',
-            summary: 'returns cached answers for repeated or similar questions before any retrieval',
+            summary: '在做任何 retrieval 之前，对重复或相似的提问直接返回缓存的答案',
           },
         ],
       },
       {
         id: 'retrieval',
-        label: 'Retrieval',
+        label: '检索 Retrieval',
         variant: 'backbone',
         nodes: [
           {
             id: 'queryEmbedder',
             title: 'Query embedder',
-            subtitle: 'text to vector',
+            subtitle: '文本转 vector',
             kind: 'gpu',
-            summary: 'embeds the question with the same model used at ingestion',
+            summary: '用 ingestion 时同一个模型把提问 embed 成向量',
           },
           {
             id: 'vectorIndex',
             title: 'Vector index',
             subtitle: 'ANN top-k',
             kind: 'search',
-            summary: 'approximate-nearest-neighbour search returns the top-k candidate chunks',
+            summary: 'approximate-nearest-neighbour 搜索返回 top-k 候选 chunk',
           },
           {
             id: 'keywordIndex',
             title: 'Keyword index',
-            subtitle: 'BM25 matches',
+            subtitle: 'BM25 匹配',
             kind: 'search',
-            summary: 'inverted index that catches exact terms dense vectors miss, for hybrid search',
+            summary: '用于 hybrid search 的 inverted index，抓住 dense vector 漏掉的精确词',
           },
         ],
       },
       {
         id: 'assembly',
-        label: 'Rerank + assemble',
+        label: 'Rerank + 组装',
         variant: 'processing',
         nodes: [
           {
@@ -289,49 +289,49 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
             title: 'Reranker',
             subtitle: 'cross-encoder',
             kind: 'gpu',
-            summary: 'reorders candidates by query-chunk relevance before they enter the context',
+            summary: '在候选进入 context 之前，按 query-chunk relevance 重新排序',
           },
           {
             id: 'contextAssembler',
             title: 'Context assembler',
-            subtitle: 'fit window',
+            subtitle: '塞进 window',
             kind: 'service',
-            summary: 'packs the best chunks plus the prompt to fit within the context window',
+            summary: '把最好的 chunk 连同 prompt 一起打包，正好塞进 context window',
           },
         ],
       },
       {
         id: 'generation',
-        label: 'Generation',
+        label: '生成 Generation',
         variant: 'storage',
         nodes: [
           {
             id: 'llm',
             title: 'LLM generator',
-            subtitle: 'grounded answer',
+            subtitle: '有据可依的答案',
             kind: 'gpu',
-            summary: 'generates the answer conditioned on the assembled context',
+            summary: '以 assemble 好的 context 为条件生成答案',
           },
         ],
       },
       {
         id: 'ingestion',
-        label: 'Ingestion',
+        label: '摄入 Ingestion',
         variant: 'processing',
         nodes: [
           {
             id: 'chunker',
             title: 'Chunk + embed',
-            subtitle: 'async pipeline',
+            subtitle: '异步 pipeline',
             kind: 'compute',
-            summary: 'splits new documents into chunks and embeds them off the query path',
+            summary: '在 query 路径之外，把新文档切成 chunk 并做 embed',
           },
           {
             id: 'indexWriter',
             title: 'Index writer',
-            subtitle: 'upsert vectors',
+            subtitle: 'upsert 向量',
             kind: 'compute',
-            summary: 'upserts chunk vectors into the index to keep retrieval fresh',
+            summary: '把 chunk 向量 upsert 进 index，让 retrieval 保持新鲜',
           },
         ],
       },
@@ -350,111 +350,111 @@ export const ragSystemLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'indexScale', label: 'Vector index scale' },
-    { id: 'annLoad', label: 'ANN query load' },
-    { id: 'rerankLoad', label: 'Rerank load' },
-    { id: 'contextFit', label: 'Context window fit' },
+    { id: 'indexScale', label: 'Vector index 规模' },
+    { id: 'annLoad', label: 'ANN query 负载' },
+    { id: 'rerankLoad', label: 'Rerank 负载' },
+    { id: 'contextFit', label: 'Context window 占用' },
     { id: 'ingestionFreshness', label: 'Ingestion / freshness' },
   ],
   decisions: [
-    { id: 'chunking', title: 'Chunking strategy' },
+    { id: 'chunking', title: 'Chunking 策略' },
     { id: 'vectorIndex', title: 'Vector index / ANN' },
     { id: 'hybrid', title: 'Hybrid search' },
     { id: 'rerank', title: 'Reranking' },
-    { id: 'contextAssembly', title: 'Context assembly' },
+    { id: 'contextAssembly', title: 'Context 组装' },
     { id: 'ingestion', title: 'Ingestion / freshness' },
   ],
   sourceBackedRules: [
     {
-      title: 'RAG conditions generation on retrieved passages instead of memorised weights',
+      title: 'RAG 让生成以 retrieve 到的段落为条件，而不是靠记在权重里的知识',
       source: 'Lewis et al., 2020 (arXiv:2005.11401)',
       url: 'https://arxiv.org/abs/2005.11401',
       summary:
-        'The original RAG paper retrieves relevant passages with a dense retriever and feeds them to a seq2seq generator, separating knowledge (the index) from the parametric model.',
+        '最初的 RAG 论文用 dense retriever 取出相关段落、喂给一个 seq2seq generator，把知识（index）和参数化模型分离开。',
     },
     {
-      title: 'Billion-scale similarity search needs an ANN index, not brute force',
+      title: '十亿级别的 similarity search 需要 ANN index，不能用暴力扫描',
       source: 'FAISS',
       url: 'https://github.com/facebookresearch/faiss',
       summary:
-        'FAISS provides quantised and graph-based indexes so nearest-neighbour search over very large vector sets stays fast and memory-feasible.',
+        'FAISS 提供 quantised 和 graph-based 的 index，让超大向量集上的 nearest-neighbour search 既快又能装进内存。',
     },
     {
-      title: 'HNSW gives logarithmic-time approximate nearest-neighbour search',
+      title: 'HNSW 把 approximate nearest-neighbour search 做到对数时间',
       source: 'Malkov & Yashunin, 2016 (arXiv:1603.09320)',
       url: 'https://arxiv.org/abs/1603.09320',
       summary:
-        'Hierarchical Navigable Small World graphs trade a tunable recall/latency knob for high-recall search that scales to large indexes, the default in most vector databases.',
+        'Hierarchical Navigable Small World 图用一个可调的 recall/latency 旋钮，换来能扩展到大 index 的 high-recall 搜索，是大多数 vector database 的默认选择。',
     },
     {
-      title: 'Vector databases manage embeddings, metadata filtering, and updates',
+      title: 'Vector database 管的是 embedding、metadata 过滤和更新',
       source: 'pgvector',
       url: 'https://github.com/pgvector/pgvector',
       summary:
-        'A production vector store handles index building, upserts for freshness, and metadata filters for multi-tenant isolation, beyond raw nearest-neighbour math.',
+        '一个生产级的 vector store 不只是干 nearest-neighbour 的数学，还要负责 index 构建、为 freshness 做 upsert、以及用 metadata filter 做多租户隔离。',
     },
   ],
   teachingAssumptions: [
-    'Average documents split into a few chunks; total vectors are documents times chunks-per-doc scaled by chunk size.',
-    'Freshness is modeled as new/changed docs (a small daily share of the corpus) being embedded and upserted, not a full-corpus re-embed; a tighter target forces a streaming pipeline.',
-    'ANN, rerank, embedding, and generation per-node budgets are conservative teaching numbers, not vendor limits.',
-    'Cache hit rate and recall are approximated; real systems tune HNSW parameters and rerankers empirically.',
+    '平均每篇文档切成几个 chunk；总向量数 = 文档数 × 每篇 chunk 数，再按 chunk size 缩放。',
+    'freshness 建模成：只有新增/改动的文档（corpus 中每天一小部分）被 embed 和 upsert，而不是整个 corpus 重新 embed；目标越紧就越逼出 streaming pipeline。',
+    'ANN、rerank、embedding、generation 的单节点预算都是保守的教学数字，不是厂商上限。',
+    'cache 命中率和 recall 都是近似值；真实系统会凭经验调 HNSW 参数和 reranker。',
   ],
   teachingWalkthrough: [
     {
       id: 'stuff',
       step: '01',
-      focus: 'Stuff the prompt',
+      focus: '直接 stuff prompt',
       scenarioId: 'prompt-stuffing',
       question:
-        'You have a handful of short docs and a 32k-token window. Do you need a vector database at all, or can you just paste the docs into the prompt?',
+        '你手上只有寥寥几篇短文档，加一个 32k-token 的 window。你真的需要一个 vector database 吗，还是直接把文档贴进 prompt 就行？',
       reveal:
-        'Just paste them. When the whole corpus fits inside the context window, retrieval is pure overhead — no embedder, no index, no ANN. The simplest correct RAG is no retrieval at all.',
-      takeaway: 'If the corpus fits the window, skip retrieval entirely.',
+        '直接贴就好。当整个 corpus 都塞得进 context window 时，retrieval 纯属多余 —— 不用 embedder、不用 index、不用 ANN。最简单又正确的 RAG，就是压根不做 retrieval。',
+      takeaway: '只要 corpus 装得进 window，就整个跳过 retrieval。',
     },
     {
       id: 'retrieve',
       step: '02',
-      focus: 'Corpus outgrows window',
+      focus: 'Corpus 撑爆 window',
       scenarioId: 'vector-retrieval',
       question:
-        '100k docs is far larger than any context window. What lets you find the few relevant chunks without scanning every vector each query?',
+        '10 万篇文档远比任何 context window 都大。靠什么能在不必每次 query 都扫遍每一个向量的前提下，找到那少数几个相关 chunk？',
       reveal:
-        'Embed each chunk once at ingestion, store the vectors in an index, and at query time embed the question and pull the top-k by similarity. Exact search is too slow at this scale, so the index uses approximate nearest neighbour (HNSW/IVF) to return candidates in logarithmic time.',
-      takeaway: 'Once the corpus exceeds the window, retrieve top-k via an ANN vector index.',
+        '在 ingestion 时把每个 chunk embed 一次、把向量存进 index，到 query 时再把问题 embed 出来，按 similarity 取 top-k。这个规模下精确搜索太慢，所以 index 用 approximate nearest neighbour（HNSW/IVF）在对数时间里返回候选。',
+      takeaway: '一旦 corpus 超过 window，就用 ANN vector index 取 top-k。',
     },
     {
       id: 'rerank',
       step: '03',
-      focus: 'Quality: chunk + rerank',
+      focus: '质量：chunk + rerank',
       scenarioId: 'chunk-and-rerank',
       question:
-        'Answers cite the wrong passage even though the right one is sitting in the index. Why is the relevant chunk retrieved but not surfaced near the top, and how do you fix it without shrinking recall?',
+        '正确的段落明明就在 index 里，答案却引用了错的那一段。为什么相关 chunk 被 retrieve 到了、却没排到靠前的位置，又怎么在不牺牲 recall 的前提下修好它？',
       reveal:
-        'Retrieve a wide top-k cheaply with the vector index, then run a cross-encoder reranker over those candidates to reorder by true query-chunk relevance, keeping only the best for the context. Smaller chunks also sharpen what each vector represents. Reranking adds GPU cost and latency, so it sits on the top-k, never the whole corpus.',
-      takeaway: 'Retrieve wide and cheap, then rerank narrow and accurate.',
+        '先用 vector index 廉价地 retrieve 一个较宽的 top-k，再用一个 cross-encoder reranker 跑这批候选，按真正的 query-chunk relevance 重排，只把最好的留进 context。更小的 chunk 也能让每个向量表示得更精准。reranking 会带来 GPU 开销和 latency，所以它只作用在 top-k 上，绝不跑整个 corpus。',
+      takeaway: '先宽而廉价地 retrieve，再窄而精准地 rerank。',
     },
     {
       id: 'hybrid',
       step: '04',
-      focus: 'Recall + cost at load',
+      focus: '高负载下的 recall + 成本',
       scenarioId: 'hybrid-and-cache',
       question:
-        'Dense retrieval keeps missing exact product codes and rare names, and 2k QPS is making generation the bill. Two different problems — what addresses each?',
+        'dense retrieval 老是漏掉精确的产品编号和生僻名字，而 2k QPS 又让 generation 成了账单大头。这是两个不同的问题 —— 各自该怎么解？',
       reveal:
-        'Add a keyword (BM25) index and fuse its results with vector hits — hybrid search recovers exact-match terms dense embeddings blur. Separately, a response/semantic cache serves repeated and near-duplicate questions before any retrieval or generation, cutting the most expensive stage.',
-      takeaway: 'Hybrid search fixes recall on exact terms; caching fixes cost on repeated queries.',
+        '加一个关键词（BM25）index，把它的结果和 vector 命中融合起来 —— hybrid search 能找回 dense embedding 模糊掉的精确匹配词。另一边，一个 response/semantic cache 在做任何 retrieval 或 generation 之前，就把重复和近似重复的提问接住，砍掉最贵的那一段。',
+      takeaway: 'hybrid search 修复精确词上的 recall；caching 修复重复 query 上的成本。',
     },
     {
       id: 'platform',
       step: '05',
-      focus: 'Multi-tenant, fresh, scaled',
+      focus: '多租户、新鲜、规模化',
       scenarioId: 'multi-tenant-fresh',
       question:
-        'Billions of chunks, many tenants, and documents must be retrievable seconds after upload. What breaks first, and how do you keep tenants isolated and the index fresh?',
+        '数十亿 chunk、众多租户，文档上传后必须几秒内就能被 retrieve。最先撑不住的是什么，又怎么保证租户隔离、index 保持新鲜？',
       reveal:
-        'The index outgrows one node and must be sharded/replicated, with metadata filters or per-tenant namespaces for isolation. A daily batch rebuild cannot meet a seconds-level freshness target, so ingestion becomes a streaming pipeline that chunks, embeds, and upserts continuously off the query path.',
-      takeaway: 'At platform scale, shard the index, isolate tenants by namespace, and stream ingestion for freshness.',
+        'index 撑爆了单个节点，必须 shard/replicate，并用 metadata filter 或 per-tenant namespace 做隔离。每日一次的 batch rebuild 满足不了秒级的 freshness 目标，于是 ingestion 变成一条 streaming pipeline，在 query 路径之外持续地 chunk、embed、upsert。',
+      takeaway: '到平台规模，就把 index 做 shard、用 namespace 隔离租户、用 streaming ingestion 保 freshness。',
     },
   ],
   analyze: analyzeRagWorkload,
@@ -570,24 +570,24 @@ function analyzeRagWorkload(workload: WorkloadValues): LabAnalysis {
     meters: {
       indexScale: {
         ratio: needsRetrieval ? indexScaleRatio : 0,
-        valueText: needsRetrieval ? formatStorageGigabytes(indexGigabytes) : 'no index',
+        valueText: needsRetrieval ? formatStorageGigabytes(indexGigabytes) : '无 index',
         copy: needsRetrieval
-          ? `${formatCount(totalChunks)} chunk vectors at ${Math.round(embeddingDimensions)} dims (~${bytesPerFloat} bytes each).`
-          : 'The corpus fits the context window, so there is no vector index yet.',
+          ? `${formatCount(totalChunks)} 个 chunk 向量，每个 ${Math.round(embeddingDimensions)} 维（约 ${bytesPerFloat} 字节/维）。`
+          : 'corpus 塞得进 context window，所以暂时还没有 vector index。',
       },
       annLoad: {
         ratio: annRatio,
         valueText: needsRetrieval ? `${formatRate(effectiveAnnQps)} ANN/s` : 'n/a',
         copy: needsRetrieval
-          ? `${formatRate(queriesPerSecond)}/s of queries search a ${formatCount(totalChunks)}-vector index at ${Math.round(embeddingDimensions)} dims; bigger indexes and wider vectors both touch more of the graph per hop.`
-          : 'No approximate-nearest-neighbour search while everything fits the prompt.',
+          ? `${formatRate(queriesPerSecond)}/s 的 query 在一个 ${formatCount(totalChunks)} 向量、${Math.round(embeddingDimensions)} 维的 index 上搜索；index 越大、向量越宽，每跳触及的图就越多。`
+          : '一切都塞得进 prompt 时，无需做 approximate-nearest-neighbour search。',
       },
       rerankLoad: {
         ratio: rerankRatio,
-        valueText: reranking ? `${formatRate(rerankUnitsPerSecond)} rerank/s` : 'off',
+        valueText: reranking ? `${formatRate(rerankUnitsPerSecond)} rerank/s` : '关闭',
         copy: reranking
-          ? `A cross-encoder scores ${Math.round(topK)} candidates per query; cost scales with both QPS and top-k.`
-          : 'Reranking is off, so retrieval order comes straight from the vector index.',
+          ? `一个 cross-encoder 每次 query 给 ${Math.round(topK)} 个候选打分；成本随 QPS 和 top-k 一起涨。`
+          : 'reranking 关着，所以检索顺序直接来自 vector index。',
       },
       contextFit: {
         ratio: contextRatio,
@@ -595,17 +595,17 @@ function analyzeRagWorkload(workload: WorkloadValues): LabAnalysis {
           ? `${formatCount(retrievedTokens)} / ${formatCount(contextWindowTokens)} tok`
           : `${formatCount(corpusTokens)} / ${formatCount(contextWindowTokens)} tok`,
         copy: contextOverflow
-          ? 'Retrieved chunks overflow the usable window; lower top-k, shrink chunks, or compress context.'
-          : 'Retrieved chunks fit the window with headroom for the prompt and answer.',
+          ? 'retrieve 到的 chunk 溢出了可用 window；调低 top-k、缩小 chunk，或压缩 context。'
+          : 'retrieve 到的 chunk 塞得进 window，还给 prompt 和答案留了余量。',
       },
       ingestionFreshness: {
         ratio: needsRetrieval ? ingestionRatio : 0,
         valueText: needsRetrieval ? `${formatRate(requiredEmbedOpsPerSecond)} embed/s` : 'n/a',
         copy: needsRetrieval
-          ? `New and changed docs arrive at ~${formatRate(newChunksPerSecond)} chunks/s; a ${formatDuration(
+          ? `新增和改动的文档以约 ${formatRate(newChunksPerSecond)} chunks/s 的速度到来；一个 ${formatDuration(
               indexFreshnessSeconds,
-            )} target streams them through embed-and-upsert at ~${formatRate(requiredEmbedOpsPerSecond)} embeddings/s.`
-          : 'Nothing to ingest while the corpus is pasted directly into the prompt.',
+            )} 的目标会以约 ${formatRate(requiredEmbedOpsPerSecond)} embeddings/s 把它们 streaming 过 embed-and-upsert。`
+          : 'corpus 直接贴进 prompt 时，没有任何东西要 ingest。',
       },
     },
     decisions: buildDecisions({
@@ -667,16 +667,16 @@ function buildReasons(
   if (!analysis.needsRetrieval) {
     reasons.push({
       severity: 'ok',
-      text: `${formatCount(analysis.documentsIndexed)} docs (~${formatCount(
+      text: `${formatCount(analysis.documentsIndexed)} 篇文档（约 ${formatCount(
         analysis.totalChunks,
-      )} chunks) fit the context window, so you can stuff the prompt and skip retrieval entirely.`,
+      )} 个 chunk）塞得进 context window，所以可以直接 stuff prompt，整个跳过 retrieval。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `${formatCount(analysis.documentsIndexed)} docs (~${formatCount(
+      text: `${formatCount(analysis.documentsIndexed)} 篇文档（约 ${formatCount(
         analysis.totalChunks,
-      )} chunks) far exceed the window; retrieve top-k from a vector index instead of stuffing the prompt.`,
+      )} 个 chunk）远超 window；从 vector index 取 top-k，而不是 stuff prompt。`,
     });
   }
 
@@ -684,16 +684,16 @@ function buildReasons(
   if (!analysis.needsRetrieval) {
     reasons.push({
       severity: 'ok',
-      text: `Documents are short enough to pass whole into the prompt, so there is no chunking, embedding, or index to maintain yet.`,
+      text: `文档够短，可以整篇塞进 prompt，所以暂时没有 chunking、embedding 或 index 要维护。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `~${Math.round(analysis.chunkSizeTokens)}-token chunks at ${Math.round(
+      text: `约 ${Math.round(analysis.chunkSizeTokens)}-token 的 chunk、${Math.round(
         analysis.embeddingDimensions,
-      )} dims build a ~${formatStorageGigabytes(
+      )} 维，建出一个约 ${formatStorageGigabytes(
         analysis.indexGigabytes,
-      )} vector index; smaller chunks sharpen retrieval but multiply vectors.`,
+      )} 的 vector index；chunk 越小 retrieval 越精准，但向量数量翻倍。`,
     });
   }
 
@@ -701,20 +701,20 @@ function buildReasons(
   if (analysis.contextOverflow) {
     reasons.push({
       severity: 'danger',
-      text: `Top-k of ${Math.round(analysis.topK)} pulls ${formatCount(
+      text: `top-k 取 ${Math.round(analysis.topK)} 拉出 ${formatCount(
         analysis.retrievedTokens,
-      )} tokens, overflowing the usable ${formatCount(
+      )} token，溢出了可用的 ${formatCount(
         analysis.contextWindowTokens,
-      )} window; trim k, shrink chunks, or compress context.`,
+      )} window；调小 k、缩小 chunk，或压缩 context。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `Top-k of ${Math.round(analysis.topK)} fits ${formatCount(
+      text: `top-k 取 ${Math.round(analysis.topK)} 的 ${formatCount(
         analysis.retrievedTokens,
-      )} tokens inside the ${formatCount(
+      )} token 塞得进 ${formatCount(
         analysis.contextWindowTokens,
-      )} window with headroom for the prompt and answer.`,
+      )} window，还给 prompt 和答案留了余量。`,
     });
   }
 
@@ -724,14 +724,14 @@ function buildReasons(
       severity: analysis.generationRatio > 1 ? 'warning' : 'ok',
       text: `${formatRate(
         analysis.queriesPerSecond,
-      )}/s makes generation the dominant cost; a response/semantic cache lets repeated questions skip retrieval and generation.`,
+      )}/s 让 generation 成为主导成本；一个 response/semantic cache 能让重复提问跳过 retrieval 和 generation。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
       text: `${formatRate(
         analysis.queriesPerSecond,
-      )}/s of generation calls sit comfortably on one LLM tier, so no response cache is justified yet.`,
+      )}/s 的 generation 调用，单个 LLM tier 就能轻松扛住，所以暂时没必要上 response cache。`,
     });
   }
 
@@ -739,41 +739,41 @@ function buildReasons(
   if (analysis.needsAnnScaling) {
     reasons.push({
       severity: analysis.indexGigabytes > ramVectorBudgetGigabytes * 2 ? 'danger' : 'warning',
-      text: `A ~${formatStorageGigabytes(analysis.indexGigabytes)} index at ${formatRate(
+      text: `约 ${formatStorageGigabytes(analysis.indexGigabytes)} 的 index 在 ${formatRate(
         analysis.queriesPerSecond,
-      )}/s outgrows one ANN node; shard and replicate the vector index.`,
+      )}/s 下撑爆了单个 ANN 节点；把 vector index 做 shard 和 replicate。`,
     });
   }
 
   if (analysis.needsRerank) {
     reasons.push({
       severity: 'warning',
-      text: 'A cross-encoder reranker reorders the top-k for relevance; keep it on the candidates only, never the whole corpus.',
+      text: '一个 cross-encoder reranker 按 relevance 重排 top-k；只让它作用在候选上，绝不跑整个 corpus。',
     });
   }
 
   if (analysis.needsHybrid) {
     reasons.push({
       severity: 'ok',
-      text: 'Hybrid search fuses BM25 keyword hits with vector similarity to recover exact terms dense embeddings miss.',
+      text: 'hybrid search 把 BM25 关键词命中和 vector similarity 融合起来，找回 dense embedding 漏掉的精确词。',
     });
   }
 
   if (analysis.needsStreamingIngestion) {
     reasons.push({
       severity: 'warning',
-      text: `Hitting a ${formatDuration(
+      text: `要达到 ${formatDuration(
         analysis.indexFreshnessSeconds,
-      )} freshness target needs ~${formatRate(
+      )} 的 freshness 目标，新文档上需要约 ${formatRate(
         analysis.requiredEmbedOpsPerSecond,
-      )} embeddings/s on new docs; move from batch rebuilds to a streaming ingest-and-upsert pipeline.`,
+      )} embeddings/s；从 batch rebuild 转向一条 streaming 的 ingest-and-upsert pipeline。`,
     });
   }
 
   if (analysis.needsMultiTenant) {
     reasons.push({
       severity: 'warning',
-      text: 'At this scale tenants must be isolated by namespace or metadata filter, and the index sharded per tenant or shard key.',
+      text: '到这个规模，租户必须用 namespace 或 metadata filter 隔离，index 也要按租户或 shard key 做 shard。',
     });
   }
 
@@ -792,58 +792,58 @@ function buildDecisions(
     chunking: {
       state: flags.needsRetrieval ? (flags.contextOverflow ? 'tradeoff' : 'needed') : 'not-yet',
       copy: flags.needsRetrieval
-        ? `Split documents into ~${Math.round(
+        ? `把文档切成约 ${Math.round(
             flags.chunkSizeTokens,
-          )}-token chunks: smaller sharpens retrieval but multiplies vectors and tightens the context budget.`
-        : 'No chunking yet — the documents are short enough to pass whole into the prompt.',
+          )}-token 的 chunk：越小 retrieval 越精准，但向量数量翻倍、context 预算也更紧。`
+        : '暂时不用 chunking —— 文档够短，可以整篇塞进 prompt。',
     },
     vectorIndex: {
       state: flags.needsAnnScaling ? 'needed' : flags.needsVectorIndex ? 'useful' : 'not-yet',
       copy: flags.needsVectorIndex
         ? flags.needsAnnScaling
-          ? 'Shard and replicate an ANN index (HNSW/IVF, e.g. FAISS or a vector DB); a single node no longer holds or serves it.'
-          : 'Store chunk vectors in an ANN index (HNSW) so top-k search stays sub-linear as the corpus grows.'
-        : 'No vector index needed while the whole corpus fits the context window.',
+          ? '把 ANN index（HNSW/IVF，比如 FAISS 或某个 vector DB）做 shard 和 replicate；单个节点已经放不下也服务不动它了。'
+          : '把 chunk 向量存进 ANN index（HNSW），让 top-k 搜索在 corpus 增长时保持亚线性。'
+        : '整个 corpus 都塞得进 context window 时，不需要 vector index。',
     },
     hybrid: {
       state: flags.needsHybrid ? 'useful' : 'not-yet',
       copy: flags.needsHybrid
-        ? 'Run BM25 keyword search alongside vector search and fuse the rankings to catch exact-term queries.'
-        : 'Pure vector search is enough until exact-term recall (codes, names) becomes a problem.',
+        ? '在 vector search 旁边再跑 BM25 关键词搜索，把两边的排名融合起来，抓住精确词的 query。'
+        : '在精确词 recall（编号、名字）还没成为问题之前，纯 vector search 就够了。',
     },
     rerank: {
       state: flags.needsRerank ? 'tradeoff' : 'not-yet',
       copy: flags.needsRerank
-        ? `Cross-encoder reranking lifts top-${Math.round(
+        ? `cross-encoder reranking 以实打实的 GPU 和 latency 成本，把 top-${Math.round(
             flags.topK,
-          )} relevance at real GPU and latency cost; retrieve wide, then rerank narrow.`
-        : 'Reranking is off; the bi-encoder ordering from the vector index goes straight to assembly.',
+          )} 的 relevance 拉上去；先宽地 retrieve，再窄地 rerank。`
+        : 'reranking 关着；vector index 给出的 bi-encoder 排序直接进入 assembly。',
     },
     contextAssembly: {
       state: flags.needsRetrieval ? (flags.contextOverflow ? 'needed' : 'useful') : 'not-yet',
       copy: flags.needsRetrieval
         ? flags.contextOverflow
-          ? 'Retrieved tokens exceed the window; cap top-k, dedupe, or compress chunks so the prompt and answer still fit.'
-          : 'Pack the best chunks plus the prompt, leaving headroom for the answer within the window.'
-        : 'The whole corpus is the context, so there is nothing to assemble.',
+          ? 'retrieve 到的 token 超出了 window；限制 top-k、去重，或压缩 chunk，好让 prompt 和答案仍塞得下。'
+          : '把最好的 chunk 连同 prompt 一起打包，在 window 内给答案留出余量。'
+        : '整个 corpus 就是 context，没有什么要 assemble 的。',
     },
     ingestion: {
       state: flags.needsStreamingIngestion ? 'needed' : flags.needsRetrieval ? 'useful' : 'not-yet',
       copy: flags.needsRetrieval
         ? flags.needsStreamingIngestion
-          ? 'Stream new documents through chunk-embed-upsert continuously to hit the freshness target; batch rebuilds are too slow.'
-          : 'A periodic batch job that chunks, embeds, and upserts new documents keeps the index fresh enough.'
-        : 'No ingestion pipeline while documents are pasted into the prompt directly.',
+          ? '把新文档持续地 streaming 过 chunk-embed-upsert 来命中 freshness 目标；batch rebuild 太慢了。'
+          : '一个定期的 batch 任务来 chunk、embed、upsert 新文档，就能让 index 保持足够新鲜。'
+        : '文档直接贴进 prompt 时，没有 ingestion pipeline。',
     },
   };
 }
 
 function chooseArchitectureTitle(flags: ArchitectureFlags): string {
   if (!flags.needsRetrieval) {
-    return 'Prompt stuffing (no retrieval)';
+    return 'Prompt stuffing（不做 retrieval）';
   }
   if (flags.needsMultiTenant) {
-    return 'Multi-tenant RAG platform + streaming ingestion';
+    return '多租户 RAG 平台 + streaming ingestion';
   }
   if (flags.needsHybrid && flags.needsCache) {
     return 'Hybrid retrieval + rerank + caching';
@@ -851,23 +851,23 @@ function chooseArchitectureTitle(flags: ArchitectureFlags): string {
   if (flags.needsRerank) {
     return 'Vector retrieval + reranking';
   }
-  return 'Vector DB retrieval (top-k)';
+  return 'Vector DB retrieval（top-k）';
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (!flags.needsRetrieval) {
-    return 'The whole corpus fits the context window, so the prompt is stuffed with the documents and the model answers directly. No index, embedder, or ingestion is justified.';
+    return '整个 corpus 都塞得进 context window，于是直接把文档 stuff 进 prompt、让模型作答。没必要上 index、embedder 或 ingestion。';
   }
   if (flags.needsMultiTenant) {
-    return 'A sharded, replicated vector index with per-tenant namespaces serves ANN retrieval, a reranker sharpens the top-k, and a streaming pipeline chunks, embeds, and upserts new documents to keep retrieval near-real-time.';
+    return '一个 shard、replicate 过、带 per-tenant namespace 的 vector index 提供 ANN retrieval，一个 reranker 把 top-k 磨精准，一条 streaming pipeline 持续 chunk、embed、upsert 新文档，让 retrieval 近乎实时。';
   }
   if (flags.needsHybrid && flags.needsCache) {
-    return 'Vector and keyword indexes are fused for recall, a reranker reorders candidates, and a response cache absorbs repeated queries before the costly generation step.';
+    return 'vector 和 keyword index 融合起来提升 recall，一个 reranker 重排候选，一个 response cache 在昂贵的 generation 步骤之前把重复 query 接住。';
   }
   if (flags.needsRerank) {
-    return 'The vector index returns a wide top-k cheaply and a cross-encoder reranker reorders it for relevance before the best chunks are assembled into the context.';
+    return 'vector index 廉价地返回一个较宽的 top-k，一个 cross-encoder reranker 按 relevance 重排，再把最好的 chunk assemble 进 context。';
   }
-  return 'Documents are chunked and embedded into an ANN vector index; each query embeds, retrieves top-k by similarity, and the chunks are assembled into the prompt for generation.';
+  return '文档被 chunk 并 embed 进一个 ANN vector index；每次 query 都做 embed、按 similarity 取 top-k，再把这些 chunk assemble 进 prompt 去 generate。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {

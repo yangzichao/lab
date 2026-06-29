@@ -18,26 +18,26 @@ const comfortableDriversPerCity = 50_000;
 
 export const rideSharingLabDefinition: SystemDesignLabDefinition = {
   id: 'ride-sharing',
-  eyebrow: 'System Design Lab',
-  title: 'Ride matching is bound by ingesting high-frequency driver GPS and answering nearest-driver queries fast, not by request volume.',
+  eyebrow: '系统设计 Lab',
+  title: 'Ride matching 的瓶颈在于高频吞下司机 GPS、并快速回答 nearest-driver 查询，而不在请求量本身。',
   summary:
-    'Tune how many drivers are online, how often each one reports GPS, the ride-request rate, the search radius, and how many cities you serve. The design moves from one service to a dedicated location-ingest path, an in-memory geospatial index for nearest-driver queries, a durable trip-state store, and per-geo sharding with surge pricing.',
+    '调节有多少司机在线、每个司机上报 GPS 的频率、ride-request 速率、搜索半径，以及服务多少个城市。设计会从单个 service 逐步演进到专门的 location-ingest 路径、用于 nearest-driver 查询的 in-memory geospatial index、durable 的 trip-state store，以及按 geo 分片加 surge pricing。',
   controls: [
     {
       id: 'activeDrivers',
-      label: 'Active drivers',
-      help: 'Drivers currently online and reporting GPS. Each one is a continuous write stream.',
+      label: '在线司机数',
+      help: '当前在线、正在上报 GPS 的司机。每个都是一条持续的写入 stream。',
       min: 100,
       max: 5_000_000,
       defaultValue: 20_000,
       scale: 'log',
-      unit: 'drivers',
+      unit: '名',
       format: 'count',
     },
     {
       id: 'locationUpdateHz',
-      label: 'GPS update frequency',
-      help: 'How often each driver reports a new location. This sets the ingest write rate.',
+      label: 'GPS 上报频率',
+      help: '每个司机上报新位置的频率。这决定了 ingest 的写入速率。',
       min: 0.1,
       max: 4,
       defaultValue: 0.25,
@@ -46,8 +46,8 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'rideRequestsPerSecond',
-      label: 'Ride requests',
-      help: 'Riders asking to be matched. Each one triggers a nearest-driver geo query.',
+      label: 'Ride request 速率',
+      help: '乘客发起 matching 请求。每个请求都会触发一次 nearest-driver 的 geo 查询。',
       min: 1,
       max: 500_000,
       defaultValue: 200,
@@ -56,41 +56,41 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'searchRadiusMeters',
-      label: 'Search radius',
-      help: 'How far to look for available drivers. Wider radius scans more index cells per query.',
+      label: '搜索半径',
+      help: '找可用司机时往外搜多远。半径越宽，每次查询要扫的 index cell 越多。',
       min: 200,
       max: 10_000,
       defaultValue: 1_500,
       scale: 'log',
-      unit: 'meters',
+      unit: '米',
       format: 'count',
     },
     {
       id: 'driversPerCell',
-      label: 'Drivers per cell',
-      help: 'Density of drivers in a geohash/S2 cell. Hot dense cells cost more per query.',
+      label: '每个 cell 的司机数',
+      help: '一个 geohash/S2 cell 内的司机密度。又热又密的 cell 每次查询代价更高。',
       min: 5,
       max: 5_000,
       defaultValue: 60,
       scale: 'log',
-      unit: 'drivers',
+      unit: '名',
       format: 'count',
     },
     {
       id: 'cities',
-      label: 'Cities / regions',
-      help: 'Independent geographies served. Each can be a natural shard boundary.',
+      label: '城市 / region 数',
+      help: '服务的独立地理区域。每个都可以是天然的 shard 边界。',
       min: 1,
       max: 600,
       defaultValue: 1,
       scale: 'log',
-      unit: 'cities',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'matchLatencyMs',
-      label: 'Match latency target',
-      help: 'Budget to find candidate drivers and return a match to the rider.',
+      label: 'Match latency 目标',
+      help: '从找候选司机到把 match 返回给乘客的延迟预算。',
       min: 50,
       max: 5_000,
       defaultValue: 1_500,
@@ -102,13 +102,13 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'surgePricing',
       label: 'Surge pricing',
-      help: 'Compute demand/supply ratio per area to raise prices; runs as its own engine.',
+      help: '按区域算 demand/supply 比例来抬价；作为独立 engine 运行。',
       defaultValue: false,
     },
     {
       id: 'etaPrediction',
-      label: 'ETA / route prediction',
-      help: 'Predict arrival and route per candidate; adds compute to every match.',
+      label: 'ETA / 路线预测',
+      help: '为每个候选预测到达时间和路线；给每次 match 增加计算量。',
       defaultValue: false,
     },
   ],
@@ -116,8 +116,8 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'one-city',
       step: '01',
-      title: 'One small city',
-      summary: 'A few thousand drivers, a handful of requests per second.',
+      title: '一个小城市',
+      summary: '几千名司机，每秒几个请求。',
       values: {
         activeDrivers: 2_000,
         locationUpdateHz: 0.2,
@@ -134,7 +134,7 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
       id: 'ingest-spike',
       step: '02',
       title: 'GPS firehose',
-      summary: 'More drivers reporting faster floods the ingest write path.',
+      summary: '更多司机更快地上报，把 ingest 写入路径冲垮。',
       values: {
         activeDrivers: 80_000,
         locationUpdateHz: 1,
@@ -150,8 +150,8 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'fast-nearest',
       step: '03',
-      title: 'Fast nearest-driver',
-      summary: 'A wide radius over dense cells makes geo queries the bottleneck.',
+      title: '快速找最近司机',
+      summary: '宽半径加上密集 cell，让 geo 查询成为瓶颈。',
       values: {
         activeDrivers: 200_000,
         locationUpdateHz: 1,
@@ -167,8 +167,8 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'durable-trips',
       step: '04',
-      title: 'Durable trip state',
-      summary: 'Matching and the trip-state machine run at high, sustained QPS.',
+      title: 'Durable 的 trip state',
+      summary: 'Matching 和 trip-state machine 在持续的高 QPS 下运行。',
       values: {
         activeDrivers: 600_000,
         locationUpdateHz: 2,
@@ -184,8 +184,8 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'global-surge',
       step: '05',
-      title: 'Many cities + surge',
-      summary: 'Hundreds of cities worldwide, sharded by geo, with live surge.',
+      title: '多城市 + surge',
+      summary: '全球数百个城市，按 geo 分片，配合实时 surge。',
       values: {
         activeDrivers: 3_000_000,
         locationUpdateHz: 2,
@@ -200,9 +200,9 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'Ride-sharing matching architecture diagram',
+    title: 'Ride-sharing matching 架构图',
     description:
-      'Whiteboard-style architecture diagram for ride matching: drivers and riders, a location-ingest path and API gateway, an in-memory geospatial index with a matching service, a durable trip-state store, and an async pricing and analytics pipeline.',
+      'Ride matching 的白板风格架构图：司机和乘客、location-ingest 路径与 API gateway、带 matching service 的 in-memory geospatial index、durable 的 trip-state store，以及异步的 pricing 与 analytics pipeline。',
     columns: [
       {
         id: 'clients',
@@ -211,16 +211,16 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
         nodes: [
           {
             id: 'driverApp',
-            title: 'Driver app',
+            title: '司机 app',
             subtitle: 'GPS stream',
-            summary: 'reports its location every few seconds while online',
+            summary: '在线时每隔几秒上报一次自己的位置',
             kind: 'client',
           },
           {
             id: 'riderApp',
-            title: 'Rider app',
-            subtitle: 'requests rides',
-            summary: 'asks to be matched with the nearest available driver',
+            title: '乘客 app',
+            subtitle: '发起叫车',
+            summary: '请求和最近的可用司机进行 match',
             kind: 'client',
           },
         ],
@@ -233,15 +233,15 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'gateway',
             title: 'API gateway',
-            subtitle: 'rider requests',
-            summary: 'authenticates riders and routes match requests to the matching service',
+            subtitle: '乘客请求',
+            summary: '给乘客做鉴权，并把 match 请求路由到 matching service',
             kind: 'lb',
           },
           {
             id: 'locationIngest',
             title: 'Location ingest',
-            subtitle: 'high write rate',
-            summary: 'absorbs the firehose of driver GPS updates and feeds the geo index',
+            subtitle: '高写入速率',
+            summary: '吸收司机 GPS 更新的 firehose，并喂给 geo index',
             kind: 'compute',
           },
         ],
@@ -254,15 +254,15 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'geoIndex',
             title: 'Geo index',
-            subtitle: 'in-memory cells',
-            summary: 'keeps live driver positions in geohash/quadtree/S2 cells for nearest queries',
+            subtitle: 'in-memory cell',
+            summary: '把司机的实时位置保存在 geohash/quadtree/S2 cell 里，用于 nearest 查询',
             kind: 'search',
           },
           {
             id: 'matcher',
             title: 'Matching service',
-            subtitle: 'pairs + state',
-            summary: 'queries the index for candidates and pairs a rider to a driver',
+            subtitle: '配对 + 状态',
+            summary: '查 index 拿候选，把乘客和司机配对起来',
             kind: 'compute',
           },
         ],
@@ -276,14 +276,14 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
             id: 'tripStore',
             title: 'Trip-state store',
             subtitle: 'state machine',
-            summary: 'durably tracks each trip from requested to matched to en route to complete',
+            summary: '持久化追踪每段行程，从 requested 到 matched 到 en route 再到 complete',
             kind: 'db',
           },
           {
             id: 'geoShards',
             title: 'Geo shards',
-            subtitle: 'by city / cell',
-            summary: 'partitions drivers and trips by geography so each region scales independently',
+            subtitle: '按城市 / cell',
+            summary: '按地理把司机和行程分片，让每个 region 独立扩展',
             kind: 'nosql',
           },
         ],
@@ -297,14 +297,14 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
             id: 'pricing',
             title: 'Surge engine',
             subtitle: 'demand / supply',
-            summary: 'computes per-area surge multipliers off the hot matching path',
+            summary: '在 matching 热路径之外，按区域计算 surge 倍率',
             kind: 'compute',
           },
           {
             id: 'analytics',
             title: 'Event stream',
-            subtitle: 'async events',
-            summary: 'collects trip and location events for analytics and ML offline',
+            subtitle: '异步事件',
+            summary: '收集行程和位置事件，供离线的 analytics 与 ML 使用',
             kind: 'stream',
           },
         ],
@@ -324,66 +324,66 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'ingestThroughput', label: 'Location write throughput' },
-    { id: 'geoQueryLoad', label: 'Geo-query load' },
-    { id: 'geoIndexMemory', label: 'Geo-index memory' },
+    { id: 'ingestThroughput', label: 'Location 写入吞吐' },
+    { id: 'geoQueryLoad', label: 'Geo-query 负载' },
+    { id: 'geoIndexMemory', label: 'Geo-index 内存' },
     { id: 'matchingQps', label: 'Matching + trip-state QPS' },
-    { id: 'shardPressure', label: 'Cross-city / shard pressure' },
+    { id: 'shardPressure', label: '跨城市 / shard 压力' },
   ],
   decisions: [
-    { id: 'ingestPath', title: 'Location ingest path' },
+    { id: 'ingestPath', title: 'Location ingest 路径' },
     { id: 'geoIndexChoice', title: 'Geospatial index' },
     { id: 'matching', title: 'Matching service' },
     { id: 'tripState', title: 'Trip-state store' },
     { id: 'pricingEngine', title: 'Surge pricing engine' },
-    { id: 'sharding', title: 'Shard by city / geo' },
+    { id: 'sharding', title: '按城市 / geo 分片' },
   ],
   sourceBackedRules: [
     {
-      title: 'Uber matches riders to drivers using S2 geospatial cells',
+      title: 'Uber 用 S2 geospatial cell 把乘客匹配给司机',
       source: 'Uber Engineering',
       url: 'https://www.uber.com/en-US/blog/h3/',
       summary:
-        'Uber indexes the world with hierarchical cells (H3, building on Google S2) so nearest-driver lookups become bounded scans over a small set of cells.',
+        'Uber 用层级化的 cell（H3，构建在 Google S2 之上）给整个世界建 index，让 nearest-driver 查找变成只扫一小撮 cell 的有界 scan。',
     },
     {
-      title: 'Geohashing turns proximity search into prefix range scans',
+      title: 'Geohashing 把临近搜索变成 prefix range scan',
       source: 'Redis Docs',
       url: 'https://redis.io/docs/latest/develop/data-types/geospatial/',
       summary:
-        'Encoding lat/long as a geohash lets nearby points share a prefix, so a radius query becomes a small set of in-memory sorted-set range reads.',
+        '把经纬度编码成 geohash，让邻近的点共享同一个 prefix，于是一次半径查询就变成对 in-memory sorted-set 的一小组 range 读取。',
     },
     {
-      title: 'High-frequency location ingest is a write-heavy streaming problem',
+      title: '高频 location ingest 是一个 write-heavy 的 streaming 问题',
       source: 'Apache Kafka',
       url: 'https://kafka.apache.org/documentation/',
       summary:
-        'A continuous flood of per-driver GPS events is best absorbed by a partitioned log that decouples ingest from the index and downstream consumers.',
+        '持续涌入的逐司机 GPS 事件，最好用一个 partitioned log 来吸收，把 ingest 与 index 和下游 consumer 解耦开。',
     },
     {
-      title: 'Quadtrees answer 2D nearest-neighbour queries efficiently',
+      title: 'Quadtree 能高效回答 2D 的 nearest-neighbour 查询',
       source: 'Wikipedia',
       url: 'https://en.wikipedia.org/wiki/Quadtree',
       summary:
-        'A quadtree recursively subdivides space so a region query only visits the cells that overlap the search area instead of every point.',
+        'Quadtree 递归地划分空间，于是一次区域查询只访问和搜索区域有重叠的 cell，而不是每个点都看。',
     },
   ],
   teachingAssumptions: [
-    'Location ingest write rate is modeled as active drivers times GPS update frequency; real systems batch and dedup updates.',
-    'Single-node ingest, geo-query, and trip-state budgets are conservative teaching numbers, not vendor limits.',
-    'Geo-query cost grows with search radius and cell density; the in-memory index memory scales with active drivers.',
+    'Location ingest 的写入速率按「在线司机数 × GPS 上报频率」建模；真实系统会对更新做 batch 和 dedup。',
+    '单节点的 ingest、geo-query 和 trip-state 预算是保守的教学数字，不是厂商上限。',
+    'Geo-query 代价随搜索半径和 cell 密度增长；in-memory index 的内存随在线司机数增长。',
   ],
   teachingWalkthrough: [
     {
       id: 'one-service',
       step: '01',
-      focus: 'One city, one service',
+      focus: '一个城市，一个 service',
       scenarioId: 'one-city',
       question:
-        'A small city has ~2k drivers and ~20 ride requests/s. Do you need a dedicated geo index, ingest path, or sharding yet?',
+        '一个小城市有约 2k 名司机、约 20 个 ride request/s。现在需要专门的 geo index、ingest 路径或分片吗？',
       reveal:
-        'No. At a few hundred GPS writes/s and 20 queries/s, one service can keep driver positions in memory and scan them on each request. A separate ingest tier, a partitioned index, and per-city shards would all be premature.',
-      takeaway: 'Start with one service holding driver positions in memory; the binding constraint has not appeared yet.',
+        '不需要。在每秒几百个 GPS 写入、20 个查询的量级下，一个 service 就能把司机位置放在内存里，每次请求扫一遍。单独的 ingest 层、partitioned index、按城市的 shard，现在都为时过早。',
+      takeaway: '从一个把司机位置放在内存里的 service 起步；真正的瓶颈还没出现。',
     },
     {
       id: 'firehose',
@@ -391,43 +391,43 @@ export const rideSharingLabDefinition: SystemDesignLabDefinition = {
       focus: 'GPS firehose',
       scenarioId: 'ingest-spike',
       question:
-        '80k drivers each reporting once a second is ~80k location writes/s. What saturates first — request handling or location ingest?',
+        '8 万名司机每秒各上报一次，就是约 80k location 写入/s。先被打满的是请求处理，还是 location ingest？',
       reveal:
-        'Location ingest. Ride requests are still modest, but the continuous GPS stream dominates: it is the binding constraint. Split ingest onto its own path (a partitioned log/stream) so it never blocks matching, and write positions into the index asynchronously.',
-      takeaway: 'The bottleneck is ingesting GPS, not handling requests; give ingest its own write-optimized path.',
+        '是 location ingest。Ride request 还不大，但持续的 GPS stream 才是主导：它就是瓶颈。把 ingest 拆到自己的路径上（一个 partitioned log/stream），让它永远不阻塞 matching，再异步地把位置写进 index。',
+      takeaway: '瓶颈是吞 GPS，不是处理请求；给 ingest 一条专门为写入优化的路径。',
     },
     {
       id: 'nearest',
       step: '03',
-      focus: 'Fast nearest-driver',
+      focus: '快速找最近司机',
       scenarioId: 'fast-nearest',
       question:
-        '6k requests/s each scan a 4 km radius over cells holding 400 drivers. Why not just filter the full driver table per request?',
+        '6k 请求/s，每个都要在装着 400 名司机的 cell 上扫 4 km 半径。为什么不干脆每个请求都过一遍整张司机表？',
       reveal:
-        'A full scan is O(drivers) per query and blows the latency budget. A geospatial index (geohash, quadtree, or S2 cells) kept hot in memory turns each query into a bounded scan of a few nearby cells, so cost depends on radius and density, not total fleet size.',
-      takeaway: 'A hot in-memory geo index makes nearest-driver cost depend on radius and density, not fleet size.',
+        '全表扫描每次查询是 O(drivers)，会撑爆 latency 预算。一个 hot 在内存里的 geospatial index（geohash、quadtree 或 S2 cell）把每次查询变成对附近几个 cell 的有界 scan，于是代价取决于半径和密度，而不是司机总规模。',
+      takeaway: 'Hot 的 in-memory geo index 让 nearest-driver 的代价取决于半径和密度，而不是车队规模。',
     },
     {
       id: 'trips',
       step: '04',
-      focus: 'Durable trip state',
+      focus: 'Durable 的 trip state',
       scenarioId: 'durable-trips',
       question:
-        'At 40k requests/s with live trips, where does trip status (requested -> matched -> en route -> complete) live so a crash never loses a ride?',
+        '在 40k 请求/s、有实时行程的情况下，trip 状态（requested -> matched -> en route -> complete）该放在哪，才能让崩溃永远不丢单？',
       reveal:
-        'Matching alone is stateless and scales out, but the trip is a state machine that must survive failures. Persist it in a durable, low-latency store keyed by trip/region, and run matching as horizontally scaled workers in front of it. Surge can now run as its own engine off the hot path.',
-      takeaway: 'Keep matching stateless and scalable; push the trip state machine into a durable per-region store.',
+        'Matching 本身是 stateless 的、可以横向扩，但 trip 是一台必须扛过故障的 state machine。把它持久化到一个 durable、低延迟、按 trip/region 做 key 的 store 里，再让 matching 作为横向扩展的 worker 跑在它前面。Surge 现在可以作为独立 engine 跑在热路径之外。',
+      takeaway: '让 matching 保持 stateless、可扩展；把 trip state machine 推进一个 durable 的按 region 的 store。',
     },
     {
       id: 'global',
       step: '05',
-      focus: 'Many cities + surge',
+      focus: '多城市 + surge',
       scenarioId: 'global-surge',
       question:
-        'Hundreds of cities and millions of drivers worldwide. Can one global geo index and one trip store hold all of it?',
+        '全球数百个城市、数百万名司机。一个全局 geo index 加一个 trip store 装得下全部吗？',
       reveal:
-        'No — memory, ingest, and query load exceed any single node. Shard by city or geo cell: rides are inherently local, so a driver in one city never matches a rider in another. Each shard owns its index, trips, and surge, and the system scales by adding shards.',
-      takeaway: 'Rides are local, so shard by city/geo cell; each region runs its own index, trips, and surge.',
+        '装不下——内存、ingest 和查询负载都超过任何单节点。按城市或 geo cell 分片：叫车天然是本地的，一个城市的司机永远不会和另一个城市的乘客 match。每个 shard 拥有自己的 index、trips 和 surge，系统靠加 shard 来扩展。',
+      takeaway: '叫车是本地的，所以按城市/geo cell 分片；每个 region 跑自己的 index、trips 和 surge。',
     },
   ],
   analyze: analyzeRideSharingWorkload,
@@ -538,36 +538,36 @@ function analyzeRideSharingWorkload(workload: WorkloadValues): LabAnalysis {
         ratio: ingestWritesPerSecond / comfortableIngestWritesPerSecond,
         valueText: `${formatRate(ingestWritesPerSecond)}/s`,
         copy: needsDedicatedIngest
-          ? `${formatRate(ingestWritesPerSecond)}/s of GPS writes need a dedicated ingest path off the matching workers.`
-          : `${formatCount(activeDrivers)} drivers at ${locationUpdateHz.toFixed(2)} Hz produce ${formatRate(ingestWritesPerSecond)}/s of writes.`,
+          ? `${formatRate(ingestWritesPerSecond)}/s 的 GPS 写入需要一条独立的 ingest 路径，和 matching worker 分开。`
+          : `${formatCount(activeDrivers)} 名司机在 ${locationUpdateHz.toFixed(2)} Hz 下产生 ${formatRate(ingestWritesPerSecond)}/s 的写入。`,
       },
       geoQueryLoad: {
         ratio: effectiveGeoQueriesPerSecond / comfortableGeoQueriesPerSecond,
         valueText: `${formatRate(effectiveGeoQueriesPerSecond)}/s`,
         copy: needsGeoIndex
-          ? `A ${formatCount(searchRadiusMeters)} m radius over ~${formatCount(driversPerCell)}-driver cells makes each query a bounded index scan.`
-          : 'Query volume is low enough to scan in-memory positions without a dedicated geo index.',
+          ? `在装着约 ${formatCount(driversPerCell)} 名司机的 cell 上扫 ${formatCount(searchRadiusMeters)} m 半径，让每次查询成为一次有界的 index scan。`
+          : '查询量足够低，不用专门的 geo index，直接扫内存里的位置即可。',
       },
       geoIndexMemory: {
         ratio: geoIndexGigabytes / comfortableGeoIndexGigabytes,
         valueText: formatStorageGigabytes(geoIndexGigabytes),
-        copy: `${formatCount(activeDrivers)} live driver positions held hot at roughly ${bytesPerDriverCell} bytes each.`,
+        copy: `${formatCount(activeDrivers)} 个实时司机位置 hot 保存在内存里，每个约 ${bytesPerDriverCell} 字节。`,
       },
       matchingQps: {
         ratio: tripStateWritesPerSecond / comfortableTripStateWritesPerSecond,
         valueText: `${formatRate(tripStateWritesPerSecond)}/s`,
         copy: needsDurableTripStore
-          ? `${formatRate(rideRequestsPerSecond)}/s of matches drive ~${formatRate(tripStateWritesPerSecond)}/s of trip-state transitions.`
-          : 'Matching and trip state fit comfortably in one service at this request rate.',
+          ? `${formatRate(rideRequestsPerSecond)}/s 的 match 带来约 ${formatRate(tripStateWritesPerSecond)}/s 的 trip-state 状态转换。`
+          : '在这个请求速率下，matching 和 trip state 都能舒服地放进一个 service。',
       },
       shardPressure: {
         ratio: shardPressure,
         valueText: needsSharding
-          ? `${formatCount(shardCount)} ${pluralize('shard', shardCount)}`
-          : `${formatCount(cities)} ${pluralize('city', cities)}`,
+          ? `${formatCount(shardCount)} 个 shard`
+          : `${formatCount(cities)} 个城市`,
         copy: needsSharding
-          ? 'Drivers and trips are partitioned by city/geo cell so each region scales on its own.'
-          : 'A single region holds the index, trips, and pricing without geo sharding.',
+          ? '司机和行程按城市/geo cell 分片，让每个 region 各自扩展。'
+          : '单个 region 就装下了 index、trips 和 pricing，不需要 geo 分片。',
       },
     },
     decisions: buildDecisions({
@@ -629,32 +629,32 @@ function buildReasons(
     reasons.push({
       severity:
         analysis.ingestWritesPerSecond > comfortableIngestWritesPerSecond * 4 ? 'danger' : 'warning',
-      text: `${formatCount(analysis.activeDrivers)} drivers at ${analysis.locationUpdateHz.toFixed(
+      text: `${formatCount(analysis.activeDrivers)} 名司机在 ${analysis.locationUpdateHz.toFixed(
         2,
-      )} Hz produce ~${formatRate(
+      )} Hz 下产生约 ${formatRate(
         analysis.ingestWritesPerSecond,
-      )}/s of GPS writes — the binding constraint; give ingest its own write-optimized path.`,
+      )}/s 的 GPS 写入——这就是瓶颈；给 ingest 一条专门为写入优化的路径。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `Location ingest is only ~${formatRate(
+      text: `Location ingest 只有约 ${formatRate(
         analysis.ingestWritesPerSecond,
-      )}/s, so one service can absorb the GPS stream directly.`,
+      )}/s，所以一个 service 就能直接吸收 GPS stream。`,
     });
   }
 
   if (analysis.needsGeoIndex) {
     reasons.push({
       severity: analysis.effectiveGeoQueriesPerSecond > comfortableGeoQueriesPerSecond ? 'danger' : 'warning',
-      text: `Nearest-driver queries over a ${formatCount(
+      text: `在 ${formatCount(
         analysis.searchRadiusMeters,
-      )} m radius need an in-memory geospatial index (geohash/quadtree/S2), not a full-fleet scan.`,
+      )} m 半径内做 nearest-driver 查询，需要一个 in-memory geospatial index（geohash/quadtree/S2），而不是全车队扫描。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Query volume and fleet size are small enough to scan in-memory positions without a dedicated geo index.',
+      text: '查询量和车队规模都够小，直接扫内存里的位置即可，不用专门的 geo index。',
     });
   }
 
@@ -663,37 +663,37 @@ function buildReasons(
       severity: analysis.tripStateWritesPerSecond > comfortableTripStateWritesPerSecond ? 'warning' : 'ok',
       text: `${formatRate(
         analysis.rideRequestsPerSecond,
-      )}/s of matches drive a trip state machine that must survive failures; persist it in a durable per-region store.`,
+      )}/s 的 match 驱动着一台必须扛过故障的 trip state machine；把它持久化到一个 durable 的按 region 的 store。`,
     });
   }
 
   if (analysis.needsMatchingTier) {
     reasons.push({
       severity: 'warning',
-      text: 'Keep matching stateless and horizontally scaled in front of the trip store so a worker crash never loses a ride.',
+      text: '让 matching 保持 stateless、横向扩展，跑在 trip store 前面，这样 worker 崩溃也永远不丢单。',
     });
   }
 
   if (analysis.etaPrediction) {
     reasons.push({
       severity: 'ok',
-      text: 'ETA/route prediction adds compute to every candidate, so it runs inside matching workers that scale out.',
+      text: 'ETA/路线预测给每个候选都加了计算量，所以它跑在可横向扩展的 matching worker 里。',
     });
   }
 
   if (analysis.needsSharding) {
     reasons.push({
       severity: analysis.cities > 4 ? 'warning' : 'ok',
-      text: `Rides are local, so shard by city/geo cell into ~${formatCount(
+      text: `叫车是本地的，所以按城市/geo cell 分成约 ${formatCount(
         analysis.shardCount,
-      )} ${pluralize('shard', analysis.shardCount)}; a driver never matches a rider in another region.`,
+      )} 个 shard；一个司机永远不会和另一个 region 的乘客 match。`,
     });
   }
 
   if (analysis.needsPricing) {
     reasons.push({
       severity: 'ok',
-      text: 'Surge pricing computes per-area demand/supply as its own engine off the hot matching path.',
+      text: 'Surge pricing 在 matching 热路径之外，作为独立 engine 按区域计算 demand/supply。',
     });
   }
 
@@ -714,46 +714,46 @@ function buildDecisions(
     ingestPath: {
       state: flags.needsDedicatedIngest ? 'needed' : 'not-yet',
       copy: flags.needsDedicatedIngest
-        ? `Absorb ~${formatRate(
+        ? `用一条独立的、partitioned 的写入路径（stream/log）吸收约 ${formatRate(
             flags.ingestWritesPerSecond,
-          )}/s of GPS on a dedicated, partitioned write path (stream/log) that feeds the index asynchronously.`
-        : 'One service ingests the GPS stream directly while the write rate stays modest.',
+          )}/s 的 GPS，并异步喂给 index。`
+        : '写入速率还不大时，一个 service 直接吸收 GPS stream 即可。',
     },
     geoIndexChoice: {
       state: flags.needsGeoIndex ? 'needed' : 'not-yet',
       copy: flags.needsGeoIndex
-        ? 'Keep driver positions hot in a geohash/quadtree/S2 index so nearest-driver queries are bounded cell scans.'
-        : 'Scanning in-memory positions is fine until query volume or fleet size grows.',
+        ? '把司机位置 hot 保存在 geohash/quadtree/S2 index 里，让 nearest-driver 查询变成有界的 cell scan。'
+        : '在查询量或车队规模变大之前，扫内存里的位置就够了。',
     },
     matching: {
       state: flags.needsMatchingTier ? 'needed' : flags.needsGeoIndex ? 'useful' : 'not-yet',
       copy: flags.needsMatchingTier
-        ? 'Run matching as stateless, horizontally scaled workers that query the index and pair riders to drivers.'
+        ? '把 matching 跑成 stateless、可横向扩展的 worker，去查 index 并把乘客和司机配对。'
         : flags.needsGeoIndex
-          ? 'A single matching service queries the index and pairs riders to drivers.'
-          : 'Matching is a simple in-process scan while load is low.',
+          ? '单个 matching service 查 index 并把乘客和司机配对。'
+          : '负载低时，matching 就是一次进程内的简单扫描。',
     },
     tripState: {
       state: flags.needsDurableTripStore ? 'needed' : 'not-yet',
       copy: flags.needsDurableTripStore
-        ? `Persist the requested -> matched -> en route -> complete state machine (~${formatRate(
+        ? `把 requested -> matched -> en route -> complete 这台 state machine（约 ${formatRate(
             flags.tripStateWritesPerSecond,
-          )}/s) in a durable, low-latency store.`
-        : 'Trip state can live in the matching service while there are few concurrent rides.',
+          )}/s）持久化到一个 durable、低延迟的 store。`
+        : '并发行程不多时，trip state 可以放在 matching service 里。',
     },
     pricingEngine: {
       state: flags.needsPricing ? 'useful' : 'not-yet',
       copy: flags.needsPricing
-        ? 'Compute per-area surge multipliers in a separate engine off the hot path and feed prices back to matching.'
-        : 'Surge pricing is off, so matching returns a flat fare with no demand computation.',
+        ? '在一个独立 engine 里、热路径之外按区域计算 surge 倍率，再把价格反馈给 matching。'
+        : 'Surge pricing 关闭，所以 matching 返回固定车费，不做需求计算。',
     },
     sharding: {
       state: flags.needsSharding ? 'needed' : 'not-yet',
       copy: flags.needsSharding
-        ? `Shard by city/geo cell into ~${formatCount(
+        ? `按城市/geo cell 分成约 ${formatCount(
             flags.shardCount,
-          )} ${pluralize('shard', flags.shardCount)}; each owns its index, trips, and surge.`
-        : 'One region is enough until cities, fleet size, or index memory prove otherwise.',
+          )} 个 shard；每个拥有自己的 index、trips 和 surge。`
+        : '在城市数、车队规模或 index 内存证明之前，一个 region 就够了。',
     },
   };
 }
@@ -765,18 +765,18 @@ function chooseArchitectureTitle(flags: ArchitectureFlags): string {
     !flags.needsMatchingTier &&
     !flags.needsSharding
   ) {
-    return 'Single matching service';
+    return '单个 matching service';
   }
   if (flags.needsSharding) {
-    return 'Geo-sharded ingest + in-memory index + durable trips';
+    return 'Geo 分片的 ingest + in-memory index + durable trips';
   }
   if (flags.needsMatchingTier || flags.needsDurableTripStore) {
-    return 'Dedicated ingest + geo index + matching tier + trip store';
+    return '专门的 ingest + geo index + matching 层 + trip store';
   }
   if (flags.needsGeoIndex) {
-    return 'Dedicated ingest + in-memory geo index';
+    return '专门的 ingest + in-memory geo index';
   }
-  return 'Single matching service';
+  return '单个 matching service';
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
@@ -786,18 +786,18 @@ function chooseArchitectureSummary(flags: ArchitectureFlags): string {
     !flags.needsMatchingTier &&
     !flags.needsSharding
   ) {
-    return 'One service holds driver positions in memory, scans them per request, and tracks trips inline. Nothing else is justified yet.';
+    return '一个 service 把司机位置放在内存里，每次请求扫一遍，并就地追踪行程。其它一切都还没有必要。';
   }
   if (flags.needsSharding) {
-    return 'Drivers and trips are partitioned by city/geo cell; each shard runs its own ingest path, in-memory geo index, matching workers, durable trip store, and surge engine.';
+    return '司机和行程按城市/geo cell 分片；每个 shard 跑自己的 ingest 路径、in-memory geo index、matching worker、durable trip store 和 surge engine。';
   }
   if (flags.needsMatchingTier || flags.needsDurableTripStore) {
-    return 'A dedicated ingest path feeds an in-memory geo index, stateless matching workers query it to pair rides, and a durable store holds the trip state machine.';
+    return '一条专门的 ingest 路径喂给 in-memory geo index，stateless 的 matching worker 查它来配对行程，一个 durable store 保存着 trip state machine。';
   }
   if (flags.needsGeoIndex) {
-    return 'A dedicated ingest path absorbs the GPS firehose and feeds an in-memory geospatial index so nearest-driver queries stay bounded.';
+    return '一条专门的 ingest 路径吸收 GPS firehose 并喂给 in-memory geospatial index，让 nearest-driver 查询保持有界。';
   }
-  return 'One matching service still covers the workload.';
+  return '一个 matching service 仍然能覆盖这个负载。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {
@@ -824,14 +824,4 @@ function chooseArchitecturePath(flags: ArchitectureFlags): string {
 function numericValue(workload: WorkloadValues, key: string): number {
   const value = workload[key];
   return typeof value === 'number' ? value : 0;
-}
-
-function pluralize(unit: string, value: number): string {
-  if (Math.round(value) === 1) {
-    return unit;
-  }
-  if (unit === 'city') {
-    return 'cities';
-  }
-  return `${unit}s`;
 }

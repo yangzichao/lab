@@ -9,54 +9,54 @@ const entry = findPhysicsLab('wave-interference')!;
 <BaseLayout title={`${entry.title} — Lab`} description={entry.tagline}>
   <PhysicsLabShell entry={entry}>
     <Fragment slot="readouts">
-      <div class="plab__readout"><span>Path diff</span><strong data-readout="pathDiff">0.0 px</strong></div>
-      <div class="plab__readout"><span>In wavelengths</span><strong data-readout="pathDiffLambda">0.00 λ</strong></div>
-      <div class="plab__readout"><span>Field at probe</span><strong data-readout="field">+0.00</strong></div>
-      <div class="plab__readout"><span>Fringe spacing</span><strong data-readout="fringeScale">0 px</strong></div>
+      <div class="plab__readout"><span>光程差</span><strong data-readout="pathDiff">0.0 px</strong></div>
+      <div class="plab__readout"><span>以波长计</span><strong data-readout="pathDiffLambda">0.00 λ</strong></div>
+      <div class="plab__readout"><span>探针处场值</span><strong data-readout="field">+0.00</strong></div>
+      <div class="plab__readout"><span>条纹间距</span><strong data-readout="fringeScale">0 px</strong></div>
     </Fragment>
 
-    <form class="plab__panel" slot="controls" aria-label="Wave interference controls">
+    <form class="plab__panel" slot="controls" aria-label="波的干涉控制">
       <div class="plab__panel-head">
-        <p>Controls</p>
+        <p>控制</p>
         <h2>Wave Interference</h2>
       </div>
 
       <div class="plab__actions">
         <button class="plab__button is-primary" type="button" data-action="toggle">
-          <i class="ph ph-pause" aria-hidden="true"></i><span>Pause</span>
+          <i class="ph ph-pause" aria-hidden="true"></i><span>暂停</span>
         </button>
         <button class="plab__button" type="button" data-action="reset">
-          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>Reset</span>
+          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>重置</span>
         </button>
       </div>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showWavefronts" checked />
-        <span><strong>Wavefronts</strong><small>Expanding crests from each source.</small></span>
+        <span><strong>波前</strong><small>从每个波源扩张的波峰。</small></span>
       </label>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showIntensity" checked />
-        <span><strong>Intensity on screen</strong><small>The fringe pattern down the right edge.</small></span>
+        <span><strong>屏上强度</strong><small>沿右边缘呈现的条纹图样。</small></span>
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Wavelength λ</span><output data-output="wavelength">48 px</output></span>
+        <span class="plab__field-label"><span>波长 λ</span><output data-output="wavelength">48 px</output></span>
         <input type="range" min="24" max="88" step="1" value="48" data-control="wavelength" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Source gap d</span><output data-output="sourceSeparation">160 px</output></span>
+        <span class="plab__field-label"><span>波源间距 d</span><output data-output="sourceSeparation">160 px</output></span>
         <input type="range" min="48" max="260" step="1" value="160" data-control="sourceSeparation" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Phase offset</span><output data-output="phaseOffset">0°</output></span>
+        <span class="plab__field-label"><span>相位差</span><output data-output="phaseOffset">0°</output></span>
         <input type="range" min="-180" max="180" step="1" value="0" data-control="phaseOffset" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Falloff</span><output data-output="falloff">0.006</output></span>
+        <span class="plab__field-label"><span>衰减</span><output data-output="falloff">0.006</output></span>
         <input type="range" min="0.001" max="0.014" step="0.001" value="0.006" data-control="falloff" />
       </label>
     </form>

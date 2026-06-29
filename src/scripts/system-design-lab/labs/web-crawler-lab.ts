@@ -27,15 +27,15 @@ const politeFetchesPerDomainPerSecond = 1; // typical per-domain rate cap when p
 
 export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
   id: 'web-crawler',
-  eyebrow: 'System Design Lab',
-  title: 'A web crawler is throughput-bound at the fetcher and memory-bound at the "seen" set, with politeness capping how fast you may go.',
+  eyebrow: '系统设计 Lab',
+  title: 'web crawler 在 fetcher 处受 throughput 约束、在 "seen" set 处受内存约束，而 politeness 决定了你能跑多快。',
   summary:
-    'Change the target crawl rate, how many pages you intend to fetch, the fetcher worker pool, average page size, how many distinct domains you span, and the dedup tolerance. The design moves from a single-threaded loop to a worker pool, a politeness-aware scheduler, a Bloom-filter "seen" set, and a partitioned frontier with sharded content storage.',
+    '调整目标 crawl rate、打算抓多少页、fetcher worker pool、平均页面大小、覆盖多少个不同 domain，以及 dedup 容忍度。设计会从单线程循环演进到 worker pool、politeness-aware scheduler、Bloom-filter "seen" set，再到 partitioned frontier 配 sharded 内容存储。',
   controls: [
     {
       id: 'targetPagesPerSecond',
-      label: 'Target crawl rate',
-      help: 'Pages per second you want to fetch overall. This is the throughput the fetcher pool must sustain.',
+      label: '目标 crawl rate',
+      help: '整体上每秒想抓取的页面数。这是 fetcher pool 必须撑住的 throughput。',
       min: 1,
       max: 1_000_000,
       defaultValue: 50,
@@ -44,30 +44,30 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'totalPages',
-      label: 'Pages to crawl',
-      help: 'Total pages the crawl will visit; drives storage and the size of the seen-URL set.',
+      label: '要抓取的页数',
+      help: '这次 crawl 总共会访问的页面数；决定存储量和 seen-URL set 的大小。',
       min: 1_000,
       max: 100_000_000_000,
       defaultValue: 1_000_000,
       scale: 'log',
-      unit: 'pages',
+      unit: '页',
       format: 'count',
     },
     {
       id: 'fetcherWorkers',
-      label: 'Fetcher workers',
-      help: 'Concurrent HTTP download workers. Each is I/O bound and holds a handful of fetches per second.',
+      label: 'Fetcher worker',
+      help: '并发的 HTTP 下载 worker。每个都是 I/O bound，每秒只能撑住少量 fetch。',
       min: 1,
       max: 100_000,
       defaultValue: 8,
       scale: 'log',
-      unit: 'workers',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'averagePageKilobytes',
-      label: 'Average page size',
-      help: 'Mean downloaded bytes per page; multiplies into content storage and fetch bandwidth.',
+      label: '平均页面大小',
+      help: '每页平均下载的字节数；乘起来就是内容存储量和 fetch 带宽。',
       min: 10,
       max: 5_000,
       defaultValue: 80,
@@ -76,19 +76,19 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'uniqueDomains',
-      label: 'Unique domains',
-      help: 'Distinct hosts spanned. Few domains plus politeness throttles total throughput; many domains parallelize it.',
+      label: '不同 domain 数',
+      help: '覆盖的不同 host 数。domain 少加上 politeness 会压低总 throughput；domain 多则能并行化。',
       min: 1,
       max: 100_000_000,
       defaultValue: 5_000,
       scale: 'log',
-      unit: 'domains',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'dedupFalsePositiveRate',
-      label: 'Dedup tolerance',
-      help: 'Acceptable false-positive rate for the "seen" set. A looser rate lets a Bloom filter shrink memory.',
+      label: 'Dedup 容忍度',
+      help: '"seen" set 可接受的 false-positive rate。容忍度越松，Bloom filter 越能压缩内存。',
       min: 0.001,
       max: 5,
       defaultValue: 1,
@@ -99,14 +99,14 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
   toggles: [
     {
       id: 'respectPoliteness',
-      label: 'Respect politeness + robots.txt',
-      help: 'Obey robots.txt and per-domain rate limits. Caps how fast a single domain may be hit.',
+      label: '遵守 politeness + robots.txt',
+      help: '遵守 robots.txt 和 per-domain rate limit。限制单个 domain 被打多快。',
       defaultValue: true,
     },
     {
       id: 'contentDedup',
-      label: 'Content deduplication',
-      help: 'Fingerprint page bodies to skip near-duplicate content, not just already-seen URLs.',
+      label: '内容 dedup',
+      help: '对页面正文做指纹来跳过近似重复内容，不只是已见过的 URL。',
       defaultValue: false,
     },
   ],
@@ -115,7 +115,7 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
       id: 'single-threaded',
       step: '01',
       title: 'Single-threaded crawler',
-      summary: 'One loop walks a small site sequentially.',
+      summary: '一个循环顺序遍历一个小站点。',
       values: {
         targetPagesPerSecond: 5,
         totalPages: 50_000,
@@ -131,7 +131,7 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
       id: 'worker-pool',
       step: '02',
       title: 'Concurrent worker pool',
-      summary: 'Many workers fetch in parallel across sites.',
+      summary: '众多 worker 跨站点并行抓取。',
       values: {
         targetPagesPerSecond: 500,
         totalPages: 5_000_000,
@@ -147,7 +147,7 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
       id: 'politeness-scheduler',
       step: '03',
       title: 'Politeness scheduler',
-      summary: 'Per-domain rate limits gate the fetch order.',
+      summary: 'Per-domain rate limit 把控 fetch 顺序。',
       values: {
         targetPagesPerSecond: 2_000,
         totalPages: 50_000_000,
@@ -163,7 +163,7 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
       id: 'dedup-at-scale',
       step: '04',
       title: 'Dedup at billions of URLs',
-      summary: 'The seen-URL set no longer fits in RAM.',
+      summary: 'seen-URL set 已经塞不进 RAM。',
       values: {
         targetPagesPerSecond: 20_000,
         totalPages: 5_000_000_000,
@@ -179,7 +179,7 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
       id: 'distributed-frontier',
       step: '05',
       title: 'Distributed, partitioned frontier',
-      summary: 'A web-scale crawl sharded across machines.',
+      summary: 'web 规模的 crawl，跨机器 sharded。',
       values: {
         targetPagesPerSecond: 200_000,
         totalPages: 50_000_000_000,
@@ -193,9 +193,9 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'Distributed web crawler architecture diagram',
+    title: '分布式 web crawler 架构图',
     description:
-      'Whiteboard-style architecture diagram for a distributed web crawler: seed URLs feeding a frontier, a politeness-aware scheduler with a DNS cache, a pool of fetcher workers, a parser with URL and content dedup, and a sharded content store.',
+      '白板风格的分布式 web crawler 架构图：seed URL 喂给 frontier，带 DNS cache 的 politeness-aware scheduler，一组 fetcher worker，做 URL 和内容 dedup 的 parser，以及一个 sharded 内容存储。',
     columns: [
       {
         id: 'frontier',
@@ -204,16 +204,16 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
         nodes: [
           {
             id: 'seeds',
-            title: 'Seed URLs',
-            subtitle: 'crawl roots',
-            summary: 'starting URLs that prime the crawl before discovered links take over',
+            title: 'Seed URL',
+            subtitle: 'crawl 起点',
+            summary: '启动 crawl 的初始 URL，之后由发现到的 link 接力',
             kind: 'client',
           },
           {
             id: 'frontier',
             title: 'URL frontier',
-            subtitle: 'priority queues',
-            summary: 'holds URLs waiting to be fetched, ordered by priority and per-domain queues',
+            subtitle: 'priority queue',
+            summary: '存放待抓取的 URL，按优先级和 per-domain queue 排序',
             kind: 'queue',
           },
         ],
@@ -226,15 +226,15 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'scheduler',
             title: 'Scheduler',
-            subtitle: 'politeness gate',
-            summary: 'picks the next fetchable URL while honoring robots.txt and per-domain rate limits',
+            subtitle: 'politeness 关卡',
+            summary: '挑选下一个可抓取的 URL，同时遵守 robots.txt 和 per-domain rate limit',
             kind: 'scheduler',
           },
           {
             id: 'dnsCache',
             title: 'DNS cache',
-            subtitle: 'resolved hosts',
-            summary: 'caches host-to-IP lookups so resolution does not become the hidden bottleneck',
+            subtitle: '已解析的 host',
+            summary: '缓存 host 到 IP 的查询，让解析不致成为隐藏瓶颈',
             kind: 'cache',
           },
         ],
@@ -247,8 +247,8 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'fetcherPool',
             title: 'Fetcher pool',
-            subtitle: 'HTTP downloads',
-            summary: 'concurrent I/O-bound workers that download pages from the open web',
+            subtitle: 'HTTP 下载',
+            summary: '从开放 web 下载页面的并发 I/O-bound worker',
             kind: 'compute',
           },
         ],
@@ -261,15 +261,15 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'parser',
             title: 'Parser',
-            subtitle: 'extract links',
-            summary: 'parses fetched pages and extracts outgoing links to feed back to the frontier',
+            subtitle: '抽取 link',
+            summary: '解析抓回的页面，抽取出站 link 回灌给 frontier',
             kind: 'compute',
           },
           {
             id: 'seenSet',
             title: 'Seen set',
-            subtitle: 'URL + content',
-            summary: 'rejects already-seen URLs and near-duplicate content, often via a Bloom filter at scale',
+            subtitle: 'URL + 内容',
+            summary: '拒掉已见过的 URL 和近似重复内容，规模大时通常用 Bloom filter',
             kind: 'cache',
           },
         ],
@@ -282,15 +282,15 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'contentStore',
             title: 'Content store',
-            subtitle: 'fetched pages',
-            summary: 'durable store of downloaded page bodies for indexing and analysis',
+            subtitle: '抓回的页面',
+            summary: '持久存放下载的页面正文，供索引和分析',
             kind: 'objectstore',
           },
           {
             id: 'storeShards',
-            title: 'Store shards',
-            subtitle: 'partition pages',
-            summary: 'spreads page bodies across nodes once one store can no longer hold the corpus',
+            title: 'Store shard',
+            subtitle: '页面分片',
+            summary: '当单个 store 装不下整个语料时，把页面正文分散到多个节点',
             kind: 'objectstore',
           },
         ],
@@ -309,110 +309,110 @@ export const webCrawlerLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'fetchThroughput', label: 'Fetch throughput vs target' },
-    { id: 'frontierBacklog', label: 'Frontier / queue backlog' },
-    { id: 'seenSetMemory', label: 'Seen-set memory' },
-    { id: 'dnsPressure', label: 'DNS lookup pressure' },
-    { id: 'contentStorage', label: 'Content storage' },
+    { id: 'fetchThroughput', label: 'Fetch throughput vs 目标' },
+    { id: 'frontierBacklog', label: 'Frontier / queue 积压' },
+    { id: 'seenSetMemory', label: 'Seen-set 内存' },
+    { id: 'dnsPressure', label: 'DNS 查询压力' },
+    { id: 'contentStorage', label: '内容存储' },
   ],
   decisions: [
-    { id: 'frontierDesign', title: 'Frontier design' },
-    { id: 'politeness', title: 'Politeness / rate control' },
-    { id: 'dedup', title: 'URL + content dedup' },
+    { id: 'frontierDesign', title: 'Frontier 设计' },
+    { id: 'politeness', title: 'Politeness / rate 控制' },
+    { id: 'dedup', title: 'URL + 内容 dedup' },
     { id: 'dnsCaching', title: 'DNS caching' },
-    { id: 'contentStorage', title: 'Content storage' },
-    { id: 'coordination', title: 'Distributed coordination' },
+    { id: 'contentStorage', title: '内容存储' },
+    { id: 'coordination', title: '分布式协调' },
   ],
   sourceBackedRules: [
     {
-      title: 'A crawler must enforce politeness with per-host rate limits and robots.txt',
+      title: 'crawler 必须用 per-host rate limit 和 robots.txt 来执行 politeness',
       source: 'Manning & Schütze, IR (Stanford NLP)',
       url: 'https://nlp.stanford.edu/IR-book/html/htmledition/the-url-frontier-1.html',
       summary:
-        'The URL frontier must avoid hammering any one host; per-domain queues and back-off enforce a polite delay between requests to the same server.',
+        'URL frontier 必须避免猛打任何单个 host；per-domain queue 和 back-off 在对同一服务器的请求之间强制一段礼貌延迟。',
     },
     {
-      title: 'DNS resolution is a hidden bottleneck and must be cached',
+      title: 'DNS 解析是隐藏瓶颈，必须 cache',
       source: 'Manning & Schütze, IR (Stanford NLP)',
       url: 'https://nlp.stanford.edu/IR-book/html/htmledition/dns-resolution-1.html',
       summary:
-        'DNS lookups are a well-known bottleneck for a high-throughput crawler, so a custom cache (and asynchronous resolution) is standard practice.',
+        '对高 throughput 的 crawler 来说，DNS lookup 是众所周知的瓶颈，所以自建 cache（加异步解析）是标准做法。',
     },
     {
-      title: 'A Bloom filter tests set membership in tiny space at the cost of false positives',
+      title: 'Bloom filter 以极小空间检测集合成员关系，代价是 false positive',
       source: 'Bloom, CACM 1970',
       url: 'https://dl.acm.org/doi/10.1145/362686.362692',
       summary:
-        'Bloom filters answer "have I seen this URL?" using a few bits per element and never produce false negatives, making them the standard seen-set at billions of URLs.',
+        'Bloom filter 用每个元素几个 bit 来回答"这个 URL 见过吗？"，而且从不产生 false negative，因此在数十亿 URL 规模下成为标准的 seen-set。',
     },
     {
-      title: 'A scalable crawler partitions the frontier and seen-set across machines',
+      title: '可扩展的 crawler 把 frontier 和 seen-set 跨机器 partition',
       source: 'Olston & Najork (Google Research)',
       url: 'https://research.google/pubs/web-crawling/',
       summary:
-        'The "Web Crawling" survey describes partitioning the URL frontier and duplicate-detection state across machines so a crawler can scale toward the whole web.',
+        '"Web Crawling" 这篇综述描述了如何把 URL frontier 和去重状态跨机器 partition，让 crawler 能向整个 web 规模扩展。',
     },
   ],
   teachingAssumptions: [
-    'A fetcher worker is modeled as I/O bound; throughput scales with worker count until politeness or DNS caps it.',
-    'Single-node throughput, DNS, memory, and storage budgets are conservative teaching numbers, not vendor limits.',
-    'Seen-set memory uses ~64 bytes/URL for an exact hash set and ~1.5 bytes/URL for a Bloom filter at the chosen tolerance.',
+    'fetcher worker 被建模为 I/O bound；throughput 随 worker 数量线性增长，直到 politeness 或 DNS 把它封顶。',
+    '单节点的 throughput、DNS、内存和存储预算都是保守的教学数字，不是厂商上限。',
+    'Seen-set 内存按 exact hash set 每 URL ~64 bytes、给定容忍度下 Bloom filter 每 URL ~1.5 bytes 计算。',
   ],
   teachingWalkthrough: [
     {
       id: 'one-loop',
       step: '01',
-      focus: 'One loop, one site',
+      focus: '一个循环，一个站点',
       scenarioId: 'single-threaded',
       question:
-        'A single-threaded crawler fetches one page, parses it, then fetches the next, ~5 pages/s over one site. What is it spending almost all of its time doing?',
+        '单线程 crawler 抓一页、解析、再抓下一页，在一个站点上 ~5 pages/s。它几乎所有时间都花在做什么？',
       reveal:
-        'Waiting on the network. A fetch is I/O bound, so a sequential loop sits idle during each round trip. The seen set fits in a hash set and one store holds everything — no concurrency, no Bloom filter, no sharding is justified yet.',
-      takeaway: 'A crawler is I/O bound; a sequential loop wastes nearly all its time waiting on the network.',
+        '等网络。fetch 是 I/O bound，所以顺序循环在每次往返时都在空转。seen set 装得进一个 hash set，一个 store 存得下全部——还没到需要并发、Bloom filter 或 sharding 的时候。',
+      takeaway: 'crawler 是 I/O bound；顺序循环几乎把所有时间都浪费在等网络上。',
     },
     {
       id: 'concurrency',
       step: '02',
-      focus: 'Add a worker pool',
+      focus: '加一个 worker pool',
       scenarioId: 'worker-pool',
       question:
-        'You want 500 pages/s. With each worker holding ~12 fetches/s, how many workers do you need, and what is the first thing that breaks if you ignore politeness?',
+        '你想要 500 pages/s。每个 worker 撑住 ~12 fetches/s，你需要多少个 worker？如果不管 politeness，第一个崩的是什么？',
       reveal:
-        'About 80 concurrent workers overlap the I/O waits to hit the target. But if you point that pool at few domains with politeness off, you hammer those hosts — getting throttled or banned. Concurrency creates throughput and a politeness problem at the same time.',
-      takeaway: 'Concurrency is how a crawler gets throughput — and exactly why politeness becomes mandatory.',
+        '大约 80 个并发 worker 把 I/O 等待重叠起来就能打到目标。但如果你把这个 pool 对准少数 domain 还关掉 politeness，就会猛打那些 host——被限速或封禁。并发同时带来 throughput 和一个 politeness 问题。',
+      takeaway: '并发是 crawler 获得 throughput 的方式——也正因如此 politeness 变成必须的。',
     },
     {
       id: 'politeness',
       step: '03',
-      focus: 'Per-domain rate limits',
+      focus: 'Per-domain rate limit',
       scenarioId: 'politeness-scheduler',
       question:
-        'Now respect ~1 fetch/domain/s across only ~1,500 domains while targeting 2,000 pages/s. Can the worker pool alone reach the target?',
+        '现在在只有 ~1,500 个 domain 上遵守 ~1 fetch/domain/s，目标却是 2,000 pages/s。光靠 worker pool 能打到目标吗？',
       reveal:
-        'No. Politeness caps you at roughly one fetch per domain per second, so ~1,500 domains ceil total throughput near 1,500 pages/s regardless of worker count. A scheduler with per-domain queues — not more workers — becomes the real throttle, and spreading across more domains is the only way to go faster.',
-      takeaway: 'With politeness on, throughput is bounded by domains times the per-domain rate, not by worker count.',
+        '不能。politeness 把你限制在大约每 domain 每秒一次 fetch，所以无论多少 worker，~1,500 个 domain 都把总 throughput 封顶在 ~1,500 pages/s 附近。真正的瓶颈变成带 per-domain queue 的 scheduler——而不是更多 worker——想更快的唯一办法是铺到更多 domain。',
+      takeaway: 'politeness 开着时，throughput 受 domain 数乘以 per-domain rate 约束，而非 worker 数。',
     },
     {
       id: 'bloom',
       step: '04',
-      focus: 'Seen set outgrows RAM',
+      focus: 'Seen set 撑爆 RAM',
       scenarioId: 'dedup-at-scale',
       question:
-        'At 5 billion URLs, an exact hash set is ~64 bytes each — about 320 GB. Does that fit in one machine, and what shrinks it?',
+        '到 50 亿 URL 时，exact hash set 每个 ~64 bytes——大约 320 GB。这装得进一台机器吗？什么能把它缩小？',
       reveal:
-        'No — an exact set blows past a single node. A Bloom filter at a small false-positive tolerance drops it to ~1.5 bytes/URL (a few GB), trading a tiny chance of skipping a new URL for fitting in memory. Content fingerprinting also skips near-duplicate bodies before they reach storage.',
-      takeaway: 'At billions of URLs the seen set must become a Bloom filter; you trade exactness for fitting in RAM.',
+        '装不下——exact set 远远超出单节点。容忍一点小 false-positive 的 Bloom filter 把它压到 ~1.5 bytes/URL（几 GB），用极小概率漏掉新 URL 换取塞进内存。内容指纹还能在页面正文到达存储前就跳过近似重复的。',
+      takeaway: '到数十亿 URL 时 seen set 必须变成 Bloom filter；你用精确性换取塞进 RAM。',
     },
     {
       id: 'distributed',
       step: '05',
-      focus: 'Partition the frontier',
+      focus: 'Partition frontier',
       scenarioId: 'distributed-frontier',
       question:
-        'A 50-billion-page crawl at 200k pages/s needs tens of thousands of workers. Can one frontier, one seen set, and one store coordinate that?',
+        '500 亿页、200k pages/s 的 crawl 需要数万个 worker。一个 frontier、一个 seen set、一个 store 协调得了吗？',
       reveal:
-        'No — the frontier, seen set, and content store all exceed one machine. Partition the frontier by host (so politeness stays local to each shard), shard the Bloom filter, and shard the content store. Coordination becomes the central design problem, as in Mercator-style crawlers.',
-      takeaway: 'At web scale you partition the frontier by host and shard the seen set and store; coordination is the design.',
+        '协调不了——frontier、seen set 和 content store 都超出一台机器。按 host 给 frontier 做 partition（让 politeness 留在每个 shard 内部本地处理），把 Bloom filter 分片，把 content store 分片。协调成了核心设计问题，就像 Mercator 风格的 crawler 那样。',
+      takeaway: '到 web 规模你按 host partition frontier 并把 seen set 和 store 分片；协调本身就是设计。',
     },
   ],
   analyze: analyzeWebCrawlerWorkload,
@@ -509,39 +509,39 @@ function analyzeWebCrawlerWorkload(workload: WorkloadValues): LabAnalysis {
     meters: {
       fetchThroughput: {
         ratio: fetchRatio + (throughputShortfall > 0 ? 1 : 0),
-        valueText: `${formatRate(achievableThroughput)}/s of ${formatRate(targetPagesPerSecond)}/s`,
+        valueText: `${formatRate(achievableThroughput)}/s，目标 ${formatRate(targetPagesPerSecond)}/s`,
         copy:
           throughputShortfall > 0
             ? politenessBound
-              ? `Politeness caps you near ${formatRate(politenessCeiling)}/s across ${formatCount(uniqueDomains)} ${pluralize('domain', uniqueDomains)}; more workers will not help.`
-              : `The worker pool tops out near ${formatRate(workerCeiling)}/s; add workers to close the gap to ${formatRate(targetPagesPerSecond)}/s.`
-            : `The fetcher pool sustains the ${formatRate(targetPagesPerSecond)}/s target with headroom.`,
+              ? `Politeness 把你限在 ${formatRate(politenessCeiling)}/s 附近，跨 ${formatCount(uniqueDomains)} 个 domain；加 worker 也没用。`
+              : `Worker pool 在 ${formatRate(workerCeiling)}/s 见顶；加 worker 来补上到 ${formatRate(targetPagesPerSecond)}/s 的缺口。`
+            : `Fetcher pool 撑住 ${formatRate(targetPagesPerSecond)}/s 目标还有余量。`,
       },
       frontierBacklog: {
         ratio: frontierBacklogRatio,
-        valueText: `${formatRate(targetPagesPerSecond)}/s enqueue`,
+        valueText: `${formatRate(targetPagesPerSecond)}/s 入队`,
         copy: needsCoordination
-          ? 'Enqueue/dequeue volume exceeds one frontier node; partition the frontier by host.'
-          : 'A single frontier keeps up with the enqueue and dequeue rate.',
+          ? '入队/出队量超过单个 frontier 节点；按 host 给 frontier 做 partition。'
+          : '单个 frontier 跟得上入队和出队速率。',
       },
       seenSetMemory: {
         ratio: seenSetGigabytes / comfortableSeenSetGigabytes,
         valueText: formatStorageGigabytes(seenSetGigabytes),
         copy: needsBloomFilter
-          ? `An exact set would be ${formatStorageGigabytes(exactSeenSetGigabytes)}; a Bloom filter at ${formatPercent(dedupFalsePositiveRate)} false positives fits it in memory.`
-          : `${formatCount(totalPages)} URLs at ~${seenSetBytesPerUrlExact} bytes each still fit an exact in-memory set.`,
+          ? `Exact set 要 ${formatStorageGigabytes(exactSeenSetGigabytes)}；${formatPercent(dedupFalsePositiveRate)} false positive 的 Bloom filter 能把它塞进内存。`
+          : `${formatCount(totalPages)} 个 URL 每个 ~${seenSetBytesPerUrlExact} bytes，仍装得进内存里的 exact set。`,
       },
       dnsPressure: {
         ratio: dnsPressure,
-        valueText: `${formatRate(dnsLookupsPerSecond)}/s misses`,
+        valueText: `${formatRate(dnsLookupsPerSecond)}/s miss`,
         copy: needsDnsCache
-          ? `With ~${formatRatio(dnsLookupsCachedShare)} of lookups cached, only ${formatRate(dnsLookupsPerSecond)}/s reach the resolver.`
-          : 'DNS volume is low enough to resolve inline without a dedicated cache.',
+          ? `~${formatRatio(dnsLookupsCachedShare)} 的 lookup 命中 cache，只有 ${formatRate(dnsLookupsPerSecond)}/s 真正打到 resolver。`
+          : 'DNS 量足够低，可以内联解析，不需要专门的 cache。',
       },
       contentStorage: {
         ratio: storageTerabytes / comfortableStorageTerabytes,
         valueText: formatStorageGigabytes(storageTerabytes * 1_000),
-        copy: `${formatCount(totalPages)} pages at ~${Math.round(averagePageKilobytes)} KB each.`,
+        copy: `${formatCount(totalPages)} 页，每页 ~${Math.round(averagePageKilobytes)} KB。`,
       },
     },
     decisions: buildDecisions({
@@ -603,57 +603,53 @@ function buildReasons(
     reasons.push({
       severity: analysis.throughputShortfall > analysis.targetPagesPerSecond * 0.5 ? 'danger' : 'warning',
       text: analysis.politenessBound
-        ? `Politeness caps throughput near ${formatRate(
+        ? `Politeness 把 throughput 限在 ${formatRate(
             analysis.politenessCeiling,
-          )}/s across ${formatCount(analysis.uniqueDomains)} ${pluralize(
-            'domain',
-            analysis.uniqueDomains,
-          )}; only spanning more domains raises the ceiling.`
-        : `${formatCount(analysis.fetcherWorkers)} ${pluralize(
-            'worker',
-            analysis.fetcherWorkers,
-          )} top out near ${formatRate(analysis.workerCeiling)}/s, short of the ${formatRate(
+          )}/s 附近，跨 ${formatCount(analysis.uniqueDomains)} 个 domain；只有铺到更多 domain 才能抬高这个上限。`
+        : `${formatCount(analysis.fetcherWorkers)} 个 worker 在 ${formatRate(
+            analysis.workerCeiling,
+          )}/s 见顶，达不到 ${formatRate(
             analysis.targetPagesPerSecond,
-          )}/s target.`,
+          )}/s 的目标。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `The fetcher pool sustains ${formatRate(
+      text: `Fetcher pool 撑住 ${formatRate(
         analysis.achievableThroughput,
-      )}/s, meeting the crawl-rate target.`,
+      )}/s，达到了 crawl-rate 目标。`,
     });
   }
 
   if (analysis.needsWorkerPool) {
     reasons.push({
       severity: 'ok',
-      text: 'Fetches are I/O bound, so a pool of concurrent workers overlaps network waits to raise throughput.',
+      text: 'Fetch 是 I/O bound，所以一组并发 worker 把网络等待重叠起来抬高 throughput。',
     });
   }
 
   if (analysis.needsScheduler) {
     reasons.push({
       severity: 'warning',
-      text: 'A politeness-aware scheduler with per-domain queues enforces robots.txt and rate limits, not just raw worker count.',
+      text: '带 per-domain queue 的 politeness-aware scheduler 来执行 robots.txt 和 rate limit，而不只是靠堆 worker 数。',
     });
   }
 
   if (analysis.needsBloomFilter) {
     reasons.push({
       severity: analysis.exactSeenSetGigabytes > comfortableSeenSetGigabytes * 4 ? 'danger' : 'warning',
-      text: `${formatCount(analysis.totalPages)} URLs would need ~${formatStorageGigabytes(
+      text: `${formatCount(analysis.totalPages)} 个 URL 作为 exact set 要 ~${formatStorageGigabytes(
         analysis.exactSeenSetGigabytes,
-      )} as an exact set; a Bloom filter at ${formatPercent(
+      )}；${formatPercent(
         analysis.dedupFalsePositiveRate,
-      )} fits it in ~${formatStorageGigabytes(analysis.seenSetGigabytes)}.`,
+      )} 的 Bloom filter 能把它压进 ~${formatStorageGigabytes(analysis.seenSetGigabytes)}。`,
     });
   }
 
   if (analysis.needsDnsCache) {
     reasons.push({
       severity: 'ok',
-      text: 'DNS resolution is a hidden bottleneck at high fetch rates, so host lookups are cached and resolved asynchronously.',
+      text: '高 fetch rate 下 DNS 解析是隐藏瓶颈，所以 host lookup 要 cache 并异步解析。',
     });
   }
 
@@ -662,21 +658,21 @@ function buildReasons(
       severity: analysis.storageTerabytes > comfortableStorageTerabytes * 2 ? 'danger' : 'warning',
       text: `~${formatStorageGigabytes(
         analysis.storageTerabytes * 1_000,
-      )} of page bodies exceeds one content store; shard the corpus across nodes.`,
+      )} 的页面正文超出单个 content store；把语料跨节点分片。`,
     });
   }
 
   if (analysis.needsCoordination) {
     reasons.push({
       severity: 'warning',
-      text: 'At this scale the frontier, seen set, and store all exceed one machine; partition by host and coordinate across shards.',
+      text: '到这个规模，frontier、seen set 和 store 都超出一台机器；按 host partition 并跨 shard 协调。',
     });
   }
 
   if (analysis.needsContentDedup) {
     reasons.push({
       severity: 'ok',
-      text: 'Content fingerprinting skips near-duplicate page bodies before they reach storage, on top of URL dedup.',
+      text: '在 URL dedup 之上，内容指纹在页面正文到达存储前就跳过近似重复的。',
     });
   }
 
@@ -695,48 +691,48 @@ function buildDecisions(
     frontierDesign: {
       state: flags.needsCoordination ? 'needed' : flags.needsScheduler ? 'useful' : 'not-yet',
       copy: flags.needsCoordination
-        ? 'Partition the frontier by host across machines, each with priority and per-domain politeness queues.'
+        ? '按 host 把 frontier 跨机器 partition，每片各带优先级和 per-domain politeness queue。'
         : flags.needsScheduler
-          ? 'Use a frontier with priority plus per-domain queues so the scheduler can order fetches fairly.'
-          : 'A simple in-memory queue is enough for a single sequential crawler.',
+          ? '用一个带优先级加 per-domain queue 的 frontier，让 scheduler 能公平地排 fetch 顺序。'
+          : '单个顺序 crawler 用一个简单的内存 queue 就够了。',
     },
     politeness: {
       state: flags.respectPoliteness ? (flags.politenessBound ? 'needed' : 'useful') : 'tradeoff',
       copy: flags.respectPoliteness
         ? flags.politenessBound
-          ? `Per-domain rate limits cap throughput near ${formatRate(
+          ? `Per-domain rate limit 把 throughput 限在 ${formatRate(
               flags.politenessCeiling,
-            )}/s; spread across more domains to go faster while staying polite.`
-          : 'Obey robots.txt and a per-domain delay; with many domains this rarely limits total throughput.'
-        : 'Politeness is off — fast, but risks hammering hosts, getting throttled, or being banned.',
+            )}/s 附近；想更快又保持礼貌，就铺到更多 domain。`
+          : '遵守 robots.txt 和 per-domain 延迟；domain 多时这很少会限制总 throughput。'
+        : 'Politeness 关着——快，但有猛打 host、被限速或被封禁的风险。',
     },
     dedup: {
       state: flags.needsBloomFilter ? 'needed' : flags.needsContentDedup ? 'useful' : 'useful',
       copy: flags.needsBloomFilter
-        ? `Use a Bloom filter for the seen-URL set at ${formatPercent(
+        ? `seen-URL set 用 ${formatPercent(
             flags.dedupFalsePositiveRate,
-          )} false positives${flags.needsContentDedup ? ', plus content fingerprints for near-duplicates' : ''}.`
+          )} false positive 的 Bloom filter${flags.needsContentDedup ? '，再加内容指纹来挡近似重复' : ''}。`
         : flags.needsContentDedup
-          ? 'An exact seen-URL set fits in memory; add content fingerprints to skip near-duplicate bodies.'
-          : 'An exact in-memory seen-URL set is enough at this scale.',
+          ? 'Exact seen-URL set 装得进内存；再加内容指纹来跳过近似重复的正文。'
+          : '这个规模下内存里的 exact seen-URL set 就够了。',
     },
     dnsCaching: {
       state: flags.needsDnsCache ? 'needed' : 'not-yet',
       copy: flags.needsDnsCache
-        ? 'Cache host-to-IP lookups and resolve asynchronously so DNS does not throttle the fetchers.'
-        : 'DNS volume is low enough to resolve inline without a dedicated cache.',
+        ? '缓存 host 到 IP 的 lookup 并异步解析，别让 DNS 拖慢 fetcher。'
+        : 'DNS 量足够低，可以内联解析，不需要专门的 cache。',
     },
     contentStorage: {
       state: flags.needsStorageShards ? 'needed' : 'useful',
       copy: flags.needsStorageShards
-        ? 'Shard page bodies across a distributed store; the access pattern is write-once, batch-read.'
-        : 'A single object/blob store holds the fetched pages while the corpus fits on one node.',
+        ? '把页面正文跨一个分布式 store 分片；访问模式是 write-once、batch-read。'
+        : '语料还装得下单节点时，一个 object/blob store 就能存下抓回的页面。',
     },
     coordination: {
       state: flags.needsCoordination ? 'needed' : 'not-yet',
       copy: flags.needsCoordination
-        ? 'Coordinate a Mercator-style distributed crawler: partition frontier and seen-set by host across machines.'
-        : 'One machine coordinates the whole crawl while throughput and corpus stay modest.',
+        ? '协调一个 Mercator 风格的分布式 crawler：按 host 把 frontier 和 seen-set 跨机器 partition。'
+        : 'throughput 和语料都还不大时，一台机器协调整个 crawl。',
     },
   };
 }
@@ -771,18 +767,18 @@ function chooseArchitectureSummary(flags: ArchitectureFlags): string {
     !flags.needsStorageShards &&
     !flags.needsCoordination
   ) {
-    return 'One loop fetches, parses, and stores pages in sequence. An in-memory queue and exact seen set are all that is justified.';
+    return '一个循环顺序地 fetch、parse、存页面。一个内存 queue 加 exact seen set 就是全部所需。';
   }
   if (flags.needsCoordination) {
-    return 'The frontier is partitioned by host across machines, the Bloom-filter seen set and content store are sharded, and a scheduler keeps each shard polite.';
+    return 'Frontier 按 host 跨机器 partition，Bloom-filter seen set 和 content store 都分片，scheduler 让每个 shard 保持礼貌。';
   }
   if (flags.needsBloomFilter) {
-    return 'A worker pool drives throughput, a politeness scheduler orders fetches, and a Bloom-filter seen set keeps billions of URLs in memory.';
+    return 'Worker pool 拉起 throughput，politeness scheduler 排 fetch 顺序，Bloom-filter seen set 把数十亿 URL 留在内存里。';
   }
   if (flags.needsScheduler) {
-    return 'A concurrent worker pool overlaps network waits while a politeness-aware scheduler enforces robots.txt and per-domain rate limits.';
+    return '并发 worker pool 重叠网络等待，同时 politeness-aware scheduler 执行 robots.txt 和 per-domain rate limit。';
   }
-  return 'A pool of concurrent fetcher workers overlaps I/O waits to raise crawl throughput beyond a single loop.';
+  return '一组并发 fetcher worker 重叠 I/O 等待，把 crawl throughput 抬到单循环之上。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {
@@ -810,10 +806,6 @@ function chooseArchitecturePath(flags: ArchitectureFlags): string {
 function numericValue(workload: WorkloadValues, key: string): number {
   const value = workload[key];
   return typeof value === 'number' ? value : 0;
-}
-
-function pluralize(unit: string, value: number): string {
-  return Math.round(value) === 1 ? unit : `${unit}s`;
 }
 
 function formatPercent(value: number): string {

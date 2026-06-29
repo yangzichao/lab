@@ -5,16 +5,18 @@ import '../styles/effects/depth-3d.css';
 interface Props {
   title?: string;
   description?: string;
+  lang?: string;
 }
 
 const {
   title = 'Zichao Yang',
-  description = 'Personal homepage of Zichao Yang — researcher and developer.',
+  description = 'Zichao Yang 的个人主页 —— researcher 与 developer。',
+  lang = 'zh-CN',
 } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

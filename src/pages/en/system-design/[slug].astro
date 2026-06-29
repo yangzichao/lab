@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SystemDesignLabNav from '../../../components/system-design-lab/SystemDesignLabNav.astro';
+import SystemDesignConstraintLab from '../../../components/system-design-lab/SystemDesignConstraintLab.astro';
+import AdTrackingConstraintLab from '../../../components/system-design-lab-en/AdTrackingConstraintLab.astro';
+import { getSystemDesignLabDefinition } from '../../../scripts/system-design-lab/lab-definitions';
+import {
+  getSystemDesignLabPage,
+  getSystemDesignLabPages,
+} from '../../../scripts/system-design-lab/system-design-pages';
+
+export function getStaticPaths() {
+  return getSystemDesignLabPages('en').map((page) => ({
+    params: { slug: page.slug },
+  }));
+}
+
+const slug = Astro.params.slug!;
+const page = getSystemDesignLabPage(slug, 'en');
+const lab = slug === 'ad-tracking' ? null : getSystemDesignLabDefinition(slug, 'en');
+---
+
+<BaseLayout title={page.pageTitle} description={page.metaDescription} lang="en">
+  <SystemDesignLabNav current={slug} locale="en" />
+  {slug === 'ad-tracking' ? (
+    <AdTrackingConstraintLab />
+  ) : (
+    <SystemDesignConstraintLab lab={lab!} locale="en" />
+  )}
+</BaseLayout>

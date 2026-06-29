@@ -34,96 +34,96 @@ const axisPresets = [
 
 const conceptCards = [
   {
-    title: '1. A unit quaternion is a rotation handle',
+    title: '1. 单位 quaternion 就是一个旋转手柄',
     body:
-      'Write q = w + xi + yj + zk. When |q| = 1, the vector part points along a rotation axis and the scalar part stores the half angle.',
+      '写成 q = w + xi + yj + zk。当 |q| = 1 时，vector part 指向 rotation axis，scalar part 存着 half angle。',
     formula: 'q = cos(theta/2) + u sin(theta/2)',
   },
   {
-    title: '2. Rotate vectors by conjugation',
+    title: '2. 用 conjugation 旋转向量',
     body:
-      'A 3D vector v becomes a pure quaternion p = 0 + vx i + vy j + vz k. The rotated vector is the vector part of q p q^-1.',
+      '把 3D 向量 v 写成纯 quaternion p = 0 + vx i + vy j + vz k，旋转后的向量就是 q p q^-1 的 vector part。',
     formula: "p' = q p q^-1",
   },
   {
-    title: '3. Composition is multiplication',
+    title: '3. 组合就是乘法',
     body:
-      'Doing rotation A and then rotation B is not ordinary addition of angles. It is quaternion multiplication, so order matters.',
+      '先做旋转 A 再做旋转 B，不是简单地把角度相加，而是 quaternion 乘法，所以顺序很重要。',
     formula: 'q_total = q_B q_A',
   },
   {
-    title: '4. q and -q describe the same 3D attitude',
+    title: '4. q 和 -q 描述的是同一个 3D 姿态',
     body:
-      'The cube returns after 360 degrees, but the spinor sign flips. The SU(2) object needs 720 degrees to return to its starting sign.',
+      '立方体转 360 度就回到原样，但 spinor 的符号翻转了。SU(2) 这个对象要转 720 度才能回到初始符号。',
     formula: 'SO(3) = SU(2) / {+I, -I}',
   },
 ];
 
 const applicationCards = [
   {
-    title: 'Graphics and games',
+    title: '图形与游戏',
     body:
-      'Camera orientation, character rigs, and object animation use quaternions because they avoid gimbal lock and interpolate cleanly with SLERP.',
+      '相机朝向、角色骨骼和物体动画都用 quaternion，因为它能避免 gimbal lock，还能用 SLERP 平滑插值。',
   },
   {
-    title: 'Robotics and navigation',
+    title: '机器人与导航',
     body:
-      'Drones, phones, and robot arms fuse IMU data into orientation quaternions, then convert them into control-frame rotations.',
+      '无人机、手机和机械臂把 IMU 数据融合成姿态 quaternion，再转换成控制坐标系下的旋转。',
   },
   {
-    title: 'Quantum mechanics',
+    title: '量子力学',
     body:
-      'Pauli matrices generate SU(2). A single-qubit gate or spin-1/2 rotation is exp(-i theta n.sigma / 2), the matrix twin of a unit quaternion.',
+      'Pauli matrix 生成 SU(2)。一个 single-qubit gate 或 spin-1/2 旋转就是 exp(-i theta n.sigma / 2)，正是单位 quaternion 的矩阵孪生体。',
   },
   {
-    title: 'Physics visualization',
+    title: '物理可视化',
     body:
-      'Bloch-sphere motion, angular momentum, and rigid-body attitudes can be shown with the same axis-angle and double-cover ideas.',
+      'Bloch sphere 上的运动、角动量、刚体姿态，都能用同一套 axis-angle 和 double-cover 的思路来展示。',
   },
 ];
 ---
 
 <BaseLayout
   title="Quaternion Rotation Lab - Zichao Yang"
-  description="An interactive 3D teaching page for quaternions, 3D rotations, Pauli matrices, SU(2), and the Bloch sphere."
+  description="一个讲 quaternion、3D rotation、Pauli matrix、SU(2) 和 Bloch sphere 的交互式 3D 教学页面。"
 >
   <section class="quaternion-lab" data-quaternion-lab>
     <header class="quaternion-lab__header">
       <a href="/" class="quaternion-lab__home-link">
         <i class="ph ph-arrow-left" aria-hidden="true"></i>
-        <span>Home</span>
+        <span>首页</span>
       </a>
 
       <div class="quaternion-lab__title-block">
         <p class="quaternion-lab__eyebrow">Quaternion Rotation Lab</p>
-        <h1>One object, two covers, three ways to see rotation.</h1>
+        <h1>同一个对象，两层 cover，三种看旋转的方式。</h1>
         <p>
-          A visual lab for the unit quaternion
-          <code>q = w + xi + yj + zk</code>, its 3D rotation
-          <code>p' = qpq^-1</code>, and the Pauli-matrix form of the same
-          SU(2) transformation.
+          一个可视化的 lab，讲单位 quaternion
+          <code>q = w + xi + yj + zk</code>、它的 3D rotation
+          <code>p' = qpq^-1</code>，以及同一个 SU(2) 变换的
+          Pauli-matrix 形式。
         </p>
       </div>
     </header>
 
-    <section class="quaternion-stage" aria-label="Quaternion 3D simulator">
+    <section class="quaternion-stage" aria-label="Quaternion 3D 模拟器">
       <div class="quaternion-stage__visual" data-quaternion-scene>
-        <div class="quaternion-stage__fallback">Loading 3D quaternion scene...</div>
+        <div class="quaternion-stage__fallback">正在加载 3D quaternion 场景...</div>
       </div>
 
-      <aside class="quaternion-stage__control-panel" aria-label="Quaternion controls">
+      <aside class="quaternion-stage__control-panel" aria-label="Quaternion 控制面板">
         <div class="quaternion-control-panel__header">
-          <p>Live Quaternion</p>
+          <p>实时 Quaternion</p>
           <strong data-quaternion-readout="quaternion">q = (1.000, 0.000, 0.000, 0.000)</strong>
         </div>
 
-        <div class="quaternion-readout-grid" aria-label="Rotation readouts">
+        <div class="quaternion-readout-grid" aria-label="旋转读数">
           <span>
-            <small>Axis</small>
+            <small>Axis（轴）</small>
             <strong data-quaternion-readout="axis">(0.00, 1.00, 0.00)</strong>
           </span>
           <span>
-            <small>Spinor phase</small>
+            <small>Spinor 相位</small>
             <strong data-quaternion-readout="spinorPhase">0 deg</strong>
           </span>
         </div>
@@ -131,15 +131,15 @@ const applicationCards = [
         <div class="quaternion-button-row">
           <button class="quaternion-button is-primary" type="button" data-quaternion-action="toggle">
             <i class="ph ph-pause" aria-hidden="true"></i>
-            <span>Pause</span>
+            <span>暂停</span>
           </button>
           <button class="quaternion-button" type="button" data-quaternion-action="reset">
             <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i>
-            <span>Reset</span>
+            <span>重置</span>
           </button>
         </div>
 
-        <div class="quaternion-segmented" role="group" aria-label="3D focus mode">
+        <div class="quaternion-segmented" role="group" aria-label="3D focus 模式">
           {
             focusModes.map((mode, index) => (
               <button
@@ -157,7 +157,7 @@ const applicationCards = [
 
         <label class="quaternion-range">
           <span>
-            <strong>Rotation angle</strong>
+            <strong>旋转角度</strong>
             <output data-quaternion-output="angle">72 deg</output>
           </span>
           <input
@@ -172,7 +172,7 @@ const applicationCards = [
 
         <label class="quaternion-range">
           <span>
-            <strong>Axis x</strong>
+            <strong>轴 x</strong>
             <output data-quaternion-output="axisX">0.35</output>
           </span>
           <input
@@ -187,7 +187,7 @@ const applicationCards = [
 
         <label class="quaternion-range">
           <span>
-            <strong>Axis y</strong>
+            <strong>轴 y</strong>
             <output data-quaternion-output="axisY">0.72</output>
           </span>
           <input
@@ -202,7 +202,7 @@ const applicationCards = [
 
         <label class="quaternion-range">
           <span>
-            <strong>Axis z</strong>
+            <strong>轴 z</strong>
             <output data-quaternion-output="axisZ">0.59</output>
           </span>
           <input
@@ -217,7 +217,7 @@ const applicationCards = [
 
         <label class="quaternion-range">
           <span>
-            <strong>Animation speed</strong>
+            <strong>动画速度</strong>
             <output data-quaternion-output="speed">26 deg/s</output>
           </span>
           <input
@@ -230,7 +230,7 @@ const applicationCards = [
           />
         </label>
 
-        <div class="quaternion-presets" aria-label="Axis presets">
+        <div class="quaternion-presets" aria-label="Axis 预设">
           {
             axisPresets.map((preset) => (
               <button type="button" data-quaternion-axis-preset={preset.id}>{preset.label}</button>
@@ -241,24 +241,24 @@ const applicationCards = [
         <label class="quaternion-toggle">
           <input type="checkbox" data-quaternion-control="showGhosts" checked />
           <span>
-            <strong>Show SLERP ghosts</strong>
-            <small>Intermediate orientations from identity to q.</small>
+            <strong>显示 SLERP ghosts</strong>
+            <small>从 identity 到 q 之间的中间姿态。</small>
           </span>
         </label>
       </aside>
     </section>
 
-    <section class="quaternion-live-math" aria-label="Live quaternion math">
+    <section class="quaternion-live-math" aria-label="实时 quaternion 数学">
       <article class="quaternion-equation-block">
-        <p>Axis-angle form</p>
+        <p>Axis-angle 形式</p>
         <code data-quaternion-readout="axisAngleFormula">
           q = cos(36 deg) + (0.35i + 0.72j + 0.59k) sin(36 deg)
         </code>
       </article>
 
       <article class="quaternion-equation-block">
-        <p>Pauli-matrix form</p>
-        <div class="quaternion-matrix" aria-label="SU(2) matrix generated from quaternion">
+        <p>Pauli-matrix 形式</p>
+        <div class="quaternion-matrix" aria-label="由 quaternion 生成的 SU(2) 矩阵">
           <code data-pauli-entry="m00">1.000 + 0.000i</code>
           <code data-pauli-entry="m01">0.000 + 0.000i</code>
           <code data-pauli-entry="m10">0.000 + 0.000i</code>
@@ -267,10 +267,10 @@ const applicationCards = [
       </article>
     </section>
 
-    <section class="quaternion-teaching" aria-label="Quaternion teaching notes">
+    <section class="quaternion-teaching" aria-label="Quaternion 教学笔记">
       <div class="quaternion-section-heading">
-        <p>Teaching Path</p>
-        <h2>From quaternion numbers to Pauli matrices.</h2>
+        <p>教学路径</p>
+        <h2>从 quaternion 数到 Pauli matrix。</h2>
       </div>
 
       <div class="quaternion-concept-grid">
@@ -286,25 +286,24 @@ const applicationCards = [
       </div>
     </section>
 
-    <section class="quaternion-pauli-section" aria-label="Quaternion and Pauli matrix connection">
+    <section class="quaternion-pauli-section" aria-label="Quaternion 与 Pauli matrix 的联系">
       <div class="quaternion-pauli-copy">
-        <p class="quaternion-lab__eyebrow">The Pauli Bridge</p>
-        <h2>Unit quaternions and SU(2) use the same four real degrees of freedom.</h2>
+        <p class="quaternion-lab__eyebrow">Pauli 之桥</p>
+        <h2>单位 quaternion 和 SU(2) 用的是同样四个实数自由度。</h2>
         <p>
-          Pack a unit quaternion into a complex matrix with
-          <code>U(q) = wI - i(x sigma_x + y sigma_y + z sigma_z)</code>.
-          Because <code>w^2 + x^2 + y^2 + z^2 = 1</code>, this matrix is unitary
-          and has determinant one. That is exactly SU(2).
+          把单位 quaternion 打包进一个复矩阵：
+          <code>U(q) = wI - i(x sigma_x + y sigma_y + z sigma_z)</code>。
+          因为 <code>w^2 + x^2 + y^2 + z^2 = 1</code>，这个矩阵是 unitary 的，
+          行列式为一。这正好就是 SU(2)。
         </p>
         <p>
-          This is why a 3D rotation can be described either as a quaternion
-          acting on vectors, or as a Pauli-matrix exponential acting on a spinor:
-          <code>U = exp(-i theta n.sigma / 2)</code>. The half angle is the
-          shared clue.
+          这就是为什么一个 3D rotation 既可以描述成 quaternion 作用在向量上，
+          也可以描述成 Pauli-matrix 指数作用在 spinor 上：
+          <code>U = exp(-i theta n.sigma / 2)</code>。half angle 是两边共享的线索。
         </p>
       </div>
 
-      <div class="quaternion-pauli-table" aria-label="Pauli matrices">
+      <div class="quaternion-pauli-table" aria-label="Pauli 矩阵">
         <article>
           <strong>sigma_x</strong>
           <code>[[0, 1], [1, 0]]</code>
@@ -320,10 +319,10 @@ const applicationCards = [
       </div>
     </section>
 
-    <section class="quaternion-applications" aria-label="Quaternion applications">
+    <section class="quaternion-applications" aria-label="Quaternion 应用">
       <div class="quaternion-section-heading">
-        <p>Applications</p>
-        <h2>Where the same math shows up.</h2>
+        <p>应用</p>
+        <h2>同一套数学还会出现在哪里。</h2>
       </div>
 
       <div class="quaternion-application-grid">

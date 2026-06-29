@@ -294,47 +294,47 @@ function chooseArchitecture(flags: {
 }) {
   if (!flags.needsMultiHost && !flags.needsEventLog && !flags.needsPartitioning) {
     return {
-      architectureTitle: 'Single host collector + one database',
+      architectureTitle: '单机 collector + 一个 database',
       architecturePath: 'Ad events -> single collector -> shared database',
       architectureSummary:
-        'The simplest design is still defensible: one service validates events and writes a local or managed database. You avoid distributed coordination until the workload proves it needs it.',
+        '最简单的设计依然站得住脚：一个服务校验 event 并写入本地或托管的 database。在 workload 真正证明需要之前，你都不必引入分布式协调。',
     };
   }
 
   if (flags.needsMultiHost && !flags.needsEventLog && !flags.needsPartitioning) {
     return {
-      architectureTitle: 'Multiple collectors + shared database',
+      architectureTitle: '多个 collector + 共享 database',
       architecturePath: 'Ad events -> load balancer -> collector fleet -> shared database',
       architectureSummary:
-        'The first scale move is stateless collectors behind a load balancer. This solves host capacity and availability, but the shared database is now the place to watch.',
+        '第一步扩展是把无状态的 collector 放到 load balancer 后面。这解决了单机容量和可用性，但现在该盯着的是共享 database。',
     };
   }
 
   if (flags.needsEventLog && !flags.needsPartitioning) {
     return {
-      architectureTitle: 'Collector fleet + durable event log',
+      architectureTitle: 'Collector 集群 + 持久化 event log',
       architecturePath: 'Ad events -> load balancer -> collector fleet -> event log -> reporting database',
       architectureSummary:
-        'The system should stop writing every request directly into the reporting store. Append first, then let consumers dedupe, aggregate, and retry without blocking ingestion.',
+        '系统该停止把每个请求直接写进报表存储。先 append，再让 consumer 去 dedupe、聚合、retry，而不阻塞 ingest。',
     };
   }
 
   if (flags.needsPartitioning && !flags.needsServingStores && !flags.needsStreaming) {
     return {
-      architectureTitle: 'Partitioned event log + partitioned consumers',
+      architectureTitle: '分区的 event log + 分区的 consumer',
       architecturePath:
         'Ad events -> collector fleet -> partitioned event log -> partitioned consumers -> reports',
       architectureSummary:
-        'One stream or one database shard is no longer enough. Partitioning spreads throughput and storage, but now the partition key controls ordering, hot spots, and rebalancing cost.',
+        '单个 stream 或单个 database shard 已经不够了。partitioning 分摊了 throughput 和存储，但现在 partition key 决定了 ordering、热点和 rebalance 的代价。',
     };
   }
 
   return {
-    architectureTitle: 'Partitioned pipeline + realtime serving views',
+    architectureTitle: '分区 pipeline + 实时 serving view',
     architecturePath:
       'Ad events -> collector fleet -> partitioned event log -> stream workers -> serving stores + warehouse',
     architectureSummary:
-      'Ingestion, replay, aggregation, and reporting need separate shapes. Raw events flow through partitioned logs; stream workers build fast counters; OLAP or warehouse stores handle heavier reads.',
+      'ingest、replay、聚合和报表需要各自不同的形态。原始 event 流经分区的 log；stream worker 构建快速 counter；OLAP 或 warehouse 存储扛更重的读。',
   };
 }
 
@@ -360,64 +360,64 @@ function buildReasons(analysis: {
   if (analysis.needsMultiHost) {
     reasons.push({
       severity: analysis.singleHostLoad > 1 ? 'danger' : 'warning',
-      text: `Peak load is ${formatRate(analysis.peakEventsPerSecond)}, which is ${formatRatio(
+      text: `峰值负载是 ${formatRate(analysis.peakEventsPerSecond)}，相当于教学模型里单机 ingest 预算的 ${formatRatio(
         analysis.singleHostLoad,
-      )} of the teaching model's single-host ingestion budget. Multi host is justified by capacity or availability, not by taste.`,
+      )}。上多机是被容量或可用性逼出来的，不是凭喜好。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `Peak load is ${formatRate(analysis.peakEventsPerSecond)}, below the single-host threshold. Single machine is still a reasonable starting point.`,
+      text: `峰值负载是 ${formatRate(analysis.peakEventsPerSecond)}，低于单机阈值。单台机器仍是合理的起点。`,
     });
   }
 
   if (analysis.sharedDatabaseLoad > 0.7) {
     reasons.push({
       severity: analysis.sharedDatabaseLoad > 1 ? 'danger' : 'warning',
-      text: `The shared database is at ${formatRatio(
+      text: `把原始写入和报表查询合在一起后，共享 database 已经到了 ${formatRatio(
         analysis.sharedDatabaseLoad,
-      )} after combining raw writes and report queries. Adding collectors alone would move the bottleneck into the database.`,
+      )}。光加 collector 只会把瓶颈推进 database。`,
     });
   }
 
   if (analysis.workload.billingGrade) {
     reasons.push({
       severity: 'warning',
-      text: 'Billing-grade durability means accepted events need audit and replay. A direct request-to-row write path is too fragile for collector restarts and downstream outages.',
+      text: 'Billing-grade 持久性意味着被接收的 event 需要审计和 replay。一条「请求直接写一行」的路径，撑不住 collector 重启和下游故障，太脆弱。',
     });
   }
 
   if (analysis.needsEventLog) {
     reasons.push({
       severity: 'warning',
-      text: 'A durable event log buys buffering, replay, and independent consumers. The tradeoff is lag, consumer ownership, and eventual consistency in reports.',
+      text: '持久化 event log 换来了缓冲、replay 和独立的 consumer。代价是 lag、consumer 的归属问题，以及报表里的 eventual consistency。',
     });
   }
 
   if (analysis.needsPartitioning) {
     reasons.push({
       severity: analysis.hotPartitionRisk ? 'danger' : 'warning',
-      text: `Partitioning becomes relevant at ${formatRate(
+      text: `在 ${formatRate(
         analysis.peakEventsPerSecond,
-      )} peak and ${formatStorage(analysis.retainedTerabytes)} retained raw data. It scales throughput, but forces a partition-key decision.`,
+      )} 峰值、${formatStorage(analysis.retainedTerabytes)} 保留的原始数据下，partitioning 开始变得相关。它能扩 throughput，但逼你做 partition-key 的决定。`,
     });
   }
 
   if (analysis.hotPartitionRisk) {
     reasons.push({
       severity: 'danger',
-      text: `The hottest campaign receives about ${formatRate(
+      text: `最热的 campaign 大约要收 ${formatRate(
         analysis.hotCampaignEventsPerSecond,
-      )}. Partitioning by campaign preserves campaign-local aggregation, but can create a hot partition; bucketing by event id spreads load but requires later grouping.`,
+      )}。按 campaign 分区能保住 campaign 内的聚合，但可能造出一个 hot partition；按 event id 分桶能摊平负载，却需要事后再做分组。`,
     });
   }
 
   if (analysis.needsStreaming) {
     reasons.push({
       severity: 'warning',
-      text: `A ${formatFreshness(
+      text: `${formatFreshness(
         analysis.workload.freshnessSeconds,
-      )} freshness target or duplicate pressure makes batch-only reporting weak. Stream workers handle dedupe windows and near-realtime counters.`,
+      )} 的新鲜度目标，或是重复压力，让纯 batch 报表显得乏力。stream worker 能处理 dedupe window 和近实时的 counter。`,
     });
   }
 
@@ -426,9 +426,9 @@ function buildReasons(analysis: {
       severity: 'warning',
       text: `${formatStorage(
         analysis.retainedTerabytes,
-      )} of retained raw data and ${formatQueries(
+      )} 保留的原始数据，加上 ${formatQueries(
         analysis.workload.reportingQueriesPerMinute,
-      )} should not fight the ingest path. Separate serving stores protect writes from reads.`,
+      )}，不该跟 ingest 路径抢资源。独立的 serving store 能让写入不受读的干扰。`,
     });
   }
 
@@ -443,12 +443,12 @@ function updateNodes(labElement: HTMLElement, analysis: ReturnType<typeof analyz
   setText(
     labElement,
     '[data-node-title="collectors"]',
-    analysis.needsMultiHost ? 'Collector fleet' : 'Single collector',
+    analysis.needsMultiHost ? 'Collector 集群' : '单机 collector',
   );
   setText(
     labElement,
     '[data-node-copy="collectors"]',
-    analysis.needsMultiHost ? 'stateless validators' : 'validate + write',
+    analysis.needsMultiHost ? '无状态校验器' : '校验 + 写入',
   );
 
   setNodeState(labElement, 'loadBalancer', analysis.needsMultiHost ? 'needed' : 'inactive');
@@ -466,7 +466,7 @@ function updateNodes(labElement: HTMLElement, analysis: ReturnType<typeof analyz
   setText(
     labElement,
     '[data-node-copy="sharedDatabase"]',
-    analysis.needsEventLog ? 'consumer sink' : 'raw events + reports',
+    analysis.needsEventLog ? 'consumer sink' : '原始 event + 报表',
   );
 
   setNodeState(labElement, 'eventLog', analysis.needsEventLog ? 'needed' : 'inactive');
@@ -518,37 +518,37 @@ function updateMeters(labElement: HTMLElement, analysis: ReturnType<typeof analy
     'singleHost',
     analysis.singleHostLoad,
     formatRatio(analysis.singleHostLoad),
-    `${formatRate(analysis.peakEventsPerSecond)} peak / ${formatRate(
+    `${formatRate(analysis.peakEventsPerSecond)} 峰值 / ${formatRate(
       capacityAssumptions.singleHostEventsPerSecond,
-    )} single-host teaching budget.`,
+    )} 单机教学预算。`,
   );
   updateMeter(
     labElement,
     'sharedDatabase',
     analysis.sharedDatabaseLoad,
     formatRatio(analysis.sharedDatabaseLoad),
-    'Combines raw event writes and report reads against one shared database path.',
+    '把原始 event 写入和报表读取压在同一条共享 database 路径上。',
   );
   updateMeter(
     labElement,
     'storage',
     analysis.storageLoad,
     formatStorage(analysis.retainedTerabytes),
-    `${formatGigabytes(analysis.gigabytesPerDay)} per day at the current normal rate.`,
+    `按当前常态速率，每天 ${formatGigabytes(analysis.gigabytesPerDay)}。`,
   );
   updateMeter(
     labElement,
     'hotPartition',
     analysis.hotPartitionLoad,
     formatRatio(analysis.hotPartitionLoad),
-    `${analysis.workload.hotCampaignShare.toFixed(0)}% of peak traffic maps to the hottest campaign.`,
+    `峰值流量里有 ${analysis.workload.hotCampaignShare.toFixed(0)}% 落在最热的 campaign 上。`,
   );
   updateMeter(
     labElement,
     'freshness',
     analysis.freshnessLoad,
     formatFreshness(analysis.workload.freshnessSeconds),
-    'Lower freshness targets increase the need for streaming instead of batch correction only.',
+    '新鲜度目标越低，就越需要 streaming，而不是只靠 batch 事后修正。',
   );
 }
 
@@ -561,8 +561,8 @@ function updateDecisionCards(
     'multiHost',
     analysis.needsMultiHost ? 'needed' : 'not-yet',
     analysis.needsMultiHost
-      ? 'Needed once one host lacks headroom or availability matters. Cost: load balancing, health checks, and idempotent retries.'
-      : 'Do not add hosts yet. One process is easier to reason about while capacity and availability are acceptable.',
+      ? '一旦单机没了余量、或可用性变重要，就需要它。代价：load balancing、健康检查，以及幂等的 retry。'
+      : '先别加机器。在容量和可用性都还能接受时，单进程更容易推理。',
   );
 
   setDecision(
@@ -570,8 +570,8 @@ function updateDecisionCards(
     'sharedDatabase',
     analysis.sharedDatabaseLoad > 0.7 ? 'tradeoff' : 'useful',
     analysis.sharedDatabaseLoad > 0.7
-      ? 'Shared DB is now the bottleneck. It is simple, but writes and report reads contend for the same resource.'
-      : 'A shared DB is acceptable at this load. It keeps the system simple before replay or fanout is required.',
+      ? '共享 DB 现在成了瓶颈。它简单，但写入和报表读取在抢同一份资源。'
+      : '在这个负载下共享 DB 还能接受。在需要 replay 或 fanout 之前，它让系统保持简单。',
   );
 
   setDecision(
@@ -579,8 +579,8 @@ function updateDecisionCards(
     'eventLog',
     analysis.needsEventLog ? 'needed' : 'not-yet',
     analysis.needsEventLog
-      ? 'Use an append-only log to absorb spikes and replay consumers. Cost: consumer lag and eventual consistency.'
-      : 'Direct writes are still fine. A log would add operational surface before it buys enough value.',
+      ? '用一条 append-only 的 log 来吸收尖峰、给 consumer 做 replay。代价：consumer lag 和 eventual consistency。'
+      : '直写现在还行。在 log 带来足够价值之前，它只会增加运维面。',
   );
 
   setDecision(
@@ -588,8 +588,8 @@ function updateDecisionCards(
     'partitioning',
     analysis.needsPartitioning ? 'needed' : 'not-yet',
     analysis.needsPartitioning
-      ? 'Partition to spread writes and storage. Tradeoff: the key decides ordering, grouping, and hot-shard behavior.'
-      : 'A single partition or shard is still within the model. Avoid sharding until the pressure is visible.',
+      ? '用 partition 来摊开写入和存储。取舍：key 决定了 ordering、分组，以及 hot-shard 的表现。'
+      : '单个 partition 或 shard 还在模型承受范围内。在压力显现前别急着 sharding。',
   );
 
   setDecision(
@@ -597,8 +597,8 @@ function updateDecisionCards(
     'streaming',
     analysis.needsStreaming ? 'needed' : 'not-yet',
     analysis.needsStreaming
-      ? 'Stream workers maintain dedupe windows and rolling counters. Cost: late-event correction and state management.'
-      : 'Batch or simple queries are enough while freshness and duplicate pressure are loose.',
+      ? 'stream worker 维护 dedupe window 和滚动 counter。代价：late-event 的修正和状态管理。'
+      : '在新鲜度和重复压力都还宽松时，batch 或简单查询就够了。',
   );
 
   setDecision(
@@ -606,8 +606,8 @@ function updateDecisionCards(
     'servingStores',
     analysis.needsServingStores ? 'needed' : 'not-yet',
     analysis.needsServingStores
-      ? 'Split OLAP, billing, risk, and warehouse views so reads do not damage ingestion.'
-      : 'One store can still serve the product. Split stores when query volume or retention makes the read path heavy.',
+      ? '把 OLAP、billing、risk 和 warehouse view 拆开，别让读破坏 ingest。'
+      : '一个存储还能撑起产品。等查询量或保留期把读路径压重了，再拆存储。',
   );
 }
 

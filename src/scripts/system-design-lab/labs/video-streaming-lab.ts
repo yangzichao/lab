@@ -24,27 +24,27 @@ const megabitsPerViewerStream = 5; // average adaptive stream bitrate
 
 export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
   id: 'video-streaming',
-  eyebrow: 'System Design Lab',
+  eyebrow: '系统设计 Lab',
   title:
-    'A video platform is really two systems: a compute-heavy transcode pipeline on ingest and a massively read-heavy CDN on playback.',
+    '视频平台其实是两个系统：ingest 端是计算密集的 transcode pipeline，playback 端是读极重的 CDN。',
   summary:
-    'Change uploads per day, average video length, concurrent viewers, catalog size, how many bitrate renditions you encode, the peak multiplier, and regions. The design moves from a single box that serves files directly, to CDN offload, to a queue plus a transcode worker farm, to sharded object storage with a separate metadata store, and finally to multi-region multi-CDN delivery.',
+    '调整每天上传量、平均视频时长、并发观众、catalog 大小、每个视频编码多少个 bitrate rendition、峰值倍数，以及 region 数。设计会从一台直接服务文件的单机，演进到 CDN offload、queue 加 transcode worker farm、sharded object storage 配独立 metadata store，最后到 multi-region multi-CDN 分发。',
   controls: [
     {
       id: 'uploadsPerDay',
-      label: 'Uploads per day',
-      help: 'New source videos submitted daily; each one fans out into a transcode job per profile.',
+      label: '每天上传量',
+      help: '每天提交的新源视频；每个都会按 profile fan-out 成一批 transcode job。',
       min: 10,
       max: 5_000_000,
       defaultValue: 1_000,
       scale: 'log',
-      unit: 'videos',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'avgVideoMinutes',
-      label: 'Average video length',
-      help: 'Mean runtime of a source video; drives both storage size and transcode compute.',
+      label: '平均视频时长',
+      help: '源视频的平均时长；同时决定存储大小和 transcode 计算量。',
       min: 1,
       max: 180,
       defaultValue: 10,
@@ -54,41 +54,41 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'concurrentViewers',
-      label: 'Concurrent viewers',
-      help: 'Playback sessions streaming at once; the dominant, read-heavy delivery load.',
+      label: '并发观众',
+      help: '同时在播放的 session；这是主导的、读极重的分发负载。',
       min: 10,
       max: 50_000_000,
       defaultValue: 5_000,
       scale: 'log',
-      unit: 'viewers',
+      unit: '人',
       format: 'count',
     },
     {
       id: 'catalogSize',
-      label: 'Catalog size',
-      help: 'Total videos stored across all renditions; drives object storage and metadata rows.',
+      label: 'Catalog 大小',
+      help: '所有 rendition 算在内存下来的视频总数；决定 object storage 和 metadata 行数。',
       min: 1_000,
       max: 10_000_000_000,
       defaultValue: 1_000_000,
       scale: 'log',
-      unit: 'videos',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'transcodeProfiles',
-      label: 'Bitrate renditions',
-      help: 'Resolutions/bitrates encoded per video (e.g. 240p…4K); multiplies ingest compute.',
+      label: 'Bitrate rendition 数',
+      help: '每个视频编码的分辨率/码率档（如 240p…4K）；成倍放大 ingest 计算量。',
       min: 1,
       max: 12,
       defaultValue: 5,
       scale: 'linear',
-      unit: 'profiles',
+      unit: '档',
       format: 'count',
     },
     {
       id: 'peakViewerMultiplier',
-      label: 'Peak multiplier',
-      help: 'How much concurrent viewers spike at peak over the average (prime time, a viral hit).',
+      label: '峰值倍数',
+      help: '峰值时并发观众相对平均值能飙多高（黄金时段、一个爆款）。',
       min: 1,
       max: 20,
       defaultValue: 3,
@@ -97,13 +97,13 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'globalRegions',
-      label: 'Regions',
-      help: 'Regions that should serve playback close to the viewer with low startup latency.',
+      label: 'Region 数',
+      help: '需要就近为观众提供 playback、压低启动延迟的 region 数。',
       min: 1,
       max: 20,
       defaultValue: 1,
       scale: 'linear',
-      unit: 'regions',
+      unit: '个',
       format: 'count',
     },
   ],
@@ -111,13 +111,13 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'adaptiveBitrate',
       label: 'Adaptive bitrate (ABR)',
-      help: 'Package HLS/DASH segments so players switch renditions to match bandwidth.',
+      help: '把 HLS/DASH segment 打包好，让 player 按带宽切换 rendition。',
       defaultValue: true,
     },
     {
       id: 'liveStreaming',
       label: 'Live streaming',
-      help: 'Ingest and transcode live in real time, with no second chance to re-encode.',
+      help: '实时 ingest 并 transcode 直播，没有重新编码的第二次机会。',
       defaultValue: false,
     },
   ],
@@ -126,7 +126,7 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
       id: 'single-box',
       step: '01',
       title: 'Clips on one box',
-      summary: 'A few uploads and a handful of viewers served straight from one server.',
+      summary: '少量上传、零星几个观众，直接从一台服务器服务。',
       values: {
         uploadsPerDay: 50,
         avgVideoMinutes: 5,
@@ -143,7 +143,7 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
       id: 'viewers-grow',
       step: '02',
       title: 'Viewers take off',
-      summary: 'Playback dwarfs ingest; the origin cannot push the egress alone.',
+      summary: 'Playback 把 ingest 衬得微不足道；origin 一家撑不住 egress。',
       values: {
         uploadsPerDay: 500,
         avgVideoMinutes: 8,
@@ -160,7 +160,7 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
       id: 'uploads-grow',
       step: '03',
       title: 'Uploads flood in',
-      summary: 'A wave of creators overwhelms inline transcoding.',
+      summary: '一波创作者把 inline transcoding 压垮。',
       values: {
         uploadsPerDay: 200_000,
         avgVideoMinutes: 12,
@@ -177,7 +177,7 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
       id: 'huge-catalog',
       step: '04',
       title: 'Huge catalog',
-      summary: 'Storage and metadata both outgrow a single node.',
+      summary: 'Storage 和 metadata 都超出单节点。',
       values: {
         uploadsPerDay: 1_500_000,
         avgVideoMinutes: 20,
@@ -194,7 +194,7 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
       id: 'global-live',
       step: '05',
       title: 'Global + live',
-      summary: 'Tens of millions watch worldwide, including real-time live events.',
+      summary: '全球数千万人观看，包含实时直播活动。',
       values: {
         uploadsPerDay: 4_000_000,
         avgVideoMinutes: 30,
@@ -209,9 +209,9 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'Video streaming platform architecture diagram',
+    title: '视频流媒体平台架构图',
     description:
-      'Whiteboard-style architecture diagram for a video platform: clients, edge CDN delivery, an upload and API tier, a transcode queue with a worker farm, and object storage with a metadata database.',
+      '白板风格的视频平台架构图：客户端、edge CDN 分发、upload 和 API 层、带 worker farm 的 transcode queue，以及 object storage 配 metadata 数据库。',
     columns: [
       {
         id: 'clients',
@@ -223,14 +223,14 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
             title: 'Viewer',
             subtitle: 'playback',
             kind: 'client',
-            summary: 'requests a manifest and streams video segments, switching bitrate as bandwidth changes',
+            summary: '请求 manifest 并流式拉取视频 segment，随带宽变化切换 bitrate',
           },
           {
             id: 'uploader',
             title: 'Uploader',
-            subtitle: 'creator',
+            subtitle: '创作者',
             kind: 'client',
-            summary: 'submits a new source video to be transcoded and published',
+            summary: '提交一个新源视频去 transcode 并发布',
           },
         ],
       },
@@ -242,16 +242,16 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'cdn',
             title: 'CDN',
-            subtitle: 'serves segments',
+            subtitle: '服务 segment',
             kind: 'cdn',
-            summary: 'caches video segments at the edge so the origin is spared the bulk of playback egress',
+            summary: '在 edge 缓存视频 segment，让 origin 省下绝大部分 playback egress',
           },
           {
             id: 'multiCdn',
             title: 'Multi-CDN',
-            subtitle: 'global delivery',
+            subtitle: '全球分发',
             kind: 'cdn',
-            summary: 'spreads delivery across regions and providers for capacity and low startup latency',
+            summary: '把分发铺到多个 region 和厂商，换取容量和低启动延迟',
           },
         ],
       },
@@ -265,14 +265,14 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
             title: 'Upload + API',
             subtitle: 'ingest + playback',
             kind: 'api',
-            summary: 'accepts uploads, serves manifests, and resolves metadata for playback',
+            summary: '接收上传、服务 manifest，并为 playback 解析 metadata',
           },
           {
             id: 'packager',
             title: 'Packager',
             subtitle: 'HLS / DASH',
             kind: 'compute',
-            summary: 'segments and packages renditions into adaptive manifests for the player',
+            summary: '把 rendition 切片并打包成 adaptive manifest 供 player 用',
           },
         ],
       },
@@ -284,23 +284,23 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'queue',
             title: 'Job queue',
-            subtitle: 'async work',
+            subtitle: '异步工作',
             kind: 'queue',
-            summary: 'buffers transcode jobs so ingest spikes never block uploads or playback',
+            summary: '缓冲 transcode job，让 ingest 峰值永远不会阻塞上传或 playback',
           },
           {
             id: 'workers',
             title: 'Worker farm',
-            subtitle: 'encode renditions',
+            subtitle: '编码 rendition',
             kind: 'compute',
-            summary: 'fans one source video into every bitrate rendition in parallel',
+            summary: '把一个源视频并行 fan-out 成每一个 bitrate rendition',
           },
           {
             id: 'liveEncoder',
             title: 'Live encoder',
-            subtitle: 'real-time',
+            subtitle: '实时',
             kind: 'compute',
-            summary: 'transcodes live ingest in real time with no chance to re-encode',
+            summary: '实时 transcode 直播 ingest，没有重新编码的机会',
           },
         ],
       },
@@ -312,16 +312,16 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'objectStore',
             title: 'Object store',
-            subtitle: 'video files',
+            subtitle: '视频文件',
             kind: 'objectstore',
-            summary: 'durably holds source videos and every encoded rendition as the playback origin',
+            summary: '作为 playback origin，持久存放源视频和每一个编码出的 rendition',
           },
           {
             id: 'metadataDb',
             title: 'Metadata DB',
-            subtitle: 'catalog rows',
+            subtitle: 'catalog 行',
             kind: 'db',
-            summary: 'stores titles, manifests, and per-video metadata that playback looks up',
+            summary: '存放标题、manifest，以及 playback 要查的每个视频的 metadata',
           },
         ],
       },
@@ -342,13 +342,13 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
   }),
   meters: [
     { id: 'cdnOffload', label: 'CDN offload / origin egress' },
-    { id: 'transcodeBacklog', label: 'Transcode backlog' },
-    { id: 'objectStorage', label: 'Object storage size' },
+    { id: 'transcodeBacklog', label: 'Transcode 积压' },
+    { id: 'objectStorage', label: 'Object storage 大小' },
     { id: 'metadataQps', label: 'Metadata QPS' },
-    { id: 'deliveryLatency', label: 'Global delivery latency' },
+    { id: 'deliveryLatency', label: '全球分发延迟' },
   ],
   decisions: [
-    { id: 'cdn', title: 'CDN delivery' },
+    { id: 'cdn', title: 'CDN 分发' },
     { id: 'transcodePipeline', title: 'Transcode pipeline' },
     { id: 'adaptiveBitrate', title: 'Adaptive bitrate' },
     { id: 'objectStorage', title: 'Object storage' },
@@ -357,38 +357,38 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
   ],
   sourceBackedRules: [
     {
-      title: 'Streaming video is delivered from CDN caches, not the origin',
+      title: '流媒体视频从 CDN cache 分发，而不是 origin',
       source: 'AWS CloudFront',
       url: 'https://aws.amazon.com/cloudfront/',
       summary:
-        'A CDN caches segments at edge locations near viewers; the origin only serves cache misses, which is the only way playback egress scales.',
+        'CDN 在靠近观众的 edge 节点缓存 segment；origin 只服务 cache miss，这是 playback egress 唯一能扩展的方式。',
     },
     {
-      title: 'Adaptive bitrate streaming packages multiple renditions for the player to switch between',
+      title: 'Adaptive bitrate streaming 打包多个 rendition 供 player 切换',
       source: 'Apple HTTP Live Streaming',
       url: 'https://developer.apple.com/streaming/',
       summary:
-        'HLS (and DASH) describe a media playlist of segmented renditions so the player picks a bitrate that fits current bandwidth; this is why ingest must encode several profiles.',
+        'HLS（和 DASH）用一份切好片的 rendition media playlist，让 player 挑一个适配当前带宽的 bitrate；这正是 ingest 必须编码好几档 profile 的原因。',
     },
     {
-      title: 'Transcoding is run as asynchronous jobs on a worker farm fed by a queue',
+      title: 'Transcoding 作为异步 job 跑在由 queue 喂料的 worker farm 上',
       source: 'AWS Elemental MediaConvert',
       url: 'https://aws.amazon.com/mediaconvert/',
       summary:
-        'File-based transcoding is submitted as jobs and processed by elastic workers, so upload spikes queue up instead of blocking the request path.',
+        '基于文件的 transcoding 以 job 形式提交，由弹性 worker 处理，于是上传峰值排队而不是阻塞请求路径。',
     },
     {
-      title: 'Object storage is the durable, scalable origin for media files',
+      title: 'Object storage 是媒体文件持久、可扩展的 origin',
       source: 'Amazon S3',
       url: 'https://aws.amazon.com/s3/',
       summary:
-        'Source videos and every rendition live in object storage, which scales storage and durability independently of the compute and serving tiers.',
+        '源视频和每一个 rendition 都放在 object storage 里，它的存储和持久性独立于计算和服务层扩展。',
     },
   ],
   teachingAssumptions: [
-    'Playback bandwidth is modeled as concurrentViewers x peak multiplier x ~5 Mbps; CDN offload assumes hot content caches well at the edge.',
-    'Transcode compute is approximated as profiles x source minutes x a fixed factor per worker; real encoders vary by codec and resolution.',
-    'Storage counts source plus renditions per video; single-node QPS, egress, and storage budgets are conservative teaching numbers, not vendor limits.',
+    'Playback 带宽按 concurrentViewers x 峰值倍数 x ~5 Mbps 建模；CDN offload 假设热门内容在 edge 缓存命中率高。',
+    'Transcode 计算量近似为 profile 数 x 源分钟数 x 每 worker 的固定系数；真实 encoder 随 codec 和分辨率而变。',
+    'Storage 算上每个视频的源加 rendition；单节点的 QPS、egress 和存储预算都是保守的教学数字，不是厂商上限。',
   ],
   teachingWalkthrough: [
     {
@@ -397,10 +397,10 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
       focus: 'Clips on one box',
       scenarioId: 'single-box',
       question:
-        'A small site has 50 uploads/day, one rendition, and ~200 viewers. Do you need a CDN, a queue, or a worker farm yet?',
+        '一个小站点每天 50 个上传、一档 rendition、~200 个观众。现在需要 CDN、queue 或 worker farm 吗？',
       reveal:
-        'No. One server can transcode a few short clips inline and serve the files directly; 200 viewers at a few Mbps is well under one box of egress. A CDN, a job queue, and a worker farm would all be premature — moving parts with no load to justify them.',
-      takeaway: 'Start simple: one box that transcodes inline and serves files directly is correct at small scale.',
+        '不需要。一台服务器就能 inline transcode 几个短 clip 并直接服务文件；200 个观众、每人几 Mbps，远低于单机 egress。CDN、job queue 和 worker farm 此刻都还早——多出来的部件却没有负载来支撑它们。',
+      takeaway: '从简单开始：小规模下一台机器 inline transcode 加直接服务文件就是对的。',
     },
     {
       id: 'viewers',
@@ -408,10 +408,10 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
       focus: 'Viewers take off',
       scenarioId: 'viewers-grow',
       question:
-        'Uploads are still modest, but concurrent viewers jump to 200k at a 4x peak. What saturates first, and what is the cheapest fix?',
+        '上传量还不大，但并发观众跳到 20 万、4 倍峰值。什么先饱和，最便宜的解法是什么？',
       reveal:
-        'Origin egress saturates long before anything else — 200k viewers at peak is hundreds of Gbps. Playback segments are highly cacheable, so a CDN offloads almost all of it and the origin only serves misses. This also forces adaptive bitrate so weak connections still play.',
-      takeaway: 'Playback is read-heavy and cacheable; a CDN, not bigger origins, is how delivery scales.',
+        'Origin egress 远早于其它东西先饱和——峰值 20 万观众就是几百 Gbps。Playback segment 极易缓存，所以一个 CDN 几乎把它全 offload 掉，origin 只服务 miss。这也逼出 adaptive bitrate，让弱连接也能播。',
+      takeaway: 'Playback 是读重且可缓存的；靠 CDN 而不是更大的 origin 来扩展分发。',
     },
     {
       id: 'uploads',
@@ -419,10 +419,10 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
       focus: 'Uploads flood in',
       scenarioId: 'uploads-grow',
       question:
-        'Now 200k uploads/day arrive, each fanned into 6 renditions. Why not just transcode every upload inline on the API server?',
+        '现在每天 20 万上传，每个 fan-out 成 6 档 rendition。为什么不在 API server 上把每个上传都 inline transcode 掉？',
       reveal:
-        'Transcoding is compute-heavy and bursty: 6 profiles x minutes of video x many uploads far exceeds inline capacity, and a spike would block the request path. Put jobs on a queue and process them on an elastic worker farm, so ingest spikes drain over time instead of failing uploads.',
-      takeaway: 'Decouple ingest from compute: a queue plus a worker farm absorbs transcode spikes asynchronously.',
+        'Transcoding 计算密集又突发：6 档 profile x 视频分钟数 x 海量上传，远超 inline 容量，一个峰值就会阻塞请求路径。把 job 放到 queue 上，交给弹性 worker farm 处理，这样 ingest 峰值随时间慢慢消化，而不是让上传失败。',
+      takeaway: '把 ingest 和计算解耦：queue 加 worker farm 异步吸收 transcode 峰值。',
     },
     {
       id: 'catalog',
@@ -430,10 +430,10 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
       focus: 'Huge catalog',
       scenarioId: 'huge-catalog',
       question:
-        '800M videos x several renditions is petabytes, and metadata lookups climb with viewers. Can one storage node and one DB hold that?',
+        '8 亿视频 x 好几档 rendition 就是 PB 级，metadata 查询又随观众增长。一个存储节点加一个 DB 装得下吗？',
       reveal:
-        'No. Media belongs in object storage that scales independently of compute, and the metadata — titles, manifests, view state — outgrows a single database, so it shards or moves to a horizontally scalable store. Only metadata hits your DB; the bytes stay in object storage behind the CDN.',
-      takeaway: 'Separate the bytes from the metadata: object storage for files, a sharded store for catalog rows.',
+        '装不下。媒体该放在独立于计算扩展的 object storage 里，而 metadata——标题、manifest、观看状态——超出单个数据库，所以要 shard 或迁到一个可横向扩展的 store。只有 metadata 打到你的 DB；字节留在 CDN 后面的 object storage 里。',
+      takeaway: '把字节和 metadata 分开：文件放 object storage，catalog 行放 sharded store。',
     },
     {
       id: 'global',
@@ -441,10 +441,10 @@ export const videoStreamingLabDefinition: SystemDesignLabDefinition = {
       focus: 'Global + live',
       scenarioId: 'global-live',
       question:
-        'Tens of millions watch worldwide, including live events with a 10x peak. Is one region behind one CDN enough?',
+        '全球数千万人观看，还有 10 倍峰值的直播活动。一个 region 后面挂一个 CDN 够吗？',
       reveal:
-        'No — a single region cannot serve global startup latency or absorb a viral/live peak, so you replicate to multiple regions and spread delivery across multiple CDNs. Live adds a real-time encoding path with no re-encode safety net, which is why it runs on its own low-latency pipeline.',
-      takeaway: 'For global low-latency and live, go multi-region, multi-CDN, and give live its own real-time path.',
+        '不够——单个 region 既给不了全球的启动延迟，也吸收不了爆款/直播峰值，所以你要复制到多个 region，并把分发铺到多个 CDN。Live 又多出一条没有重编码兜底的实时编码路径，所以它跑在自己专属的低延迟 pipeline 上。',
+      takeaway: '要全球低延迟加直播，就上 multi-region、multi-CDN，并给 live 一条专属的实时路径。',
     },
   ],
   analyze: analyzeVideoStreamingWorkload,
@@ -543,35 +543,35 @@ function analyzeVideoStreamingWorkload(workload: WorkloadValues): LabAnalysis {
         ratio: originEgressGbps / comfortableOriginEgressGbps,
         valueText: `${formatRate(originEgressGbps)} Gbps origin`,
         copy: needsCdn
-          ? `The CDN serves the cacheable bulk; the origin still pushes about ${formatRate(originEgressGbps)} Gbps of misses out of ${formatRate(peakEgressGbps)} Gbps at peak.`
-          : `Every viewer streams from the origin: ${formatRate(peakEgressGbps)} Gbps at peak with no edge to offload it.`,
+          ? `CDN 服务可缓存的大头；峰值 ${formatRate(peakEgressGbps)} Gbps 里，origin 仍要推大约 ${formatRate(originEgressGbps)} Gbps 的 miss。`
+          : `每个观众都从 origin 拉流：峰值 ${formatRate(peakEgressGbps)} Gbps，没有 edge 来 offload。`,
       },
       transcodeBacklog: {
         ratio: requiredWorkers / 1,
-        valueText: `${formatCount(Math.ceil(requiredWorkers))} ${pluralize('worker', requiredWorkers)}`,
+        valueText: `${formatCount(Math.ceil(requiredWorkers))} 个 worker`,
         copy: needsTranscodePipeline
-          ? `${formatCount(uploadsPerDay)} uploads/day x ${Math.round(transcodeProfiles)} profiles needs ~${formatCount(Math.ceil(requiredWorkers))} encode ${pluralize('worker', requiredWorkers)} draining a queue.`
-          : 'Ingest is light enough to transcode inline; no queue or worker farm is justified yet.',
+          ? `每天 ${formatCount(uploadsPerDay)} 上传 x ${Math.round(transcodeProfiles)} 档 profile，需要 ~${formatCount(Math.ceil(requiredWorkers))} 个编码 worker 来消化一个 queue。`
+          : 'Ingest 足够轻，可以 inline transcode；还用不上 queue 或 worker farm。',
       },
       objectStorage: {
         ratio: objectStorageTerabytes / comfortableObjectStorageTerabytes,
         valueText: formatStorageGigabytes(objectStorageTerabytes * 1_000),
-        copy: `${formatCount(catalogSize)} videos x source plus ${Math.round(transcodeProfiles)} renditions land in object storage.`,
+        copy: `${formatCount(catalogSize)} 个视频 x 源加 ${Math.round(transcodeProfiles)} 档 rendition，都落进 object storage。`,
       },
       metadataQps: {
         ratio: metadataQps / comfortableMetadataQps,
         valueText: `${formatRate(metadataQps)}/s`,
         copy: needsMetadataShard
-          ? `${formatRate(metadataQps)}/s of manifest and metadata reads over ${formatCount(catalogSize)} rows outgrows one DB node.`
-          : `Metadata reads sit around ${formatRate(metadataQps)}/s — comfortable for a single database.`,
+          ? `${formatCount(catalogSize)} 行之上 ${formatRate(metadataQps)}/s 的 manifest 和 metadata 读，超出单个 DB 节点。`
+          : `Metadata 读在 ${formatRate(metadataQps)}/s 上下——单个数据库轻松撑住。`,
       },
       deliveryLatency: {
         ratio: geoPressure,
-        valueText: `${formatCount(globalRegions)} ${pluralize('region', globalRegions)}`,
+        valueText: `${formatCount(globalRegions)} 个 region`,
         copy:
           needsMultiRegion
-            ? 'A global audience and peak spikes push delivery toward multiple regions and CDNs for startup latency and capacity.'
-            : 'A single region with local traffic needs no multi-region or multi-CDN delivery yet.',
+            ? '全球受众加峰值尖峰，把分发推向多个 region 和 CDN，换取启动延迟和容量。'
+            : '单个 region、本地流量，暂时不需要 multi-region 或 multi-CDN 分发。',
       },
     },
     decisions: buildDecisions({
@@ -629,72 +629,69 @@ function buildReasons(
   if (analysis.needsCdn) {
     reasons.push({
       severity: analysis.peakEgressGbps > comfortableOriginEgressGbps * 10 ? 'danger' : 'warning',
-      text: `${formatCount(analysis.peakViewers)} peak viewers push ~${formatRate(
+      text: `${formatCount(analysis.peakViewers)} 峰值观众推出 ~${formatRate(
         analysis.peakEgressGbps,
-      )} Gbps; serve cacheable segments from a CDN so the origin only handles misses.`,
+      )} Gbps；用 CDN 服务可缓存的 segment，让 origin 只处理 miss。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Playback egress is low enough that the origin can serve video files directly without a CDN.',
+      text: 'Playback egress 足够低，origin 不用 CDN 也能直接服务视频文件。',
     });
   }
 
   if (analysis.needsTranscodePipeline) {
     reasons.push({
       severity: analysis.requiredWorkers > 200 ? 'danger' : 'warning',
-      text: `${formatCount(analysis.uploadsPerDay)} uploads/day x ${Math.round(
+      text: `每天 ${formatCount(analysis.uploadsPerDay)} 上传 x ${Math.round(
         analysis.transcodeProfiles,
-      )} renditions needs ~${formatCount(
+      )} 档 rendition，需要 ~${formatCount(
         Math.ceil(analysis.requiredWorkers),
-      )} encode workers behind a queue, not inline transcoding.`,
+      )} 个编码 worker 挂在 queue 后面，而非 inline transcoding。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Ingest volume is small enough to transcode inline; no job queue or worker farm is justified yet.',
+      text: 'Ingest 量足够小，可以 inline transcode；还用不上 job queue 或 worker farm。',
     });
   }
 
   if (analysis.adaptiveBitrate) {
     reasons.push({
       severity: 'ok',
-      text: 'Adaptive bitrate packages renditions into HLS/DASH so players switch quality to match bandwidth.',
+      text: 'Adaptive bitrate 把 rendition 打包成 HLS/DASH，让 player 按带宽切换画质。',
     });
   }
 
   if (analysis.needsObjectStorage) {
     reasons.push({
       severity: analysis.objectStorageTerabytes > comfortableObjectStorageTerabytes * 4 ? 'danger' : 'warning',
-      text: `${formatCount(analysis.catalogSize)} videos with all renditions reach ~${formatStorageGigabytes(
+      text: `${formatCount(analysis.catalogSize)} 个视频连同所有 rendition 达到 ~${formatStorageGigabytes(
         analysis.objectStorageTerabytes * 1_000,
-      )}; keep the bytes in object storage that scales apart from compute.`,
+      )}；把字节留在独立于计算扩展的 object storage 里。`,
     });
   }
 
   if (analysis.needsMetadataShard) {
     reasons.push({
       severity: 'warning',
-      text: `${formatRate(
+      text: `大 catalog 之上 ${formatRate(
         analysis.metadataQps,
-      )}/s of manifest and metadata reads over a large catalog outgrows one DB node; shard or move to a scalable store.`,
+      )}/s 的 manifest 和 metadata 读超出单个 DB 节点；shard 或迁到一个可扩展的 store。`,
     });
   }
 
   if (analysis.needsMultiRegion) {
     reasons.push({
       severity: 'warning',
-      text: `${formatCount(analysis.globalRegions)} ${pluralize(
-        'region',
-        analysis.globalRegions,
-      )} and peak spikes push delivery to multiple regions and CDNs for startup latency and capacity.`,
+      text: `${formatCount(analysis.globalRegions)} 个 region 加峰值尖峰，把分发推向多个 region 和 CDN，换取启动延迟和容量。`,
     });
   }
 
   if (analysis.liveStreaming) {
     reasons.push({
       severity: 'warning',
-      text: 'Live streaming needs a real-time encoding path with no chance to re-encode, separate from the batch file pipeline.',
+      text: 'Live streaming 需要一条没有重编码机会的实时编码路径，独立于批处理的文件 pipeline。',
     });
   }
 
@@ -716,46 +713,46 @@ function buildDecisions(
     cdn: {
       state: flags.needsCdn ? 'needed' : 'not-yet',
       copy: flags.needsCdn
-        ? `Cache segments at the edge; the CDN absorbs the cacheable bulk and the origin only serves ~${formatRate(
+        ? `在 edge 缓存 segment；CDN 吸收可缓存的大头，origin 只服务 ~${formatRate(
             flags.originEgressGbps,
-          )} Gbps of misses.`
-        : 'No CDN yet — the origin serves the modest playback egress directly.',
+          )} Gbps 的 miss。`
+        : '还不需要 CDN——origin 直接服务这点不大的 playback egress。',
     },
     transcodePipeline: {
       state: flags.needsTranscodePipeline ? 'needed' : 'not-yet',
       copy: flags.needsTranscodePipeline
-        ? `Queue transcode jobs and run ~${formatCount(
+        ? `把 transcode job 入队，跑 ~${formatCount(
             Math.ceil(flags.requiredWorkers),
-          )} elastic encode workers so ingest spikes drain asynchronously.`
-        : 'Inline transcoding is fine while uploads are few; a queue and worker farm would be premature.',
+          )} 个弹性编码 worker，让 ingest 峰值异步消化。`
+        : '上传少时 inline transcoding 没问题；queue 和 worker farm 还为时过早。',
     },
     adaptiveBitrate: {
       state: flags.adaptiveBitrate ? 'useful' : 'not-yet',
       copy: flags.adaptiveBitrate
-        ? 'Package HLS/DASH renditions so the player switches bitrate to match each viewer’s bandwidth.'
-        : 'A single rendition is served as-is; no ABR packaging while quality switching is not needed.',
+        ? '把 HLS/DASH rendition 打包好，让 player 切换 bitrate 适配每个观众的带宽。'
+        : '单档 rendition 原样服务；不需要切画质时就不做 ABR 打包。',
     },
     objectStorage: {
       state: flags.needsObjectStorage ? 'needed' : 'useful',
       copy: flags.needsObjectStorage
-        ? `Store source and renditions (~${formatStorageGigabytes(
+        ? `把源和 rendition（~${formatStorageGigabytes(
             flags.objectStorageTerabytes * 1_000,
-          )}) in object storage that scales storage and durability apart from compute.`
-        : 'Object storage holds source and renditions; the footprint still fits comfortably on one tier.',
+          )}）放进 object storage，它的存储和持久性独立于计算扩展。`
+        : 'Object storage 存源和 rendition；体量还能轻松放进单层。',
     },
     metadataStore: {
       state: flags.needsMetadataShard ? 'needed' : 'useful',
       copy: flags.needsMetadataShard
-        ? `Shard the metadata store (or use a horizontally scalable DB) to absorb ${formatRate(
+        ? `Shard metadata store（或用一个可横向扩展的 DB）来吸收 ${formatRate(
             flags.metadataQps,
-          )}/s of manifest and catalog reads.`
-        : 'A single metadata database serves manifest and catalog lookups while QPS and row count stay modest.',
+          )}/s 的 manifest 和 catalog 读。`
+        : 'QPS 和行数都还不大时，单个 metadata 数据库就能服务 manifest 和 catalog 查询。',
     },
     multiRegion: {
       state: flags.needsMultiRegion ? 'needed' : 'not-yet',
       copy: flags.needsMultiRegion
-        ? 'Replicate to multiple regions and spread delivery across CDNs for global startup latency and peak capacity.'
-        : 'A single region behind one CDN is enough while the audience is local and peaks are modest.',
+        ? '复制到多个 region，并把分发铺到多个 CDN，换取全球启动延迟和峰值容量。'
+        : '受众本地、峰值不大时，一个 region 后面挂一个 CDN 就够了。',
     },
   };
 }
@@ -778,18 +775,18 @@ function chooseArchitectureTitle(flags: ArchitectureFlags): string {
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (!flags.needsCdn && !flags.needsTranscodePipeline && !flags.needsObjectStorage) {
-    return 'One server transcodes uploads inline and serves the files directly. Nothing more is justified at this scale.';
+    return '一台服务器 inline transcode 上传并直接服务文件。这个规模下再多就没必要了。';
   }
   if (flags.needsMultiRegion && (flags.needsObjectStorage || flags.needsMetadataShard)) {
-    return 'Multi-region multi-CDN delivery fronts a queue-fed transcode farm, with media in object storage and catalog rows in a sharded metadata store; live runs on its own real-time path.';
+    return 'Multi-region multi-CDN 分发挡在一个由 queue 喂料的 transcode farm 前面，媒体放 object storage、catalog 行放 sharded metadata store；live 跑在自己专属的实时路径上。';
   }
   if (flags.needsTranscodePipeline && flags.needsObjectStorage) {
-    return 'A CDN offloads playback while a queue and worker farm transcode uploads asynchronously into object storage, separate from the metadata database.';
+    return 'CDN offload 掉 playback，同时 queue 加 worker farm 把上传异步 transcode 进 object storage，与 metadata 数据库分开。';
   }
   if (flags.needsCdn) {
-    return 'A CDN absorbs the cacheable playback traffic so a single origin only serves misses and handles the modest ingest.';
+    return 'CDN 吸收可缓存的 playback 流量，于是单个 origin 只服务 miss，并处理这点不大的 ingest。';
   }
-  return 'One server still covers both ingest and playback.';
+  return '一台服务器仍然兼管 ingest 和 playback。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {
@@ -811,8 +808,4 @@ function chooseArchitecturePath(flags: ArchitectureFlags): string {
 function numericValue(workload: WorkloadValues, key: string): number {
   const value = workload[key];
   return typeof value === 'number' ? value : 0;
-}
-
-function pluralize(unit: string, value: number): string {
-  return Math.round(value) === 1 ? unit : `${unit}s`;
 }

@@ -21,26 +21,26 @@ const comfortablePresenceUpdatesPerSecond = 300_000; // presence/heartbeat event
 
 export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
   id: 'chat-messaging',
-  eyebrow: 'System Design Lab',
-  title: 'A chat backend is a connection problem first: millions of live sockets must be tracked, then a message fanned out to everyone who should receive it.',
+  eyebrow: '系统设计 Lab',
+  title: '聊天后端首先是个连接问题：得追踪上百万条活跃 socket，再把一条消息 fan-out 给所有该收到它的人。',
   summary:
-    'Change concurrent connections, message rate, group size, the online ratio, history retention, devices per user, and regions. The design moves from a single socket server to a gateway fleet with a session registry, a routing and fan-out tier with a presence service, durable per-user inboxes, and finally cross-region routing with offline push.',
+    '调节并发连接数、消息速率、群组大小、在线比例、历史保留时长、每用户设备数和 region 数。设计会从单台 socket server 演进到带 session registry 的 connection gateway 集群、带 presence service 的路由与 fan-out 层、持久化的 per-user inbox，最后是跨 region 路由加 offline push。',
   controls: [
     {
       id: 'concurrentConnections',
-      label: 'Concurrent connections',
-      help: 'Live WebSocket/long-lived TCP sockets held open at once. This sets the gateway memory floor.',
+      label: '并发连接数',
+      help: '同时保持打开的活跃 WebSocket / 长连接 TCP socket。它决定了 gateway 的内存下限。',
       min: 100,
       max: 500_000_000,
       defaultValue: 50_000,
       scale: 'log',
-      unit: 'connections',
+      unit: '条',
       format: 'count',
     },
     {
       id: 'messagesPerSecond',
-      label: 'Messages sent',
-      help: 'Inbound messages per second before group amplification. Each one may fan out to many recipients.',
+      label: '消息发送速率',
+      help: '群组放大之前的每秒入站消息数。每条都可能 fan-out 给很多收件人。',
       min: 1,
       max: 50_000_000,
       defaultValue: 5_000,
@@ -49,19 +49,19 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'averageGroupSize',
-      label: 'Average group size',
-      help: 'Recipients per message. A 1:1 chat is 2; a large group multiplies every send into many deliveries.',
+      label: '平均群组大小',
+      help: '每条消息的收件人数。1:1 聊天是 2 人；大群会把每次发送放大成很多次投递。',
       min: 2,
       max: 100_000,
       defaultValue: 2,
       scale: 'log',
-      unit: 'members',
+      unit: '人',
       format: 'count',
     },
     {
       id: 'onlineRatio',
-      label: 'Online ratio',
-      help: 'Share of recipients currently connected. The rest must be written to a durable inbox for later.',
+      label: '在线比例',
+      help: '当前已连接的收件人占比。其余的得写进持久化 inbox 留待之后投递。',
       min: 1,
       max: 100,
       defaultValue: 60,
@@ -70,8 +70,8 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'historyRetentionSeconds',
-      label: 'History retention',
-      help: 'How long messages are kept so offline and multi-device users can sync them later.',
+      label: '历史保留时长',
+      help: '消息保留多久，好让离线和多设备用户之后能同步它们。',
       min: 3_600,
       max: 315_360_000,
       defaultValue: 2_592_000,
@@ -80,24 +80,24 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'devicesPerUser',
-      label: 'Devices per user',
-      help: 'Active devices per account. Every delivery is multiplied so each device stays in sync.',
+      label: '每用户设备数',
+      help: '每个账号的活跃设备数。每次投递都会被翻倍，好让每台设备都保持同步。',
       min: 1,
       max: 10,
       defaultValue: 1,
       scale: 'linear',
-      unit: 'devices',
+      unit: '台',
       format: 'count',
     },
     {
       id: 'globalRegions',
-      label: 'Regions',
-      help: 'Regions terminating connections close to users; cross-region sends must be routed between them.',
+      label: 'Region 数',
+      help: '在靠近用户处终结连接的 region；跨 region 的发送必须在它们之间路由。',
       min: 1,
       max: 20,
       defaultValue: 1,
       scale: 'linear',
-      unit: 'regions',
+      unit: '个',
       format: 'count',
     },
   ],
@@ -105,13 +105,13 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'endToEndEncryption',
       label: 'End-to-end encryption',
-      help: 'Encrypt on the device so the server only routes ciphertext; it cannot fan out by reading content.',
+      help: '在设备上加密，服务端只路由密文；它没法靠读取内容来做 fan-out。',
       defaultValue: false,
     },
     {
       id: 'readReceipts',
-      label: 'Read receipts',
-      help: 'Track delivered/read state per recipient and device, adding a return event for every message.',
+      label: '已读回执',
+      help: '按收件人和设备追踪已送达 / 已读状态，给每条消息加一个回传事件。',
       defaultValue: true,
     },
   ],
@@ -119,8 +119,8 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'small-1on1',
       step: '01',
-      title: 'Small 1:1 app',
-      summary: 'A few thousand sockets exchanging direct messages.',
+      title: '小型 1:1 应用',
+      summary: '几千条 socket 互发直接消息。',
       values: {
         concurrentConnections: 5_000,
         messagesPerSecond: 200,
@@ -136,8 +136,8 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'many-connections',
       step: '02',
-      title: 'Millions of connections',
-      summary: 'Live sockets outgrow what one server can hold.',
+      title: '百万级连接',
+      summary: '活跃 socket 数超出了单台 server 能容纳的量。',
       values: {
         concurrentConnections: 5_000_000,
         messagesPerSecond: 80_000,
@@ -153,8 +153,8 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'large-groups',
       step: '03',
-      title: 'Large group chats',
-      summary: 'One send fans out to thousands of members.',
+      title: '大群聊',
+      summary: '一次发送 fan-out 给数千名成员。',
       values: {
         concurrentConnections: 20_000_000,
         messagesPerSecond: 200_000,
@@ -170,8 +170,8 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'offline-multidevice',
       step: '04',
-      title: 'Offline + multi-device',
-      summary: 'Most recipients are offline or on several devices.',
+      title: '离线 + 多设备',
+      summary: '大多数收件人都离线，或者用着好几台设备。',
       values: {
         concurrentConnections: 60_000_000,
         messagesPerSecond: 1_000_000,
@@ -187,8 +187,8 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'global-messenger',
       step: '05',
-      title: 'Global messenger',
-      summary: 'Hundreds of millions of sockets across regions.',
+      title: '全球级 messenger',
+      summary: '跨多个 region 的数亿条 socket。',
       values: {
         concurrentConnections: 300_000_000,
         messagesPerSecond: 20_000_000,
@@ -203,20 +203,20 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'Real-time chat / messaging architecture diagram',
+    title: '实时聊天 / 消息架构图',
     description:
-      'Whiteboard-style architecture diagram for a chat backend: clients on persistent sockets, a connection gateway fleet with a session registry, a routing and fan-out tier with a presence service, durable message and per-user inbox stores, and an async push tier for offline devices.',
+      '聊天后端的白板风格架构图：持久 socket 上的 client、带 session registry 的 connection gateway 集群、带 presence service 的路由与 fan-out 层、持久化的消息存储和 per-user inbox，以及面向离线设备的异步 push 层。',
     columns: [
       {
         id: 'clients',
-        label: 'Clients',
+        label: 'Client',
         variant: 'clients',
         nodes: [
           {
             id: 'client',
             title: 'Client',
-            subtitle: 'persistent socket',
-            summary: 'holds a long-lived WebSocket to send and receive messages in real time',
+            subtitle: '持久 socket',
+            summary: '保持一条长连接 WebSocket，用来实时收发消息',
             kind: 'client',
           },
         ],
@@ -229,57 +229,57 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'gateway',
             title: 'WS gateway',
-            subtitle: 'holds sockets',
-            summary: 'terminates persistent connections and keeps each live socket in memory',
+            subtitle: '持有 socket',
+            summary: '终结持久连接，把每条活跃 socket 保存在内存里',
             kind: 'lb',
           },
           {
             id: 'sessionRegistry',
             title: 'Session registry',
-            subtitle: 'user to server',
-            summary: 'maps each online user/device to the gateway node that holds its socket',
+            subtitle: '用户到 server',
+            summary: '把每个在线 user/device 映射到持有其 socket 的 gateway 节点',
             kind: 'scheduler',
           },
         ],
       },
       {
         id: 'routing',
-        label: 'Routing + presence',
+        label: '路由 + presence',
         variant: 'backbone',
         nodes: [
           {
             id: 'router',
             title: 'Router / fan-out',
-            subtitle: 'message to members',
-            summary: 'expands a send to every group member and routes each to the right gateway',
+            subtitle: '消息到成员',
+            summary: '把一次发送展开给每个群成员，并各自路由到对应的 gateway',
             kind: 'service',
           },
           {
             id: 'presence',
             title: 'Presence',
-            subtitle: 'online + receipts',
-            summary: 'tracks who is online and propagates delivered/read receipts',
+            subtitle: '在线 + 回执',
+            summary: '追踪谁在线，并传播已送达 / 已读回执',
             kind: 'service',
           },
         ],
       },
       {
         id: 'storage',
-        label: 'Message store',
+        label: '消息存储',
         variant: 'storage',
         nodes: [
           {
             id: 'messageStore',
-            title: 'Message store',
-            subtitle: 'durable log',
-            summary: 'persists every message so history survives restarts and late syncs',
+            title: '消息存储',
+            subtitle: '持久日志',
+            summary: '持久化每条消息，让历史能熬过重启和迟到的同步',
             kind: 'db',
           },
           {
             id: 'inbox',
             title: 'Per-user inbox',
-            subtitle: 'offline queue',
-            summary: 'queues messages per recipient device until it reconnects and pulls them',
+            subtitle: '离线队列',
+            summary: '按收件设备排队消息，直到它重连并拉取',
             kind: 'queue',
           },
         ],
@@ -292,8 +292,8 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'pushService',
             title: 'Push service',
-            subtitle: 'wake devices',
-            summary: 'sends APNs/FCM notifications to wake offline devices so they sync',
+            subtitle: '唤醒设备',
+            summary: '发 APNs/FCM 通知唤醒离线设备，让它们去同步',
             kind: 'external',
           },
         ],
@@ -311,110 +311,110 @@ export const chatMessagingLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'connectionMemory', label: 'Connection memory' },
-    { id: 'fanoutRate', label: 'Message fan-out rate' },
-    { id: 'inboxStorage', label: 'Inbox + history storage' },
-    { id: 'presenceCost', label: 'Presence + receipt cost' },
-    { id: 'crossRegion', label: 'Cross-region routing' },
+    { id: 'connectionMemory', label: '连接内存' },
+    { id: 'fanoutRate', label: '消息 fan-out 速率' },
+    { id: 'inboxStorage', label: 'Inbox + 历史存储' },
+    { id: 'presenceCost', label: 'Presence + 回执开销' },
+    { id: 'crossRegion', label: '跨 region 路由' },
   ],
   decisions: [
-    { id: 'connectionLayer', title: 'Connection / session layer' },
-    { id: 'routing', title: 'Message routing' },
-    { id: 'fanout', title: 'Group fan-out' },
+    { id: 'connectionLayer', title: '连接 / session 层' },
+    { id: 'routing', title: '消息路由' },
+    { id: 'fanout', title: '群组 fan-out' },
     { id: 'inbox', title: 'Offline inbox' },
     { id: 'presence', title: 'Presence service' },
     { id: 'encryption', title: 'End-to-end encryption' },
   ],
   sourceBackedRules: [
     {
-      title: 'A WebSocket is a persistent, full-duplex connection the server must keep open',
+      title: 'WebSocket 是一条服务端必须保持打开的持久全双工连接',
       source: 'MDN Web Docs',
       url: 'https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API',
       summary:
-        'Each chat client holds one long-lived connection, so the gateway tier is sized by how many open sockets it can keep in memory, not by request rate.',
+        '每个聊天 client 都持有一条长连接，所以 gateway 层的规模取决于它能在内存里保持多少条打开的 socket，而不是请求速率。',
     },
     {
-      title: 'Publish/subscribe decouples senders from the many recipients of a message',
+      title: 'Publish/subscribe 把发送者和消息的众多收件人解耦开',
       source: 'Google Cloud Pub/Sub',
       url: 'https://cloud.google.com/pubsub/docs/overview',
       summary:
-        'Fan-out to a group is naturally a pub/sub problem: one publish is delivered to every subscriber, which is how a router expands a send to many members.',
+        'fan-out 给一个群天然就是个 pub/sub 问题：一次 publish 投递给每个 subscriber，router 正是这样把一次发送展开给众多成员的。',
     },
     {
-      title: 'A durable message queue lets offline recipients receive messages later',
+      title: '持久化的 message queue 让离线收件人之后还能收到消息',
       source: 'AWS SQS',
       url: 'https://aws.amazon.com/sqs/',
       summary:
-        'A per-user inbox queue holds messages for disconnected or multi-device users until each device reconnects and drains its queue.',
+        'per-user inbox queue 为掉线或多设备用户暂存消息，直到每台设备重连并把它的 queue 抽干。',
     },
     {
-      title: 'End-to-end encryption means the server routes ciphertext it cannot read',
+      title: 'End-to-end encryption 意味着服务端路由的是它读不了的密文',
       source: 'Signal Protocol',
       url: 'https://signal.org/docs/',
       summary:
-        'With E2EE the server can fan out and store messages but cannot inspect content, so server-side features must work on ciphertext and metadata only.',
+        '有了 E2EE，服务端能 fan-out 和存储消息，但没法窥探内容，所以服务端的功能只能基于密文和 metadata 来做。',
     },
   ],
   teachingAssumptions: [
-    'Each live socket is charged a fixed memory budget (kernel plus app buffers plus session state); real costs vary by stack.',
-    'Fan-out rate is messages per second times average group size times devices per user; presence and receipts add return events on top.',
-    'Single-node gateway, routing, inbox-write, and presence budgets are conservative teaching numbers, not vendor limits.',
+    '每条活跃 socket 按一份固定的内存预算计费（内核加 app buffer 加 session state）；真实成本因技术栈而异。',
+    'fan-out 速率 = 每秒消息数 × 平均群组大小 × 每用户设备数；presence 和回执还会在此之上叠加回传事件。',
+    '单节点的 gateway、路由、inbox 写入和 presence 预算都是保守的教学数字，不是厂商上限。',
   ],
   teachingWalkthrough: [
     {
       id: 'one-socket-server',
       step: '01',
-      focus: 'A few thousand sockets',
+      focus: '几千条 socket',
       scenarioId: 'small-1on1',
       question:
-        'A small 1:1 app holds ~5k connections doing 200 direct messages/s. Do you need anything beyond one socket server and one database?',
+        '一个小型 1:1 应用维持着约 5k 条连接，每秒 200 条直接消息。除了一台 socket server 和一个 database，你还需要别的吗？',
       reveal:
-        'No. 5k open sockets fit in one box, and a 1:1 send fans out to just the other party. A session registry, a dedicated fan-out tier, and offline push are all premature — the one server already knows where both sockets are.',
-      takeaway: 'Start simplest: one socket server can both hold the connections and route between them.',
+        '不需要。5k 条打开的 socket 一台机器就能装下，1:1 发送也只 fan-out 给对方一个人。session registry、专门的 fan-out 层、offline push 全都为时过早 —— 这台 server 本来就知道两条 socket 都在哪。',
+      takeaway: '从最简开始：一台 socket server 既能持有连接、又能在它们之间路由。',
     },
     {
       id: 'connection-fleet',
       step: '02',
-      focus: 'Millions of connections',
+      focus: '百万级连接',
       scenarioId: 'many-connections',
       question:
-        'Now 5,000,000 sockets must stay open. What runs out first, and what does that force into the design?',
+        '现在有 5,000,000 条 socket 必须保持打开。什么会最先耗尽？它又会逼着设计变成什么样？',
       reveal:
-        'Connection memory runs out long before CPU. Millions of live sockets cannot fit on one box, so you need a gateway fleet — and the moment connections span many nodes, a send must find which node holds the recipient, which forces a session registry mapping user/device to gateway.',
-      takeaway: 'Holding millions of sockets forces a gateway fleet plus a session registry to route between them.',
+        '连接内存远在 CPU 之前先耗尽。上百万条活跃 socket 一台机器装不下，所以你需要一个 gateway 集群 —— 而一旦连接横跨多个节点，一次发送就得找出哪个节点持有收件人，这就逼出一个把 user/device 映射到 gateway 的 session registry。',
+      takeaway: '要持有上百万条 socket，就得用 gateway 集群加一个 session registry 在它们之间路由。',
     },
     {
       id: 'group-fanout',
       step: '03',
-      focus: 'Large group chats',
+      focus: '大群聊',
       scenarioId: 'large-groups',
       question:
-        '200k sends/s into groups of ~2,000 members. Why is the inbound message rate the wrong number to scale on?',
+        '每秒 200k 次发送进入约 2,000 人的群。为什么按入站消息速率来扩容是个错的数？',
       reveal:
-        'Because group chat amplifies: each send becomes group-size deliveries, so 200k/s into 2,000-member groups is hundreds of millions of deliveries per second. That belongs in a dedicated routing/fan-out tier (pub/sub-style) that expands one publish to every member, instead of the sender doing N writes inline.',
-      takeaway: 'Scale on fan-out (messages times group size), not on raw inbound message rate.',
+        '因为群聊会放大：每次发送变成「群大小」次投递，所以每秒 200k 次进入 2,000 人的群，就是每秒数亿次投递。这该交给一个专门的路由 / fan-out 层（pub/sub 式）把一次 publish 展开给每个成员，而不是让发送者内联做 N 次写入。',
+      takeaway: '按 fan-out（消息数 × 群大小）扩容，而不是按原始的入站消息速率。',
     },
     {
       id: 'offline-inbox',
       step: '04',
-      focus: 'Offline + multi-device',
+      focus: '离线 + 多设备',
       scenarioId: 'offline-multidevice',
       question:
-        'Only ~25% of recipients are online and each user has ~4 devices. Where do messages for the offline majority go?',
+        '只有约 25% 的收件人在线，且每个用户有约 4 台设备。给那离线的大多数人的消息去哪了？',
       reveal:
-        'Into a durable per-user inbox queue, one cursor per device, so each device pulls what it missed when it reconnects. Multi-device multiplies every delivery, and offline devices are woken by an async push (APNs/FCM) rather than a live socket. Fan-out is now mostly writes to inboxes, not live sends.',
-      takeaway: 'Offline and multi-device users need durable per-device inboxes plus async push, not just live delivery.',
+        '进一个持久化的 per-user inbox queue，每台设备一个 cursor，这样每台设备重连时就能拉取它错过的内容。多设备会把每次投递翻倍，离线设备靠异步 push（APNs/FCM）唤醒，而不是靠活跃 socket。现在 fan-out 大多是往 inbox 写入，而非实时发送。',
+      takeaway: '离线和多设备用户需要持久化的 per-device inbox 加异步 push，光靠实时投递不够。',
     },
     {
       id: 'global-regions',
       step: '05',
-      focus: 'Global, many regions',
+      focus: '全球、多 region',
       scenarioId: 'global-messenger',
       question:
-        'Hundreds of millions of sockets terminate across 10 regions. Is a gateway fleet plus inbox in one region enough?',
+        '数亿条 socket 终结在 10 个 region。在单个 region 里搞一个 gateway 集群加 inbox 就够了吗？',
       reveal:
-        'No. You terminate connections in the region nearest each user to keep round trips short, and a cross-region routing backbone moves a message to wherever the recipients are connected. The session registry and inboxes become regionally partitioned, and presence and receipts must propagate across regions too.',
-      takeaway: 'Globally, terminate sockets per region and route messages across a backbone to where recipients live.',
+        '不够。你要在离每个用户最近的 region 终结连接，好把往返时延压短，再用一条跨 region 路由 backbone 把消息送到收件人当前连着的地方。session registry 和 inbox 变成按 region 分区，presence 和回执也必须跨 region 传播。',
+      takeaway: '在全球范围，按 region 终结 socket，再经一条 backbone 把消息路由到收件人所在处。',
     },
   ],
   analyze: analyzeChatMessagingWorkload,
@@ -506,35 +506,35 @@ function analyzeChatMessagingWorkload(workload: WorkloadValues): LabAnalysis {
         ratio: connectionMemoryGigabytes / gigabytesPerGatewayNode,
         valueText: formatStorageGigabytes(connectionMemoryGigabytes),
         copy: needsGatewayFleet
-          ? `${formatCount(concurrentConnections)} live sockets need a gateway fleet; one node holds about ${formatCount(connectionsPerGatewayNode)}.`
-          : `${formatCount(concurrentConnections)} live sockets fit comfortably on one gateway box.`,
+          ? `${formatCount(concurrentConnections)} 条活跃 socket 需要一个 gateway 集群；单个节点大约容纳 ${formatCount(connectionsPerGatewayNode)} 条。`
+          : `${formatCount(concurrentConnections)} 条活跃 socket 一台 gateway 机器就能轻松装下。`,
       },
       fanoutRate: {
         ratio: deliveriesPerSecond / comfortableRoutingFanoutPerSecond,
         valueText: `${formatRate(deliveriesPerSecond)}/s`,
         copy: needsFanout
-          ? `Each send hits ~${formatCount(averageGroupSize)} members across ${formatCount(devicesPerUser)} ${pluralize('device', devicesPerUser)}, so ${formatRate(messagesPerSecond)}/s becomes ${formatRate(deliveriesPerSecond)}/s of deliveries.`
-          : `Small groups keep deliveries close to the ${formatRate(messagesPerSecond)}/s send rate.`,
+          ? `每次发送命中约 ${formatCount(averageGroupSize)} 名成员、横跨 ${formatCount(devicesPerUser)} 台 device，所以 ${formatRate(messagesPerSecond)}/s 变成 ${formatRate(deliveriesPerSecond)}/s 的投递。`
+          : `小群让投递量贴近 ${formatRate(messagesPerSecond)}/s 的发送速率。`,
       },
       inboxStorage: {
         ratio: storageGigabytes / 2_000,
         valueText: formatStorageGigabytes(storageGigabytes),
-        copy: `${formatCount(messagesPerSecond)}/s retained for ${formatDurationDays(historyRetentionSeconds)} is about ${formatStorageGigabytes(storageGigabytes)} per region of history and inbox.`,
+        copy: `${formatCount(messagesPerSecond)}/s 保留 ${formatDurationDays(historyRetentionSeconds)}，大约是每个 region ${formatStorageGigabytes(storageGigabytes)} 的历史和 inbox。`,
       },
       presenceCost: {
         ratio: presenceUpdatesPerSecond / comfortablePresenceUpdatesPerSecond,
         valueText: `${formatRate(presenceUpdatesPerSecond)}/s`,
         copy: readReceipts
-          ? `Presence churn plus a read receipt per delivery drives about ${formatRate(presenceUpdatesPerSecond)}/s of status events.`
-          : `Presence churn alone drives about ${formatRate(presenceUpdatesPerSecond)}/s of status events.`,
+          ? `presence 变动加上每次投递的一条已读回执，带来约 ${formatRate(presenceUpdatesPerSecond)}/s 的状态事件。`
+          : `光是 presence 变动就带来约 ${formatRate(presenceUpdatesPerSecond)}/s 的状态事件。`,
       },
       crossRegion: {
         ratio: crossRegionPressure,
-        valueText: `${formatCount(globalRegions)} ${pluralize('region', globalRegions)}`,
+        valueText: `${formatCount(globalRegions)} 个 region`,
         copy:
           globalRegions > 1
-            ? 'Sockets terminate per region, so a routing backbone moves messages to wherever recipients are connected.'
-            : 'A single region terminates every connection, so no cross-region routing is needed yet.',
+            ? 'socket 按 region 终结，所以需要一条路由 backbone 把消息送到收件人当前连着的地方。'
+            : '单个 region 终结所有连接，所以暂时不需要跨 region 路由。',
       },
     },
     decisions: buildDecisions({
@@ -595,21 +595,21 @@ function buildReasons(
       severity: analysis.connectionMemoryGigabytes > connectionsPerGatewayNode * bytesPerConnection / 1_000_000_000 * 4 ? 'danger' : 'warning',
       text: `${formatCount(
         analysis.concurrentConnections,
-      )} live sockets (~${formatStorageGigabytes(
+      )} 条活跃 socket（约 ${formatStorageGigabytes(
         analysis.connectionMemoryGigabytes,
-      )} of buffers) exceed one box; spread them across a gateway fleet.`,
+      )} 的 buffer）超出了一台机器；把它们摊到一个 gateway 集群上。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'The connection count fits on a single socket server, so no gateway fleet is needed yet.',
+      text: '连接数一台 socket server 就能装下，所以暂时不需要 gateway 集群。',
     });
   }
 
   if (analysis.needsSessionRegistry) {
     reasons.push({
       severity: 'warning',
-      text: 'With sockets spread across nodes, a send must look up which gateway holds the recipient, so a session registry maps each user/device to its server.',
+      text: 'socket 摊到多个节点后，一次发送必须查出哪个 gateway 持有收件人，所以用一个 session registry 把每个 user/device 映射到它的 server。',
     });
   }
 
@@ -618,57 +618,54 @@ function buildReasons(
       severity: analysis.deliveriesPerSecond > comfortableRoutingFanoutPerSecond * 4 ? 'danger' : 'warning',
       text: `${formatRate(
         analysis.messagesPerSecond,
-      )}/s into ~${formatCount(
+      )}/s 进入约 ${formatCount(
         analysis.averageGroupSize,
-      )}-member groups is ${formatRate(
+      )} 人的群，是 ${formatRate(
         analysis.deliveriesPerSecond,
-      )}/s of deliveries; a dedicated routing/fan-out tier expands each send.`,
+      )}/s 的投递；用一个专门的路由 / fan-out 层来展开每次发送。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `Groups of ~${formatCount(
+      text: `约 ${formatCount(
         analysis.averageGroupSize,
-      )} keep deliveries near the ${formatRate(
+      )} 人的群让投递量贴近 ${formatRate(
         analysis.messagesPerSecond,
-      )}/s send rate, so the server can route each message inline.`,
+      )}/s 的发送速率，所以 server 可以内联路由每条消息。`,
     });
   }
 
   reasons.push({
     severity: analysis.storageGigabytes > 2_000 ? 'warning' : 'ok',
-    text: `Retaining ${formatRate(
+    text: `保留 ${formatRate(
       analysis.messagesPerSecond,
-    )}/s of messages keeps about ${formatStorageGigabytes(
+    )}/s 的消息，会为离线和多设备同步留下每个 region 约 ${formatStorageGigabytes(
       analysis.storageGigabytes,
-    )} of history per region for offline and multi-device sync.`,
+    )} 的历史。`,
   });
 
   if (analysis.needsInbox) {
     reasons.push({
       severity: 'warning',
-      text: `Only ${Math.round(
+      text: `只有 ${Math.round(
         analysis.onlineRatio,
-      )}% online and ${formatCount(
+      )}% 在线、每用户 ${formatCount(
         analysis.devicesPerUser,
-      )} ${pluralize(
-        'device',
-        analysis.devicesPerUser,
-      )} per user means most deliveries are durable inbox writes pulled on reconnect.`,
+      )} 台 device，意味着大多数投递都是持久化的 inbox 写入，等重连时再拉取。`,
     });
   }
 
   if (analysis.readReceipts) {
     reasons.push({
       severity: 'ok',
-      text: 'Read receipts add a delivered/read event per recipient and device, doubling the status traffic the presence service carries.',
+      text: '已读回执给每个收件人和设备各加一个已送达 / 已读事件，把 presence service 承载的状态流量翻了一倍。',
     });
   }
 
   if (analysis.endToEndEncryption) {
     reasons.push({
       severity: 'ok',
-      text: 'End-to-end encryption means the server routes and stores ciphertext only; fan-out works on recipient lists and metadata, not message content.',
+      text: 'End-to-end encryption 意味着服务端只路由和存储密文；fan-out 基于收件人列表和 metadata，而非消息内容。',
     });
   }
 
@@ -677,7 +674,7 @@ function buildReasons(
       severity: 'warning',
       text: `${formatCount(
         analysis.globalRegions,
-      )} regions terminate connections locally, so a cross-region backbone routes each message to where its recipients are connected.`,
+      )} 个 region 各自就近终结连接，所以用一条跨 region backbone 把每条消息路由到它收件人连着的地方。`,
     });
   }
 
@@ -698,99 +695,99 @@ function buildDecisions(
     connectionLayer: {
       state: flags.needsGatewayFleet ? 'needed' : 'useful',
       copy: flags.needsGatewayFleet
-        ? `Run a gateway fleet for ${formatCount(flags.concurrentConnections)} sockets and keep a session registry mapping each user/device to its node.`
-        : 'One socket server can hold every connection while the count is small.',
+        ? `为 ${formatCount(flags.concurrentConnections)} 条 socket 跑一个 gateway 集群，并维护一个把每个 user/device 映射到其节点的 session registry。`
+        : '连接数还小时，一台 socket server 就能持有所有连接。',
     },
     routing: {
       state: flags.needsFanout ? 'needed' : flags.needsSessionRegistry ? 'useful' : 'not-yet',
       copy: flags.needsFanout
-        ? 'Route through a pub/sub-style fan-out tier so one publish reaches every member without the sender doing N inline writes.'
+        ? '通过一个 pub/sub 式的 fan-out 层路由，让一次 publish 触达每个成员，而不用发送者做 N 次内联写入。'
         : flags.needsSessionRegistry
-          ? 'A thin router uses the session registry to forward each message to the holding gateway.'
-          : 'The single server routes directly between the two sockets it already holds.',
+          ? '一个轻量 router 用 session registry 把每条消息转发给持有它的 gateway。'
+          : '单台 server 在它已经持有的两条 socket 之间直接路由。',
     },
     fanout: {
       state: flags.needsFanout ? 'needed' : 'not-yet',
       copy: flags.needsFanout
-        ? `Group amplification turns sends into ${formatRate(flags.deliveriesPerSecond)}/s of deliveries, so fan-out must be its own tier.`
-        : 'Groups are small, so a send expands to only a couple of recipients inline.',
+        ? `群组放大把发送变成 ${formatRate(flags.deliveriesPerSecond)}/s 的投递，所以 fan-out 必须自成一层。`
+        : '群很小，所以一次发送只内联展开给寥寥几个收件人。',
     },
     inbox: {
       state: flags.needsInbox ? 'needed' : 'not-yet',
       copy: flags.needsInbox
-        ? 'Give each recipient device a durable inbox queue with its own cursor so it can sync missed messages on reconnect.'
-        : 'Nearly everyone is online on one device, so live delivery is enough without durable inboxes.',
+        ? '给每台收件设备一个带自己 cursor 的持久化 inbox queue，让它重连时能同步错过的消息。'
+        : '几乎所有人都在单台设备上在线，所以实时投递就够了，不需要持久化 inbox。',
     },
     presence: {
       state: flags.needsPresence ? 'needed' : 'not-yet',
       copy: flags.needsPresence
-        ? 'A presence service tracks online state and propagates delivered/read receipts across gateways.'
-        : 'Presence and receipts are light enough to keep on the single server for now.',
+        ? '一个 presence service 追踪在线状态，并跨 gateway 传播已送达 / 已读回执。'
+        : 'presence 和回执还轻量，暂时放在单台 server 上即可。',
     },
     encryption: {
       state: flags.endToEndEncryption ? 'tradeoff' : 'not-yet',
       copy: flags.endToEndEncryption
-        ? 'End-to-end encryption removes server-side content access; routing, search, and server-side previews must adapt to ciphertext.'
-        : 'Messages are encrypted in transit and at rest but readable by the server, keeping fan-out and features simple.',
+        ? 'End-to-end encryption 拿掉了服务端对内容的访问权；路由、search 和服务端预览都得改成适配密文。'
+        : '消息在传输和落盘时加密，但服务端可读，让 fan-out 和各项功能保持简单。',
     },
   };
 }
 
 function chooseArchitectureTitle(flags: ArchitectureFlags): string {
   if (!flags.needsGatewayFleet && !flags.needsFanout && !flags.needsInbox && !flags.needsCrossRegion) {
-    return 'Single socket server + database';
+    return '单台 socket server + database';
   }
   if (flags.needsCrossRegion) {
-    return 'Multi-region gateways + cross-region routing';
+    return '多 region gateway + 跨 region 路由';
   }
   if (flags.needsInbox && flags.needsFanout) {
-    return 'Gateway fleet + fan-out + durable inboxes';
+    return 'Gateway 集群 + fan-out + 持久化 inbox';
   }
   if (flags.needsFanout) {
-    return 'Gateway fleet + routing / fan-out tier';
+    return 'Gateway 集群 + 路由 / fan-out 层';
   }
   if (flags.needsGatewayFleet) {
-    return 'Gateway fleet + session registry';
+    return 'Gateway 集群 + session registry';
   }
-  return 'Single socket server + database';
+  return '单台 socket server + database';
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (!flags.needsGatewayFleet && !flags.needsFanout && !flags.needsInbox && !flags.needsCrossRegion) {
-    return 'One socket server holds every connection and routes directly between the two sockets in a chat. Nothing else is justified yet.';
+    return '一台 socket server 持有所有连接，并在一次聊天的两条 socket 之间直接路由。此外的东西暂时都不值当。';
   }
   if (flags.needsCrossRegion) {
-    return 'Connections terminate in the region nearest each user, a cross-region backbone routes messages to where recipients are connected, and durable inboxes plus async push keep offline multi-device users in sync.';
+    return '连接在离每个用户最近的 region 终结，一条跨 region backbone 把消息路由到收件人连着的地方，持久化 inbox 加异步 push 让离线的多设备用户保持同步。';
   }
   if (flags.needsInbox && flags.needsFanout) {
-    return 'A gateway fleet holds the sockets, a fan-out tier expands each send to every member, and durable per-device inboxes plus push deliver to the offline majority.';
+    return '一个 gateway 集群持有 socket，一个 fan-out 层把每次发送展开给每个成员，持久化的 per-device inbox 加 push 投递给离线的大多数人。';
   }
   if (flags.needsFanout) {
-    return 'A gateway fleet plus a session registry locate recipients, and a routing/fan-out tier expands each send to every group member.';
+    return '一个 gateway 集群加一个 session registry 定位收件人，一个路由 / fan-out 层把每次发送展开给每个群成员。';
   }
   if (flags.needsGatewayFleet) {
-    return 'A gateway fleet spreads the sockets across many nodes, and a session registry maps each user/device to the node holding its connection.';
+    return '一个 gateway 集群把 socket 摊到多个节点上，一个 session registry 把每个 user/device 映射到持有其连接的节点。';
   }
-  return 'One socket server still covers the workload.';
+  return '一台 socket server 仍能覆盖这份负载。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {
   if (!flags.needsGatewayFleet && !flags.needsFanout && !flags.needsInbox && !flags.needsCrossRegion) {
-    return 'Send -> socket server -> recipient socket';
+    return '发送 -> socket server -> 收件人 socket';
   }
   if (flags.needsCrossRegion) {
-    return 'Send -> regional gateway -> cross-region router -> fan-out -> inbox / live socket';
+    return '发送 -> 区域 gateway -> 跨 region router -> fan-out -> inbox / 活跃 socket';
   }
   if (flags.needsInbox && flags.needsFanout) {
-    return 'Send -> gateway -> router/fan-out -> live sockets + per-device inboxes -> push';
+    return '发送 -> gateway -> router/fan-out -> 活跃 socket + per-device inbox -> push';
   }
   if (flags.needsFanout) {
-    return 'Send -> gateway -> session registry -> router/fan-out -> member gateways';
+    return '发送 -> gateway -> session registry -> router/fan-out -> 成员 gateway';
   }
   if (flags.needsGatewayFleet) {
-    return 'Send -> gateway -> session registry -> recipient gateway';
+    return '发送 -> gateway -> session registry -> 收件人 gateway';
   }
-  return 'Send -> socket server -> recipient socket';
+  return '发送 -> socket server -> 收件人 socket';
 }
 
 function numericValue(workload: WorkloadValues, key: string): number {
@@ -798,17 +795,13 @@ function numericValue(workload: WorkloadValues, key: string): number {
   return typeof value === 'number' ? value : 0;
 }
 
-function pluralize(unit: string, value: number): string {
-  return Math.round(value) === 1 ? unit : `${unit}s`;
-}
-
 function formatDurationDays(seconds: number): string {
   const days = seconds / 86_400;
   if (days >= 365) {
-    return `${(days / 365).toFixed(days >= 730 ? 0 : 1)} ${Math.round(days / 365) === 1 ? 'year' : 'years'}`;
+    return `${(days / 365).toFixed(days >= 730 ? 0 : 1)} 年`;
   }
   if (days >= 1) {
-    return `${Math.round(days)} ${Math.round(days) === 1 ? 'day' : 'days'}`;
+    return `${Math.round(days)} 天`;
   }
-  return `${Math.round(seconds / 3600)} hr`;
+  return `${Math.round(seconds / 3600)} 小时`;
 }

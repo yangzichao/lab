@@ -21,15 +21,15 @@ const singleCounterCreateBudget = 2_000;
 
 export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
   id: 'url-shortener',
-  eyebrow: 'System Design Lab',
-  title: 'A URL shortener is a read-heavy key-value lookup that outgrows one box from the read side first.',
+  eyebrow: '系统设计 Lab',
+  title: 'URL shortener 本质是一个 read-heavy 的 key-value lookup，会先从读这一侧撑爆单机。',
   summary:
-    'Change redirect and create rates, how many links are stored, hot-link skew, the short-code length, latency target, and regions. The design moves from a single database to cache-aside reads, a dedicated key-generation strategy, a sharded KV store, and multi-region edge redirects.',
+    '调节 redirect 和 create 的速率、存了多少 link、hot-link 倾斜程度、short-code 长度、latency 目标和 region 数量。设计会从单个 database 逐步演进到 cache-aside 读、专门的 key-generation 策略、sharded KV store，以及多 region 的 edge redirect。',
   controls: [
     {
       id: 'redirectQps',
-      label: 'Redirect rate',
-      help: 'Reads: short code looked up and 301/302 returned. This is the dominant traffic.',
+      label: 'Redirect 速率',
+      help: '读：查 short code 然后返回 301/302。这是占主导的流量。',
       min: 10,
       max: 5_000_000,
       defaultValue: 2_000,
@@ -38,8 +38,8 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'createQps',
-      label: 'Create rate',
-      help: 'Writes: new long URLs submitted to be shortened.',
+      label: 'Create 速率',
+      help: '写：提交新的 long URL 来缩短。',
       min: 1,
       max: 200_000,
       defaultValue: 20,
@@ -48,19 +48,19 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'totalUrls',
-      label: 'Stored links',
-      help: 'Total short-code to long-URL mappings kept in the system.',
+      label: '已存 link 数',
+      help: '系统里保存的 short-code 到 long-URL 的 mapping 总数。',
       min: 10_000,
       max: 100_000_000_000,
       defaultValue: 10_000_000,
       scale: 'log',
-      unit: 'links',
+      unit: '条',
       format: 'count',
     },
     {
       id: 'hotLinkShare',
-      label: 'Hot-link share',
-      help: 'Share of redirects that target the small set of currently popular links.',
+      label: 'Hot-link 占比',
+      help: 'redirect 中落在当前少数热门 link 上的比例。',
       min: 1,
       max: 99,
       defaultValue: 60,
@@ -69,19 +69,19 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'codeLength',
-      label: 'Short-code length',
-      help: 'Characters in the base62 code. Keyspace is 62^length.',
+      label: 'Short-code 长度',
+      help: 'base62 code 的字符数。keyspace 是 62^length。',
       min: 4,
       max: 12,
       defaultValue: 7,
       scale: 'linear',
-      unit: 'chars',
+      unit: '位',
       format: 'count',
     },
     {
       id: 'redirectLatencyMs',
-      label: 'Redirect latency target',
-      help: 'Budget for resolving a short code before the redirect is sent.',
+      label: 'Redirect latency 目标',
+      help: '发出 redirect 之前解析 short code 的时间预算。',
       min: 1,
       max: 200,
       defaultValue: 50,
@@ -90,27 +90,27 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'globalRegions',
-      label: 'Regions',
-      help: 'Regions that should serve redirects close to the user.',
+      label: 'Region 数',
+      help: '需要就近为用户提供 redirect 的 region 数量。',
       min: 1,
       max: 20,
       defaultValue: 1,
       scale: 'linear',
-      unit: 'regions',
+      unit: '个',
       format: 'count',
     },
   ],
   toggles: [
     {
       id: 'trackAnalytics',
-      label: 'Track click analytics',
-      help: 'Record each redirect for dashboards; should not slow the redirect itself.',
+      label: '记录点击 analytics',
+      help: '为 dashboard 记录每次 redirect；但不应拖慢 redirect 本身。',
       defaultValue: false,
     },
     {
       id: 'customAliases',
-      label: 'Allow custom aliases',
-      help: 'Let users pick their own code; rules out a pure auto-increment counter.',
+      label: '允许自定义 alias',
+      help: '让用户自己挑 code；这就排除了纯 auto-increment counter。',
       defaultValue: true,
     },
   ],
@@ -118,8 +118,8 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'personal',
       step: '01',
-      title: 'Personal tool',
-      summary: 'A few redirects per second over a small table.',
+      title: '个人小工具',
+      summary: '在一张小表上每秒几次 redirect。',
       values: {
         redirectQps: 50,
         createQps: 2,
@@ -135,8 +135,8 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'going-viral',
       step: '02',
-      title: 'A link goes viral',
-      summary: 'One link owns most of a heavy read spike.',
+      title: '某个 link 爆火',
+      summary: '一个 link 占据了大部分读流量高峰。',
       values: {
         redirectQps: 120_000,
         createQps: 30,
@@ -152,8 +152,8 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'public-api',
       step: '03',
-      title: 'Public shortener API',
-      summary: 'Many writers create links concurrently.',
+      title: '公开的 shortener API',
+      summary: '很多 writer 并发创建 link。',
       values: {
         redirectQps: 200_000,
         createQps: 20_000,
@@ -169,8 +169,8 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'billions-stored',
       step: '04',
-      title: 'Billions of links',
-      summary: 'Storage and writes outgrow one database.',
+      title: '数十亿条 link',
+      summary: 'storage 和写入撑爆单个 database。',
       values: {
         redirectQps: 800_000,
         createQps: 50_000,
@@ -186,8 +186,8 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'global-fast',
       step: '05',
-      title: 'Global, single-digit ms',
-      summary: 'Redirects must resolve near the user worldwide.',
+      title: '全球范围、个位数 ms',
+      summary: '全球用户的 redirect 都必须就近解析。',
       values: {
         redirectQps: 3_000_000,
         createQps: 30_000,
@@ -202,20 +202,20 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'URL shortener architecture diagram',
+    title: 'URL shortener 架构图',
     description:
-      'Whiteboard-style architecture diagram for a URL shortener: clients, edge CDN and application servers, a key-generation service and read cache, a primary mapping store with shards, and an async click-analytics stream.',
+      '白板风格的 URL shortener 架构图：client、edge CDN 和应用服务器、key-generation service 和读 cache、带 shard 的主 mapping store，以及一条异步的 click-analytics stream。',
     columns: [
       {
         id: 'clients',
-        label: 'Clients',
+        label: 'Client',
         variant: 'clients',
         nodes: [
           {
             id: 'client',
             title: 'Client',
             subtitle: 'redirect + create',
-            summary: 'follows short links and submits new long URLs to shorten',
+            summary: '点开 short link，并提交新的 long URL 去缩短',
             kind: 'client',
           },
         ],
@@ -228,36 +228,36 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'cdn',
             title: 'Edge / CDN',
-            subtitle: 'caches redirects',
-            summary: 'resolves hot redirects close to the user without hitting the origin',
+            subtitle: '缓存 redirect',
+            summary: '就近为用户解析热门 redirect，不用回 origin',
             kind: 'cdn',
           },
           {
             id: 'appServer',
             title: 'App server',
             subtitle: 'redirect + shorten',
-            summary: 'looks up codes for redirects and handles create requests',
+            summary: '为 redirect 查 code，并处理 create 请求',
             kind: 'api',
           },
         ],
       },
       {
         id: 'keys',
-        label: 'Keys + cache',
+        label: 'Key + cache',
         variant: 'backbone',
         nodes: [
           {
             id: 'idService',
             title: 'Key service',
-            subtitle: 'unique codes',
-            summary: 'hands out collision-free short codes (ranges, Snowflake, or pre-generated keys)',
+            subtitle: '唯一 code',
+            summary: '分发无冲突的 short code（区间、Snowflake，或预生成的 key）',
             kind: 'service',
           },
           {
             id: 'cache',
             title: 'Read cache',
-            subtitle: 'hot mappings',
-            summary: 'serves code to URL lookups for popular links so the store is spared',
+            subtitle: '热门 mapping',
+            summary: '为热门 link 提供 code 到 URL 的 lookup，让 store 少受压',
             kind: 'cache',
           },
         ],
@@ -270,15 +270,15 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'db',
             title: 'Mapping DB',
-            subtitle: 'code to URL',
-            summary: 'durable store of every short code and its long URL',
+            subtitle: 'code 到 URL',
+            summary: '持久保存每个 short code 及其 long URL',
             kind: 'db',
           },
           {
             id: 'shards',
             title: 'KV shards',
-            subtitle: 'partition by code',
-            summary: 'spreads mappings across nodes for storage and write throughput',
+            subtitle: '按 code 分区',
+            summary: '把 mapping 分散到多个 node 上，以扩 storage 和写 throughput',
             kind: 'nosql',
           },
         ],
@@ -291,8 +291,8 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'events',
             title: 'Click stream',
-            subtitle: 'async events',
-            summary: 'collects redirect events for dashboards off the hot path',
+            subtitle: '异步 event',
+            summary: '在 hot path 之外收集 redirect event 供 dashboard 用',
             kind: 'stream',
           },
         ],
@@ -311,110 +311,110 @@ export const urlShortenerLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'readPath', label: 'Read path load' },
-    { id: 'writePath', label: 'Write path load' },
+    { id: 'readPath', label: '读路径负载' },
+    { id: 'writePath', label: '写路径负载' },
     { id: 'storage', label: 'Mapping storage' },
-    { id: 'keyspace', label: 'Code keyspace fill' },
-    { id: 'geoLatency', label: 'Global redirect latency' },
+    { id: 'keyspace', label: 'Code keyspace 填充率' },
+    { id: 'geoLatency', label: '全球 redirect latency' },
   ],
   decisions: [
     { id: 'cache', title: 'Read cache' },
-    { id: 'idStrategy', title: 'Code generation' },
+    { id: 'idStrategy', title: 'Code 生成' },
     { id: 'store', title: 'Mapping store' },
     { id: 'sharding', title: 'Storage sharding' },
-    { id: 'edge', title: 'Edge redirects' },
+    { id: 'edge', title: 'Edge redirect' },
     { id: 'analytics', title: 'Click analytics' },
   ],
   sourceBackedRules: [
     {
-      title: 'A URL shortener is dominated by reads (redirects), not writes',
+      title: 'URL shortener 由读（redirect）主导，而不是写',
       source: 'System Design Primer',
       url: 'https://github.com/donnemartin/system-design-primer',
       summary:
-        'The canonical write-up treats redirect lookups as the high-volume path and link creation as comparatively rare, which is why read scaling comes first.',
+        '经典写法把 redirect lookup 当成高流量路径，link 创建相对罕见，所以才先做读扩展。',
     },
     {
-      title: 'Cache-aside keeps hot reads off the database',
+      title: 'Cache-aside 让热门读不打到 database',
       source: 'Azure Architecture',
       url: 'https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside',
       summary:
-        'The cache-aside pattern loads items into a cache on demand; for skewed redirect traffic a small cache absorbs most lookups.',
+        'cache-aside 模式按需把数据加载进 cache；对倾斜的 redirect 流量，一个小 cache 就能吸收掉大部分 lookup。',
     },
     {
-      title: 'Redis is a common in-memory store for hot key-value lookups',
+      title: 'Redis 是热门 key-value lookup 常用的 in-memory store',
       source: 'Redis Docs',
       url: 'https://redis.io/docs/latest/develop/',
       summary:
-        'In-memory point lookups serve popular short codes at sub-millisecond latency, far below a disk-backed store.',
+        'in-memory 的 point lookup 能以亚毫秒 latency 服务热门 short code，远低于基于磁盘的 store。',
     },
     {
-      title: 'A CDN serves cacheable responses from locations near the user',
+      title: 'CDN 从离用户近的位置提供可缓存的响应',
       source: 'AWS CloudFront',
       url: 'https://aws.amazon.com/cloudfront/',
       summary:
-        'Redirects for popular links are cacheable at the edge, cutting cross-region round trips for a global audience.',
+        '热门 link 的 redirect 可以在 edge 缓存，对全球用户能省掉跨 region 的往返。',
     },
   ],
   teachingAssumptions: [
-    'Redirects are modeled as cacheable point lookups; cache hit rate is approximated from the hot-link share.',
-    'Single-node read, write, and storage budgets are conservative teaching numbers, not vendor limits.',
-    'Code keyspace fill uses base62^length; real systems also reserve key ranges per ID server to avoid collisions.',
+    'redirect 被建模成可缓存的 point lookup；cache 命中率由 hot-link 占比估算。',
+    '单 node 的读、写、storage 预算是保守的教学数字，不是厂商上限。',
+    'Code keyspace 填充率用 base62^length 计算；真实系统还会给每个 ID server 预留 key 区间来避免冲突。',
   ],
   teachingWalkthrough: [
     {
       id: 'one-box',
       step: '01',
-      focus: 'One user, one box',
+      focus: '一个用户，一台机器',
       scenarioId: 'personal',
       question:
-        'A personal shortener does ~50 redirects/s over 50k links. Do you need anything beyond one app server and one database?',
+        '一个个人 shortener 在 50k link 上做约 50 redirects/s。除了一个 app server 加一个 database，你还需要别的吗？',
       reveal:
-        'No. A redirect is a primary-key point lookup, and 50 reads/s is trivial for an indexed table. A cache, a key service, and sharding would all be premature — they add moving parts with no load to justify them.',
-      takeaway: 'Start with the simplest correct design: one indexed table behind one app server.',
+        '不需要。redirect 是一次 primary-key point lookup，50 reads/s 对一张带 index 的表来说微不足道。cache、key service 和 sharding 在这里都太超前——它们增加了零件，却没有负载能为之买单。',
+      takeaway: '从最简单的正确设计开始：一个 app server 后面挂一张带 index 的表。',
     },
     {
       id: 'viral',
       step: '02',
-      focus: 'A link goes viral',
+      focus: '某个 link 爆火',
       scenarioId: 'going-viral',
       question:
-        'One link suddenly takes 85% of 120k redirects/s. What saturates first, and what is the cheapest fix?',
+        '一个 link 突然占据了 120k redirects/s 里的 85%。什么会先饱和，最便宜的解法是什么？',
       reveal:
-        'The database read path saturates. But the traffic is extremely skewed, so a cache-aside layer (or the CDN edge) absorbs the hot links at a very high hit rate — the store only sees the long tail of misses.',
-      takeaway: 'Redirects are cacheable; skew lets a small cache soak up most of the read traffic.',
+        'database 的读路径会先饱和。但流量极度倾斜，所以一层 cache-aside（或 CDN edge）能以非常高的命中率吸收掉热门 link——store 只会看到长尾的 miss。',
+      takeaway: 'redirect 是可缓存的；倾斜让一个小 cache 就能吃下大部分读流量。',
     },
     {
       id: 'writers',
       step: '03',
-      focus: 'Public API, many writers',
+      focus: '公开 API，很多 writer',
       scenarioId: 'public-api',
       question:
-        'Now 20k new links/s arrive from many servers. Why not let each server INSERT a random code and retry on conflict?',
+        '现在有 20k 个新 link/s 从很多 server 涌来。为什么不让每个 server INSERT 一个随机 code、冲突就重试？',
       reveal:
-        'Random-plus-collision-check wastes round trips and races as the table fills. High create rates want a dedicated strategy: counter ranges handed to each server, Snowflake-style IDs, or a key-generation service that pre-mints codes. Custom aliases must still be checked separately.',
-      takeaway: 'At high create rates, generating unique codes becomes its own coordination problem.',
+        '随机加冲突检测会浪费往返，表越满竞态越严重。高 create 速率需要专门的策略：分给每个 server 的 counter 区间、Snowflake 风格的 ID，或一个预先铸 code 的 key-generation service。自定义 alias 仍然得单独检查唯一性。',
+      takeaway: '在高 create 速率下，生成唯一 code 本身就变成了一个协调问题。',
     },
     {
       id: 'billions',
       step: '04',
-      focus: 'Billions of links',
+      focus: '数十亿条 link',
       scenarioId: 'billions-stored',
       question:
-        '20 billion mappings at ~500 bytes each is ~10 TB, with 50k writes/s. Can one database hold and serve that?',
+        '200 亿条 mapping、每条约 500 bytes 就是约 10 TB，还有 50k writes/s。一个 database 装得下、扛得住吗？',
       reveal:
-        'No — storage and write throughput exceed a single node, so you shard by code or move to a horizontally scalable KV store; the pure point-lookup access pattern fits KV perfectly. A 7-char base62 code is also filling up at this scale, so the code lengthens to keep collisions rare.',
-      takeaway: 'When storage and writes outgrow one node, shard by key into a KV store built for point lookups.',
+        '装不下——storage 和写 throughput 都超出单 node，所以你要按 code 做 shard，或换成可水平扩展的 KV store；纯 point-lookup 的访问模式正好完美契合 KV。在这个规模下 7 字符的 base62 code 也快填满了，所以要加长 code，让冲突保持罕见。',
+      takeaway: '当 storage 和写都撑爆单 node 时，按 key 做 shard，落到一个为 point lookup 而生的 KV store。',
     },
     {
       id: 'global',
       step: '05',
-      focus: 'Global, single-digit ms',
+      focus: '全球范围、个位数 ms',
       scenarioId: 'global-fast',
       question:
-        'Users worldwide expect sub-10 ms redirects. Is a sharded KV store in one region enough?',
+        '全球用户都期望低于 10 ms 的 redirect。单 region 里的一个 sharded KV store 够吗？',
       reveal:
-        'No — cross-region network latency alone blows the budget. Replicate the mapping to edge/CDN caches and multiple regions so redirects resolve near the user. Creates can stay centralized because they are rare and tolerate higher latency.',
-      takeaway: 'For global low-latency reads, push the mapping to the edge; keep the rare writes where consistency is easy.',
+        '不够——光是跨 region 的网络 latency 就把预算花光了。把 mapping replicate 到 edge/CDN cache 和多个 region，让 redirect 就近解析。create 可以保持集中，因为它罕见、也能容忍更高的 latency。',
+      takeaway: '要做全球低 latency 的读，就把 mapping 推到 edge；把罕见的写留在容易保证 consistency 的地方。',
     },
   ],
   analyze: analyzeUrlShortenerWorkload,
@@ -491,31 +491,31 @@ function analyzeUrlShortenerWorkload(workload: WorkloadValues): LabAnalysis {
         ratio: dbRedirectReads / comfortableDbReadsPerSecond,
         valueText: `${formatRate(dbRedirectReads)}/s`,
         copy: needsCache
-          ? `Cache absorbs the hot share; the store still sees about ${formatRate(dbRedirectReads)}/s of misses.`
-          : 'Every redirect hits the database directly while there is no cache layer.',
+          ? `cache 吸收掉热门那部分；store 仍然会看到约 ${formatRate(dbRedirectReads)}/s 的 miss。`
+          : '没有 cache 层时，每次 redirect 都直接打到 database。',
       },
       writePath: {
         ratio: createQps / comfortableDbWritesPerSecond,
         valueText: `${formatRate(createQps)}/s`,
-        copy: 'New links are durable writes plus a unique-code allocation.',
+        copy: '新 link 是持久写，外加一次唯一 code 的分配。',
       },
       storage: {
         ratio: storageGigabytes / comfortableStorageGigabytes,
         valueText: formatStorageGigabytes(storageGigabytes),
-        copy: `${formatCount(totalUrls)} mappings at roughly ${bytesPerMapping} bytes each.`,
+        copy: `${formatCount(totalUrls)} 条 mapping，每条约 ${bytesPerMapping} bytes。`,
       },
       keyspace: {
         ratio: keyspaceFill / 0.5,
         valueText: formatRatio(keyspaceFill),
-        copy: `${formatCount(totalUrls)} links against a 62^${Math.round(codeLength)} keyspace; collisions rise as it fills.`,
+        copy: `${formatCount(totalUrls)} 条 link 对应 62^${Math.round(codeLength)} 的 keyspace；越满冲突越多。`,
       },
       geoLatency: {
         ratio: geoPressure,
-        valueText: `${formatCount(globalRegions)} ${pluralize('region', globalRegions)}`,
+        valueText: `${formatCount(globalRegions)} 个 region`,
         copy:
           redirectLatencyMs <= 30 || globalRegions > 1
-            ? 'A tight latency target across regions pushes redirects toward edge and replicated reads.'
-            : 'A single region with a relaxed latency target needs no edge replication yet.',
+            ? '跨 region 的紧 latency 目标把 redirect 推向 edge 和 replicated 读。'
+            : '单 region 加宽松的 latency 目标，暂时还不需要 edge replication。',
       },
     },
     decisions: buildDecisions({
@@ -570,14 +570,14 @@ function buildReasons(
   if (analysis.needsCache) {
     reasons.push({
       severity: analysis.dbRedirectReads > comfortableDbReadsPerSecond ? 'danger' : 'warning',
-      text: `${formatRate(analysis.redirectQps)}/s of redirects with ${Math.round(
+      text: `${formatRate(analysis.redirectQps)}/s 的 redirect、配上 ${Math.round(
         analysis.hotLinkShare,
-      )}% hot-link skew should be served from a cache; only misses reach the store.`,
+      )}% 的 hot-link 倾斜，应该由 cache 来服务；只有 miss 才打到 store。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Read volume is low enough that the database can serve redirects directly without a cache.',
+      text: '读量足够低，database 不用 cache 就能直接服务 redirect。',
     });
   }
 
@@ -586,51 +586,48 @@ function buildReasons(
       severity: 'warning',
       text: `${formatRate(
         analysis.createQps,
-      )}/s of creates need a real code-generation strategy (counter ranges, Snowflake, or a key service), not random-and-retry.`,
+      )}/s 的 create 需要一个真正的 code-generation 策略（counter 区间、Snowflake，或 key service），而不是随机加重试。`,
     });
   }
 
   if (analysis.customAliases) {
     reasons.push({
       severity: 'ok',
-      text: 'Custom aliases rule out a pure auto-increment counter, so the code space and a uniqueness check must coexist.',
+      text: '自定义 alias 排除了纯 auto-increment counter，所以 code 空间和唯一性检查必须并存。',
     });
   }
 
   if (analysis.needsSharding) {
     reasons.push({
       severity: analysis.storageGigabytes > comfortableStorageGigabytes * 2 ? 'danger' : 'warning',
-      text: `${formatCount(analysis.totalUrls)} mappings (~${formatStorageGigabytes(
+      text: `${formatCount(analysis.totalUrls)} 条 mapping（约 ${formatStorageGigabytes(
         analysis.storageGigabytes,
-      )}) and the write rate exceed one node; shard by code into a KV store.`,
+      )}）加上写速率超出了单 node；按 code 做 shard，落进 KV store。`,
     });
   }
 
   if (analysis.needsLongerCode) {
     reasons.push({
       severity: 'warning',
-      text: `A ${Math.round(analysis.codeLength)}-char code is ${formatRatio(
+      text: `${Math.round(analysis.codeLength)} 字符的 code 已经填到 ${formatRatio(
         analysis.keyspaceFill,
-      )} full; lengthen the code to keep generation collision-free.`,
+      )} 满了；加长 code，让生成保持无冲突。`,
     });
   }
 
   if (analysis.needsCdn) {
     reasons.push({
       severity: 'warning',
-      text: `${formatCount(analysis.globalRegions)} ${pluralize(
-        'region',
-        analysis.globalRegions,
-      )} with a ${Math.round(
+      text: `${formatCount(analysis.globalRegions)} 个 region 加上 ${Math.round(
         analysis.redirectLatencyMs,
-      )} ms target push redirects to the edge and replicated reads.`,
+      )} ms 的目标，把 redirect 推向 edge 和 replicated 读。`,
     });
   }
 
   if (analysis.needsEvents) {
     reasons.push({
       severity: 'ok',
-      text: 'Click analytics is written asynchronously through an event stream so it never slows the redirect.',
+      text: 'Click analytics 通过一条 event stream 异步写入，所以从不拖慢 redirect。',
     });
   }
 
@@ -646,19 +643,19 @@ function buildDecisions(
   },
 ): Record<string, { state: DecisionState; copy: string }> {
   const idStrategyCopy = flags.customAliases
-    ? 'Allow custom aliases plus generated codes; both need a uniqueness check, so a counter alone will not do.'
+    ? '同时允许自定义 alias 和生成的 code；两者都要做唯一性检查，所以光靠 counter 不行。'
     : flags.needsIdService
-      ? `Generate codes with counter ranges, Snowflake-style IDs, or a key service to absorb ${formatRate(
+      ? `用 counter 区间、Snowflake 风格的 ID，或一个 key service 来生成 code，吸收 ${formatRate(
           flags.createQps,
-        )}/s of creates without contention.`
-      : 'A simple counter or random base62 code is fine while create volume is low.';
+        )}/s 的 create 而不产生争用。`
+      : 'create 量低的时候，一个简单的 counter 或随机 base62 code 就够了。';
 
   return {
     cache: {
       state: flags.needsCache ? 'needed' : 'not-yet',
       copy: flags.needsCache
-        ? 'Cache-aside the hot mappings (Redis); only misses fall through to the store.'
-        : 'No cache yet — the database serves the modest read volume directly.',
+        ? '对热门 mapping 做 cache-aside（Redis）；只有 miss 才落到 store。'
+        : '暂时没有 cache——database 直接服务这点读量。',
     },
     idStrategy: {
       state: flags.customAliases ? 'tradeoff' : flags.needsIdService ? 'needed' : 'useful',
@@ -667,60 +664,60 @@ function buildDecisions(
     store: {
       state: flags.needsSharding ? 'needed' : 'useful',
       copy: flags.needsSharding
-        ? 'Use a horizontally scalable KV store; the access pattern is pure point lookups by code.'
-        : 'A single relational or KV store holds every mapping while it fits on one node.',
+        ? '用一个可水平扩展的 KV store；访问模式是纯粹按 code 的 point lookup。'
+        : '只要还能装在单 node 上，一个 relational 或 KV store 就能放下所有 mapping。',
     },
     sharding: {
       state: flags.needsSharding ? 'needed' : 'not-yet',
       copy: flags.needsSharding
-        ? 'Shard by short code so storage and write throughput scale horizontally.'
-        : 'One node is enough until storage or write rate proves otherwise.',
+        ? '按 short code 做 shard，让 storage 和写 throughput 水平扩展。'
+        : '在 storage 或写速率证明不够之前，单 node 就足够了。',
     },
     edge: {
       state: flags.needsCdn ? 'needed' : 'not-yet',
       copy: flags.needsCdn
-        ? 'Serve redirects from CDN/edge caches and replicate mappings near users.'
-        : 'A single region is fine while latency targets are relaxed and traffic is local.',
+        ? '从 CDN/edge cache 提供 redirect，并把 mapping replicate 到离用户近的地方。'
+        : '只要 latency 目标宽松、流量本地化，单 region 就够了。',
     },
     analytics: {
       state: flags.needsEvents ? 'useful' : 'not-yet',
       copy: flags.needsEvents
-        ? 'Emit redirect events to a stream and aggregate offline; keep the hot path synchronous-free.'
-        : 'Click analytics is off, so the redirect path stays a single lookup.',
+        ? '把 redirect event 发到一条 stream 上离线聚合；让 hot path 不带同步开销。'
+        : 'Click analytics 关着，所以 redirect 路径保持单次 lookup。',
     },
   };
 }
 
 function chooseArchitectureTitle(flags: ArchitectureFlags): string {
   if (!flags.needsCache && !flags.needsSharding && !flags.needsCdn && !flags.needsIdService) {
-    return 'Single app + database';
+    return '单 app + database';
   }
   if (flags.needsCdn && (flags.needsSharding || flags.needsCache)) {
-    return 'Multi-region edge + sharded KV store';
+    return '多 region edge + sharded KV store';
   }
   if (flags.needsSharding) {
-    return 'Cache-aside reads + sharded KV store';
+    return 'Cache-aside 读 + sharded KV store';
   }
   if (flags.needsCache) {
-    return 'Cache-aside reads + single database';
+    return 'Cache-aside 读 + 单 database';
   }
-  return 'Single app + database';
+  return '单 app + database';
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (!flags.needsCache && !flags.needsSharding && !flags.needsCdn && !flags.needsIdService) {
-    return 'One app server and one indexed table resolve every redirect and store every new link. Nothing else is justified yet.';
+    return '一个 app server 加一张带 index 的表，就能解析每次 redirect 并存下每个新 link。其他东西暂时都还不必要。';
   }
   if (flags.needsCdn && (flags.needsSharding || flags.needsCache)) {
-    return 'Hot redirects resolve at the edge near each user, while a sharded KV store and a code-generation strategy handle scale and durable writes centrally.';
+    return '热门 redirect 在离用户近的 edge 解析，而 sharded KV store 加一套 code-generation 策略在中心统一处理规模和持久写。';
   }
   if (flags.needsSharding) {
-    return 'A cache absorbs the skewed read traffic and the mapping store is sharded by code so storage and writes scale horizontally.';
+    return '一个 cache 吸收倾斜的读流量，mapping store 按 code 做 shard，让 storage 和写都水平扩展。';
   }
   if (flags.needsCache) {
-    return 'A cache-aside layer serves the popular links so a single database only handles misses and the modest write volume.';
+    return '一层 cache-aside 服务热门 link，于是单个 database 只用处理 miss 和这点写量。';
   }
-  return 'One app server and one database still cover the workload.';
+  return '一个 app server 加一个 database 仍然能覆盖这份 workload。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {
@@ -731,10 +728,10 @@ function chooseArchitecturePath(flags: ArchitectureFlags): string {
     return 'Redirect -> edge cache -> app server -> cache -> sharded KV';
   }
   if (flags.needsSharding) {
-    return 'Redirect -> app server -> cache -> sharded KV (miss)';
+    return 'Redirect -> app server -> cache -> sharded KV（miss）';
   }
   if (flags.needsCache) {
-    return 'Redirect -> app server -> cache -> database (miss)';
+    return 'Redirect -> app server -> cache -> database（miss）';
   }
   return 'Redirect -> app server -> database';
 }
@@ -742,8 +739,4 @@ function chooseArchitecturePath(flags: ArchitectureFlags): string {
 function numericValue(workload: WorkloadValues, key: string): number {
   const value = workload[key];
   return typeof value === 'number' ? value : 0;
-}
-
-function pluralize(unit: string, value: number): string {
-  return Math.round(value) === 1 ? unit : `${unit}s`;
 }

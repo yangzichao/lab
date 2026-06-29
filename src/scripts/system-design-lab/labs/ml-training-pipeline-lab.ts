@@ -26,27 +26,27 @@ const secondsPerStepBase = 0.4;
 
 export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
   id: 'ml-training-pipeline',
-  eyebrow: 'System Design Lab',
+  eyebrow: '系统设计 Lab',
   title:
-    'An ML training platform starts as one notebook and grows the lifecycle around it: pipelines, tracking, a cluster, and a registry.',
+    'ML 训练平台一开始只是一个 notebook，然后围绕它把整个生命周期长出来：pipeline、tracking、一个 cluster、还有一个 registry。',
   summary:
-    'Change training jobs per day, dataset size, cluster GPUs, experiments tracked, model size, and pipeline stages. Toggle data-parallel distributed training and automated retraining. The design moves from a single notebook to a scheduled pipeline, versioned data and feature prep, a distributed training cluster, an experiment tracker, a model registry, and CI/CD that promotes models to serving.',
+    '调整每天的训练 job 数、dataset 大小、cluster GPU 数、tracked 的 experiment 数、模型大小、pipeline 阶段数。切换 data-parallel distributed training 和自动 retraining。设计会从单个 notebook 演进到一条 scheduled pipeline、versioned data 加 feature prep、一个 distributed training cluster、一个 experiment tracker、一个 model registry，以及把模型 promote 到 serving 的 CI/CD。',
   controls: [
     {
       id: 'trainingJobsPerDay',
-      label: 'Training jobs / day',
-      help: 'Distinct training runs launched per day across the team (experiments, sweeps, retrains).',
+      label: '每天训练 job 数',
+      help: '团队每天启动的不同训练 run 数（experiment、sweep、retrain）。',
       min: 1,
       max: 5_000,
       defaultValue: 6,
       scale: 'log',
-      unit: 'jobs',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'datasetGigabytes',
-      label: 'Dataset size',
-      help: 'Size of the training dataset that must be versioned and read each run.',
+      label: 'Dataset 大小',
+      help: '每次 run 都要 version 并读取的训练 dataset 的大小。',
       min: 1,
       max: 500_000,
       defaultValue: 20,
@@ -56,30 +56,30 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'clusterGpus',
-      label: 'Cluster GPUs',
-      help: 'Accelerators available to the training workers. One host tops out around 8 GPUs.',
+      label: 'Cluster GPU 数',
+      help: '训练 worker 能用的加速器数量。单台 host 顶多约 8 块 GPU。',
       min: 1,
       max: 1_024,
       defaultValue: 1,
       scale: 'log',
-      unit: 'GPUs',
+      unit: 'GPU',
       format: 'count',
     },
     {
       id: 'experimentsTracked',
-      label: 'Experiments tracked',
-      help: 'Experiments/runs tracked (cumulative) whose params, metrics, and artifacts must be compared.',
+      label: 'Tracked experiment 数',
+      help: '累计 tracked 的 experiment/run 数，它们的 param、metric、artifact 都要拿来对比。',
       min: 1,
       max: 100_000,
       defaultValue: 10,
       scale: 'log',
-      unit: 'experiments',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'modelParams',
-      label: 'Model size',
-      help: 'Trainable parameters. Past ~1B params one GPU can no longer hold model plus optimizer state.',
+      label: '模型大小',
+      help: '可训练 parameter 数。超过约 1B params 后，单块 GPU 就装不下模型加 optimizer state 了。',
       min: 1_000_000,
       max: 200_000_000_000,
       defaultValue: 25_000_000,
@@ -89,24 +89,24 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'pipelineStages',
-      label: 'Pipeline stages',
-      help: 'Steps from raw data to a registered model: ingest, validate, features, train, evaluate, register.',
+      label: 'Pipeline 阶段数',
+      help: '从原始 data 到 registered 模型的步骤：ingest、validate、features、train、evaluate、register。',
       min: 1,
       max: 20,
       defaultValue: 3,
       scale: 'linear',
-      unit: 'stages',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'datasetVersions',
-      label: 'Dataset versions / month',
-      help: 'How often the dataset changes; high churn makes lineage and reproducibility hard by hand.',
+      label: '每月 dataset version 数',
+      help: 'dataset 多久变一次；churn 高时，手工维护 lineage 和 reproducibility 就很难了。',
       min: 1,
       max: 2_000,
       defaultValue: 4,
       scale: 'log',
-      unit: 'versions',
+      unit: '个',
       format: 'count',
     },
   ],
@@ -114,13 +114,13 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'distributedTraining',
       label: 'Data-parallel distributed training',
-      help: 'Shard each batch across many GPUs/hosts and all-reduce gradients to train faster. Each replica still holds a full model copy, so this raises throughput but does not fit a model too big for one GPU.',
+      help: '把每个 batch shard 到很多 GPU/host 上，再 all-reduce gradient 来加速训练。每个 replica 仍然保留一份完整模型副本，所以这能提高 throughput，但装不下一个对单块 GPU 来说太大的模型。',
       defaultValue: false,
     },
     {
       id: 'automatedRetraining',
-      label: 'Automated retraining + CI/CD',
-      help: 'Trigger pipelines on new data or schedule, then promote passing models to serving automatically.',
+      label: '自动 retraining + CI/CD',
+      help: '在有新 data 或按 schedule 时触发 pipeline，然后自动把通过的模型 promote 到 serving。',
       defaultValue: false,
     },
   ],
@@ -128,8 +128,8 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'notebook',
       step: '01',
-      title: 'One notebook',
-      summary: 'A single researcher trains by hand on one machine.',
+      title: '一个 notebook',
+      summary: '单个研究员在一台机器上手工训练。',
       values: {
         trainingJobsPerDay: 4,
         datasetGigabytes: 10,
@@ -146,7 +146,7 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
       id: 'scheduled-pipeline',
       step: '02',
       title: 'Scheduled pipeline',
-      summary: 'Runs are codified into a repeatable, scheduled DAG.',
+      summary: '把 run 固化成一条可重复、scheduled 的 DAG。',
       values: {
         trainingJobsPerDay: 40,
         datasetGigabytes: 80,
@@ -163,7 +163,7 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
       id: 'distributed-cluster',
       step: '03',
       title: 'Distributed cluster',
-      summary: 'A big model and dataset need many GPUs at once.',
+      summary: '大模型加大 dataset 需要同时用很多 GPU。',
       values: {
         trainingJobsPerDay: 150,
         datasetGigabytes: 2_000,
@@ -180,7 +180,7 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
       id: 'tracked-registry',
       step: '04',
       title: 'Tracking + registry',
-      summary: 'Many experiments and models need governance.',
+      summary: '大量 experiment 和模型需要 governance。',
       values: {
         trainingJobsPerDay: 800,
         datasetGigabytes: 20_000,
@@ -197,7 +197,7 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
       id: 'continuous-mlops',
       step: '05',
       title: 'Continuous MLOps',
-      summary: 'Pipelines retrain and promote models automatically at scale.',
+      summary: 'Pipeline 在规模化下自动 retrain 并 promote 模型。',
       values: {
         trainingJobsPerDay: 3_000,
         datasetGigabytes: 200_000,
@@ -212,9 +212,9 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'ML training pipeline architecture diagram',
+    title: 'ML training pipeline 架构图',
     description:
-      'Whiteboard-style architecture diagram for an ML training platform: authors submitting runs, a pipeline orchestrator, versioned data and feature prep, a distributed training cluster, and a model registry with experiment tracking and a serving/CI-CD handoff.',
+      'ML 训练平台的白板风格架构图：author 提交 run、一个 pipeline orchestrator、versioned data 加 feature prep、一个 distributed training cluster，以及带 experiment tracking 的 model registry 和到 serving/CI-CD 的交接。',
     columns: [
       {
         id: 'authors',
@@ -226,7 +226,7 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
             title: 'ML author',
             subtitle: 'notebook + code',
             kind: 'client',
-            summary: 'writes training code and launches runs from a notebook or the CLI',
+            summary: '写训练代码，并从 notebook 或 CLI 启动 run',
           },
         ],
       },
@@ -240,14 +240,14 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
             title: 'Pipeline scheduler',
             subtitle: 'DAG runs',
             kind: 'scheduler',
-            summary: 'turns each run into a scheduled, repeatable DAG of stages',
+            summary: '把每个 run 变成一条 scheduled、可重复的、由各 stage 组成的 DAG',
           },
           {
             id: 'ciCd',
             title: 'CI/CD trigger',
             subtitle: 'retrain + promote',
             kind: 'scheduler',
-            summary: 'fires pipelines on new data or schedule and promotes passing models',
+            summary: '在有新 data 或按 schedule 时触发 pipeline，并 promote 通过的模型',
           },
         ],
       },
@@ -261,14 +261,14 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
             title: 'Data versioning',
             subtitle: 'lineage',
             kind: 'objectstore',
-            summary: 'pins an exact dataset version so every run is reproducible',
+            summary: 'pin 住一个确切的 dataset version，让每次 run 都可 reproduce',
           },
           {
             id: 'featurePrep',
             title: 'Feature prep',
             subtitle: 'transform',
             kind: 'compute',
-            summary: 'cleans and transforms raw data into training features',
+            summary: '把原始 data 清洗并 transform 成训练 feature',
           },
         ],
       },
@@ -282,14 +282,14 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
             title: 'Training worker',
             subtitle: 'single host',
             kind: 'gpu',
-            summary: 'runs the training loop on the GPUs of one machine',
+            summary: '在一台机器的 GPU 上跑 training loop',
           },
           {
             id: 'distributedWorkers',
             title: 'GPU cluster',
             subtitle: 'data-parallel',
             kind: 'gpu',
-            summary: 'shards batches across many GPUs and all-reduces gradients',
+            summary: '把 batch shard 到很多 GPU 上，并 all-reduce gradient',
           },
         ],
       },
@@ -303,21 +303,21 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
             title: 'Experiment tracker',
             subtitle: 'params + metrics',
             kind: 'db',
-            summary: 'logs params, metrics, and artifacts so runs can be compared',
+            summary: '记录 param、metric、artifact，让各次 run 能对比',
           },
           {
             id: 'modelRegistry',
             title: 'Model registry',
             subtitle: 'versioned models',
             kind: 'objectstore',
-            summary: 'stores versioned models with stage and approval metadata',
+            summary: '存储带 stage 和 approval metadata 的 versioned 模型',
           },
           {
             id: 'serving',
             title: 'Serving handoff',
             subtitle: 'deploy',
             kind: 'gpu',
-            summary: 'receives promoted models for online or batch inference',
+            summary: '接收 promote 过来的模型，做 online 或 batch inference',
           },
         ],
       },
@@ -337,10 +337,10 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'orchestrationLoad', label: 'Orchestration load' },
-    { id: 'dataThroughput', label: 'Data + lineage pressure' },
-    { id: 'clusterCapacity', label: 'GPU cluster capacity' },
-    { id: 'trackingScale', label: 'Experiment tracking scale' },
+    { id: 'orchestrationLoad', label: 'Orchestration 负载' },
+    { id: 'dataThroughput', label: 'Data + lineage 压力' },
+    { id: 'clusterCapacity', label: 'GPU cluster 容量' },
+    { id: 'trackingScale', label: 'Experiment tracking 规模' },
     { id: 'registryGovernance', label: 'Registry governance' },
   ],
   decisions: [
@@ -349,76 +349,76 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
     { id: 'distributed', title: 'Distributed training' },
     { id: 'tracking', title: 'Experiment tracking' },
     { id: 'registry', title: 'Model registry' },
-    { id: 'cicd', title: 'Automated retraining / CI-CD' },
+    { id: 'cicd', title: '自动 retraining / CI-CD' },
   ],
   sourceBackedRules: [
     {
-      title: 'A model registry manages the lifecycle of versioned models',
+      title: 'Model registry 管理 versioned 模型的生命周期',
       source: 'MLflow Docs',
       url: 'https://mlflow.org/docs/latest/index.html',
       summary:
-        'MLflow tracks params, metrics, and artifacts per run and registers versioned models with stage transitions, which is why tracking and a registry appear once many experiments and models exist.',
+        'MLflow 按 run 记录 param、metric、artifact，并以 stage transition 来 register versioned 模型——这正是为什么当 experiment 和模型一多，tracking 和 registry 就会出现。',
     },
     {
-      title: 'Pipelines make ML workflows portable, scalable, and repeatable',
+      title: 'Pipeline 让 ML workflow 可移植、可扩展、可重复',
       source: 'Kubeflow Pipelines',
       url: 'https://www.kubeflow.org/docs/components/pipelines/',
       summary:
-        'Kubeflow Pipelines orchestrates multi-step ML workflows as DAGs on Kubernetes, the reason ad-hoc scripts become a scheduled pipeline as stages and run volume grow.',
+        'Kubeflow Pipelines 在 Kubernetes 上把多步 ML workflow 编排成 DAG——这正是为什么随着 stage 和 run 量增长，ad-hoc 脚本会变成一条 scheduled pipeline。',
     },
     {
-      title: 'Production ML platforms standardize data, training, and deployment components',
+      title: '生产级 ML 平台把 data、training、deployment 组件标准化',
       source: 'TFX Guide',
       url: 'https://www.tensorflow.org/tfx/guide',
       summary:
-        'TFX defines reusable components (ingest, validate, transform, train, evaluate, push) so the lifecycle from data validation to deployment is consistent and automatable.',
+        'TFX 定义了可复用的组件（ingest、validate、transform、train、evaluate、push），让从 data validation 到 deployment 的整个生命周期保持一致且可自动化。',
     },
     {
-      title: 'Data versioning gives datasets git-like lineage and reproducibility',
+      title: 'Data versioning 给 dataset 类似 git 的 lineage 和 reproducibility',
       source: 'DVC Docs',
       url: 'https://dvc.org/doc',
       summary:
-        'DVC version-controls large datasets and pipelines so any run can be reproduced from an exact data version, essential once the dataset changes frequently.',
+        'DVC 对大 dataset 和 pipeline 做版本控制，让任何一次 run 都能从一个确切的 data version 重现——一旦 dataset 经常变，这就是必需品。',
     },
   ],
   teachingAssumptions: [
-    'Single-host training tops out around 8 GPUs and roughly 1B parameters before model and optimizer state stop fitting on one accelerator.',
-    'Orchestration, tracking, and storage budgets are conservative teaching numbers chosen to make the five scenarios progress, not vendor limits.',
-    'Data-parallel distributed training is modeled as a throughput axis (more replicas finish faster); a model larger than one GPU instead needs model sharding (tensor/pipeline parallelism or FSDP/ZeRO), modeled as a separate sharding signal.',
+    '单 host 训练顶多约 8 块 GPU、大约 1B 参数，再多模型加 optimizer state 就装不进一块加速器了。',
+    'orchestration、tracking、storage 的预算都是保守的教学数字，用来让这五个 scenario 有递进，并非 vendor 的真实上限。',
+    'data-parallel distributed training 被建模成一个 throughput 维度（replica 越多越快完成）；而一个比单块 GPU 还大的模型需要的是 model sharding（tensor/pipeline parallelism 或 FSDP/ZeRO），它被建模成一个单独的 sharding 信号。',
   ],
   teachingWalkthrough: [
     {
       id: 'one-notebook',
       step: '01',
-      focus: 'One notebook',
+      focus: '一个 notebook',
       scenarioId: 'notebook',
       question:
-        'One researcher runs ~4 training jobs a day on a 10 GB dataset and one GPU. Do you need a pipeline orchestrator, a tracker, or a registry yet?',
+        '一个研究员每天在一个 10 GB dataset 和一块 GPU 上跑约 4 个训练 job。现在你需要 pipeline orchestrator、tracker 或 registry 吗？',
       reveal:
-        'No. At this volume a notebook plus a results spreadsheet is honest. A scheduler, a feature store, and a registry are all moving parts with no load to justify them — the only real risk is forgetting which data and code produced a result.',
-      takeaway: 'Start with the simplest correct setup: one notebook, one machine, and disciplined note-taking.',
+        '不需要。在这个量级下，一个 notebook 加一张结果 spreadsheet 是诚实的做法。scheduler、feature store、registry 都是没有负载支撑的额外活动件——唯一真实的风险是忘了某个结果是哪份 data 和哪段代码产出的。',
+      takeaway: '从最简单又正确的配置起步：一个 notebook、一台机器，加上有纪律的记笔记。',
     },
     {
       id: 'codify-pipeline',
       step: '02',
-      focus: 'Codify the pipeline',
+      focus: '把 pipeline 固化下来',
       scenarioId: 'scheduled-pipeline',
       question:
-        'Now 40 runs a day over 6 stages, with the dataset changing 20 times a month. What breaks first when you do this by hand?',
+        '现在每天 40 个 run、6 个 stage，dataset 每月变 20 次。手工做的话，最先崩的是什么？',
       reveal:
-        'Reproducibility breaks first. With frequent data changes you cannot tell which dataset produced which result, and re-running 6 manual steps is error-prone. The fix is a scheduled pipeline DAG plus data versioning so each run pins an exact dataset version and re-runs identically.',
-      takeaway: 'Once data changes often and steps multiply, codify the workflow into a versioned, scheduled pipeline.',
+        '最先崩的是 reproducibility。data 频繁变动时，你说不清哪份 dataset 产出了哪个结果，而手动重跑 6 个步骤又很容易出错。解法是一条 scheduled pipeline DAG 加 data versioning，让每次 run 都 pin 住一个确切的 dataset version 并以完全相同的方式重跑。',
+      takeaway: '一旦 data 经常变、步骤又增多，就把 workflow 固化成一条 versioned、scheduled 的 pipeline。',
     },
     {
       id: 'scale-cluster',
       step: '03',
-      focus: 'Big model, many GPUs',
+      focus: '大模型，多 GPU',
       scenarioId: 'distributed-cluster',
       question:
-        'A 3B-parameter model on a 2 TB dataset will not fit on one GPU and will not finish in time on one host. Does data-parallel training across many GPUs solve both?',
+        '一个 3B 参数的模型跑在 2 TB dataset 上，既装不进一块 GPU，也没法在单 host 上按时跑完。跨多 GPU 的 data-parallel training 能同时解决这两件事吗？',
       reveal:
-        'Two different problems. To train FASTER on a big dataset, data-parallel training shards each batch across many GPUs and all-reduces gradients, dropping wall-clock time. But a 3B-param model does not FIT on one GPU, and data parallelism cannot help there — every replica holds a full model copy. Fitting a too-big model needs model sharding (tensor/pipeline parallelism or FSDP/ZeRO) that splits the parameters and optimizer state across GPUs.',
-      takeaway: 'Data-parallel speeds up training; fitting a model bigger than one GPU needs model sharding (tensor/pipeline/FSDP), not more replicas.',
+        '这是两个不同的问题。要在大 dataset 上训练得更快，data-parallel training 把每个 batch shard 到很多 GPU 上、再 all-reduce gradient，从而压低 wall-clock 时间。但一个 3B 参数的模型装不进一块 GPU，data parallelism 在这里帮不上忙——每个 replica 都保留一份完整模型副本。要装下一个过大的模型，需要 model sharding（tensor/pipeline parallelism 或 FSDP/ZeRO），把 parameter 和 optimizer state 切分到各 GPU 上。',
+      takeaway: 'data-parallel 加快训练；要装下一个比单块 GPU 还大的模型，需要的是 model sharding（tensor/pipeline/FSDP），不是更多 replica。',
     },
     {
       id: 'track-and-register',
@@ -426,10 +426,10 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
       focus: 'Tracking + registry',
       scenarioId: 'tracked-registry',
       question:
-        'With 8,000 live experiments and many candidate models, how do you know which model is in production and whether a new one is actually better?',
+        '有 8,000 个在跑的 experiment 和一堆候选模型时，你怎么知道哪个模型在 production、新模型是不是真的更好？',
       reveal:
-        'You cannot by memory. An experiment tracker logs every run\'s params, metrics, and artifacts for comparison, and a model registry versions models with stage and approval metadata. Together they give provenance and a controlled path from "trained" to "production".',
-      takeaway: 'At experiment scale, tracking plus a versioned registry turn ad-hoc results into governed, comparable models.',
+        '靠记忆是做不到的。experiment tracker 记录每次 run 的 param、metric、artifact 供对比，model registry 用 stage 和 approval metadata 给模型 version。两者合起来给出 provenance，以及一条从「trained」到「production」的受控路径。',
+      takeaway: '到了 experiment 的规模，tracking 加 versioned registry 能把 ad-hoc 结果变成受 governance、可对比的模型。',
     },
     {
       id: 'continuous',
@@ -437,10 +437,10 @@ export const mlTrainingPipelineLabDefinition: SystemDesignLabDefinition = {
       focus: 'Continuous MLOps',
       scenarioId: 'continuous-mlops',
       question:
-        'At 3,000 jobs a day with data arriving constantly, can humans keep launching retrains and promoting models?',
+        '每天 3,000 个 job、data 还源源不断地来，人还跟得上手动启动 retrain、promote 模型吗？',
       reveal:
-        'No — the loop must close itself. CI/CD triggers retraining on new data or a schedule, runs evaluation gates, and promotes only passing models to serving automatically. Humans move to approving policies and watching for drift, not babysitting each run.',
-      takeaway: 'At full scale the lifecycle becomes continuous: data triggers retraining, gates promote, and people govern the policy.',
+        '跟不上——这个 loop 必须自己闭环。CI/CD 在有新 data 或按 schedule 时触发 retraining，跑 evaluation gate，只把通过的模型自动 promote 到 serving。人转去审批 policy、盯 drift，而不是看着每一次 run。',
+      takeaway: '到了满规模，生命周期会变成 continuous：data 触发 retraining、gate 负责 promote、人来 govern policy。',
     },
   ],
   analyze: analyzeMlTrainingPipelineWorkload,
@@ -588,56 +588,56 @@ function analyzeMlTrainingPipelineWorkload(workload: WorkloadValues): LabAnalysi
     meters: {
       orchestrationLoad: {
         ratio: orchestrationRatio,
-        valueText: `${formatCount(trainingJobsPerDay)} ${pluralize('job', trainingJobsPerDay)}/day`,
+        valueText: `${formatCount(trainingJobsPerDay)} 个 job/day`,
         copy: needsOrchestration
-          ? `${formatCount(trainingJobsPerDay)} jobs/day across ${Math.round(
+          ? `每天 ${formatCount(trainingJobsPerDay)} 个 job、跨 ${Math.round(
               pipelineStages,
-            )} stages need a scheduled DAG, not hand-run scripts.`
-          : 'Run volume is low enough to launch by hand from a notebook.',
+            )} 个 stage，需要一条 scheduled DAG，而不是手跑的脚本。`
+          : 'run 量足够低，从 notebook 手动启动就行。',
       },
       dataThroughput: {
         ratio: dataRatio,
         valueText: formatStorageGigabytes(datasetGigabytes),
         copy: needsDataVersioning
-          ? `${formatStorageGigabytes(datasetGigabytes)} changing ${formatCount(
+          ? `${formatStorageGigabytes(datasetGigabytes)} 每月变 ${formatCount(
               datasetVersions,
-            )}x/month needs pinned versions and lineage for reproducibility.`
-          : 'A small, rarely-changing dataset can be read straight from disk.',
+            )} 次，需要 pin 住的 version 和 lineage 来保证 reproducibility。`
+          : '一个小而很少变的 dataset 可以直接从磁盘读。',
       },
       clusterCapacity: {
         ratio: clusterRatio,
-        valueText: `${formatCount(clusterGpus)} ${pluralize('GPU', clusterGpus)}`,
+        valueText: `${formatCount(clusterGpus)} 块 GPU`,
         copy: needsModelSharding
-          ? `A ${formatCount(
+          ? `一个 ${formatCount(
               modelParams,
-            )}-param model exceeds one GPU (~${perGpuModelRatio.toFixed(
+            )} 参数的模型超出了一块 GPU（约其显存的 ${perGpuModelRatio.toFixed(
               1,
-            )}x its memory); shard the model (tensor/pipeline/FSDP) across ${formatCount(
+            )} 倍）；把模型 shard（tensor/pipeline/FSDP）到 ${formatCount(
               effectiveGpuDemand,
-            )} GPUs. Data parallelism only adds throughput.`
+            )} 块 GPU 上。data parallelism 只增加 throughput。`
           : needsDistributed
             ? `${formatCount(
                 clusterGpus,
-              )} GPUs run data-parallel all-reduce to finish a ~${formatDurationShort(
+              )} 块 GPU 跑 data-parallel all-reduce，让一个约 ${formatDurationShort(
                 estimatedSingleHostSeconds,
-              )} single-host run faster; each replica still holds a full model copy.`
-            : 'The model and dataset fit on a single host, so one trainer suffices.',
+              )} 的单 host run 更快完成；每个 replica 仍然保留一份完整模型副本。`
+            : '模型和 dataset 都能装进单 host，所以一个 trainer 就够了。',
       },
       trackingScale: {
         ratio: trackingRatio,
-        valueText: `${formatCount(experimentsTracked)} ${pluralize('experiment', experimentsTracked)}`,
+        valueText: `${formatCount(experimentsTracked)} 个 experiment`,
         copy: needsTracking
-          ? `${formatCount(experimentsTracked)} experiments cannot be compared in a spreadsheet; log params and metrics to a tracker.`
-          : 'A handful of experiments still fit in a notes file or spreadsheet.',
+          ? `${formatCount(experimentsTracked)} 个 experiment 没法在 spreadsheet 里对比；把 param 和 metric 记到 tracker 里。`
+          : '寥寥几个 experiment 还能放在一个笔记文件或 spreadsheet 里。',
       },
       registryGovernance: {
         ratio: registryRatio,
         valueText: needsCiCd ? 'Continuous' : needsRegistry ? 'Versioned' : 'Ad-hoc',
         copy: needsCiCd
-          ? 'Automated retraining promotes only models that pass evaluation gates, so a registry with stages is mandatory.'
+          ? '自动 retraining 只 promote 通过 evaluation gate 的模型，所以一个带 stage 的 registry 是必须的。'
           : needsRegistry
-            ? 'Versioned models with stage and approval metadata give a controlled path to production.'
-            : 'Few models means hand-tracking which artifact is live is still tolerable.',
+            ? '带 stage 和 approval metadata 的 versioned 模型，给出一条通往 production 的受控路径。'
+            : '模型少的时候，手工追踪哪个 artifact 在线还能接受。',
       },
     },
     decisions: buildDecisions({
@@ -701,14 +701,14 @@ function buildReasons(
     reasons.push({
       severity:
         analysis.trainingJobsPerDay > jobsPerSchedulerPerDay ? 'warning' : 'ok',
-      text: `${formatCount(analysis.trainingJobsPerDay)} jobs/day over ${Math.round(
+      text: `每天 ${formatCount(analysis.trainingJobsPerDay)} 个 job、跨 ${Math.round(
         analysis.pipelineStages,
-      )} stages should run as a scheduled, repeatable pipeline DAG.`,
+      )} 个 stage，应该作为一条 scheduled、可重复的 pipeline DAG 来跑。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Run volume and stage count are low enough to launch training by hand from a notebook.',
+      text: 'run 量和 stage 数都足够低，从 notebook 手动启动训练就行。',
     });
   }
 
@@ -716,14 +716,14 @@ function buildReasons(
   if (analysis.needsDataVersioning) {
     reasons.push({
       severity: analysis.datasetGigabytes > datasetGbPerSingleNode ? 'warning' : 'ok',
-      text: `${formatStorageGigabytes(analysis.datasetGigabytes)} changing ${formatCount(
+      text: `${formatStorageGigabytes(analysis.datasetGigabytes)} 每月变 ${formatCount(
         analysis.datasetVersions,
-      )}x/month needs pinned data versions and lineage so runs reproduce exactly.`,
+      )} 次，需要 pin 住的 data version 和 lineage，让各次 run 能精确 reproduce。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'A small, rarely-changing dataset is read straight from disk with no versioning layer.',
+      text: '一个小而很少变的 dataset 直接从磁盘读，不需要 versioning 层。',
     });
   }
 
@@ -731,21 +731,21 @@ function buildReasons(
   if (analysis.needsModelSharding) {
     reasons.push({
       severity: analysis.modelParams > modelParamsPerSingleGpu * 10 ? 'danger' : 'warning',
-      text: `A ${formatCount(
+      text: `一个 ${formatCount(
         analysis.modelParams,
-      )}-param model is too big for one GPU; shard the model itself (tensor/pipeline parallelism or FSDP/ZeRO) across the cluster — data parallelism alone cannot make it fit.`,
+      )} 参数的模型对一块 GPU 来说太大了；把模型本身 shard（tensor/pipeline parallelism 或 FSDP/ZeRO）到整个 cluster 上——光靠 data parallelism 没法让它装下。`,
     });
   } else if (analysis.needsDistributed) {
     reasons.push({
       severity: analysis.effectiveGpuDemand > clusterScaleOutBudget ? 'danger' : 'warning',
       text: `${formatCount(
         analysis.clusterGpus,
-      )} GPUs are past one host; data-parallel training all-reduces gradients across replicas to finish faster, each holding a full model copy.`,
+      )} 块 GPU 已经超出一台 host；data-parallel training 在各 replica 间 all-reduce gradient 来更快完成，每个 replica 都持有一份完整模型副本。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'The model and dataset fit on one host, so a single trainer is enough — no distribution or sharding yet.',
+      text: '模型和 dataset 都能装进一台 host，所以一个 trainer 就够了——还不需要 distribution 或 sharding。',
     });
   }
 
@@ -755,14 +755,14 @@ function buildReasons(
       severity: 'warning',
       text: `${formatCount(
         analysis.experimentsTracked,
-      )} tracked runs cannot be compared by hand; log params, metrics, and artifacts to a tracker.`,
+      )} 个 tracked 的 run 没法手工对比；把 param、metric、artifact 记到 tracker 里。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
       text: `${formatCount(
         analysis.experimentsTracked,
-      )} runs still fit in a notes file or spreadsheet without a tracker.`,
+      )} 个 run 还能放进一个笔记文件或 spreadsheet，不用 tracker。`,
     });
   }
 
@@ -770,12 +770,12 @@ function buildReasons(
   if (analysis.needsRegistry) {
     reasons.push({
       severity: 'ok',
-      text: 'A model registry versions candidates with stage and approval metadata, giving a controlled path to production.',
+      text: 'model registry 用 stage 和 approval metadata 给候选模型 version，给出一条通往 production 的受控路径。',
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Few models means tracking which artifact is live by hand is still tolerable.',
+      text: '模型少的时候，手工追踪哪个 artifact 在线还能接受。',
     });
   }
 
@@ -783,12 +783,12 @@ function buildReasons(
   if (analysis.needsCiCd) {
     reasons.push({
       severity: 'warning',
-      text: 'Automated retraining fires pipelines on new data, runs evaluation gates, and promotes only passing models to serving.',
+      text: '自动 retraining 在有新 data 时触发 pipeline，跑 evaluation gate，只把通过的模型 promote 到 serving。',
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Retraining is manual, so a human still launches runs and promotes models deliberately.',
+      text: 'retraining 是手动的，所以仍由人来有意识地启动 run、promote 模型。',
     });
   }
 
@@ -807,31 +807,31 @@ function buildDecisions(
   },
 ): Record<string, { state: DecisionState; copy: string }> {
   const distributedCopy = flags.needsModelSharding
-    ? `A ${formatCount(
+    ? `一个 ${formatCount(
         flags.modelParams,
-      )}-param model is too big for one GPU; shard the model with tensor/pipeline parallelism or FSDP/ZeRO. Data parallelism raises throughput but does not make it fit.`
+      )} 参数的模型对一块 GPU 来说太大了；用 tensor/pipeline parallelism 或 FSDP/ZeRO 把模型 shard 开。data parallelism 提高 throughput，但没法让它装下。`
     : flags.needsDistributed
-      ? `Coordinate ${formatCount(
+      ? `用 data-parallel all-reduce 协调 ${formatCount(
           flags.clusterGpus,
-        )} GPUs with data-parallel all-reduce so wall-clock time drops; each replica keeps a full model copy.`
-      : 'One host holds the model and dataset, so a single trainer is enough.';
+        )} 块 GPU，让 wall-clock 时间下降；每个 replica 保留一份完整模型副本。`
+      : '一台 host 就能装下模型和 dataset，所以一个 trainer 就够了。';
 
   return {
     orchestration: {
       state: flags.needsOrchestration ? 'needed' : 'not-yet',
       copy: flags.needsOrchestration
-        ? `Run the ${Math.round(
+        ? `把这个 ${Math.round(
             flags.pipelineStages,
-          )}-stage workflow as a scheduled DAG (Kubeflow/TFX-style) so it repeats reliably.`
-        : 'No orchestrator yet — a notebook launches the few daily runs directly.',
+          )} 阶段的 workflow 作为一条 scheduled DAG（Kubeflow/TFX 风格）来跑，让它可靠地重复。`
+        : '还不需要 orchestrator——一个 notebook 直接启动每天那几个 run。',
     },
     dataVersioning: {
       state: flags.needsDataVersioning ? 'needed' : 'not-yet',
       copy: flags.needsDataVersioning
-        ? `Version the dataset (DVC-style) and capture lineage so any of the ${formatCount(
+        ? `给 dataset 做 version（DVC 风格）并记录 lineage，让每月 ${formatCount(
             flags.datasetVersions,
-          )} monthly versions can be reproduced.`
-        : 'A small, stable dataset is read straight from disk without version control.',
+          )} 个 version 中的任意一个都能 reproduce。`
+        : '一个小而稳定的 dataset 直接从磁盘读，不做版本控制。',
     },
     distributed: {
       state: flags.needsCluster ? 'needed' : 'not-yet',
@@ -840,24 +840,24 @@ function buildDecisions(
     tracking: {
       state: flags.needsTracking ? 'needed' : 'not-yet',
       copy: flags.needsTracking
-        ? `Log params, metrics, and artifacts for ${formatCount(
+        ? `给 ${formatCount(
             flags.experimentsTracked,
-          )} experiments so runs are comparable and reproducible.`
-        : 'A handful of experiments still fit in a spreadsheet or notes file.',
+          )} 个 experiment 记录 param、metric、artifact，让各次 run 可对比、可 reproduce。`
+        : '寥寥几个 experiment 还能放进一个 spreadsheet 或笔记文件。',
     },
     registry: {
       state: flags.needsRegistry ? (flags.needsCiCd ? 'needed' : 'useful') : 'not-yet',
       copy: flags.needsRegistry
-        ? 'Register versioned models with stage and approval metadata so the live model is always known.'
-        : 'Few models means tracking the live artifact by hand is still tolerable.',
+        ? '把 versioned 模型连同 stage 和 approval metadata 一起 register，让线上模型始终明确可知。'
+        : '模型少的时候，手工追踪线上 artifact 还能接受。',
     },
     cicd: {
       state: flags.needsCiCd ? 'needed' : flags.needsRegistry ? 'useful' : 'not-yet',
       copy: flags.needsCiCd
-        ? 'Trigger retraining on new data, gate on evaluation, and promote passing models to serving automatically.'
+        ? '在有新 data 时触发 retraining，用 evaluation 做 gate，自动把通过的模型 promote 到 serving。'
         : flags.needsRegistry
-          ? 'A manual promote-to-serving step is fine until retraining frequency forces automation.'
-          : 'No deployment automation yet — models are handed off manually.',
+          ? '手动 promote 到 serving 这一步还行，直到 retraining 频率逼着你上自动化。'
+          : '还没有 deployment 自动化——模型靠手工交接。',
     },
   };
 }
@@ -869,10 +869,10 @@ function chooseArchitectureTitle(flags: ArchitectureFlags): string {
     !flags.needsTracking &&
     !flags.needsRegistry
   ) {
-    return 'Single notebook + one GPU';
+    return '单个 notebook + 一块 GPU';
   }
   if (flags.needsCiCd) {
-    return 'Continuous MLOps platform';
+    return 'Continuous MLOps 平台';
   }
   if (flags.needsTracking || flags.needsRegistry) {
     return 'Pipeline + tracking + registry';
@@ -892,20 +892,20 @@ function chooseArchitectureSummary(flags: ArchitectureFlags): string {
     !flags.needsTracking &&
     !flags.needsRegistry
   ) {
-    return 'One notebook on one machine trains and evaluates by hand. A pipeline, a cluster, and a registry are all premature.';
+    return '一台机器上的一个 notebook 手工训练和 evaluate。pipeline、cluster、registry 现在都为时过早。';
   }
   if (flags.needsCiCd) {
-    return 'A scheduled pipeline pulls versioned data, trains data-parallel on the cluster, logs to a tracker, and CI/CD promotes gated models to serving automatically.';
+    return '一条 scheduled pipeline 拉取 versioned data，在 cluster 上做 data-parallel 训练，记录到 tracker，CI/CD 把通过 gate 的模型自动 promote 到 serving。';
   }
   if (flags.needsTracking || flags.needsRegistry) {
-    return 'A scheduled pipeline over versioned data feeds the training cluster, while an experiment tracker and a versioned model registry give provenance and governance.';
+    return '一条跑在 versioned data 上的 scheduled pipeline 喂给 training cluster，同时一个 experiment tracker 和一个 versioned model registry 提供 provenance 和 governance。';
   }
   if (flags.needsCluster) {
     return flags.needsModelSharding
-      ? 'A scheduled pipeline pins data versions and shards a too-big model (tensor/pipeline/FSDP) across the cluster; data parallelism is added for throughput, not to make the model fit.'
-      : 'A scheduled pipeline pins data versions and runs data-parallel training across many GPUs to finish faster than one host could.';
+      ? '一条 scheduled pipeline pin 住 data version，并把一个过大的模型 shard（tensor/pipeline/FSDP）到整个 cluster 上；data parallelism 是为了 throughput 加上的，不是为了让模型装下。'
+      : '一条 scheduled pipeline pin 住 data version，并跨多块 GPU 做 data-parallel 训练，比单 host 更快完成。';
   }
-  return 'Runs are codified into a scheduled DAG over versioned data so they repeat reliably as volume grows.';
+  return '把 run 固化成一条跑在 versioned data 上的 scheduled DAG，让它随着量增长仍能可靠地重复。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {
@@ -934,10 +934,6 @@ function chooseArchitecturePath(flags: ArchitectureFlags): string {
 function numericValue(workload: WorkloadValues, key: string): number {
   const value = workload[key];
   return typeof value === 'number' ? value : 0;
-}
-
-function pluralize(unit: string, value: number): string {
-  return Math.round(value) === 1 ? unit : `${unit}s`;
 }
 
 /** Compact human duration for the training-time estimate signal. */

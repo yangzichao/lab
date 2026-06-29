@@ -23,6 +23,16 @@ import { urlShortenerLabDefinition } from './labs/url-shortener-lab';
 import { videoStreamingLabDefinition } from './labs/video-streaming-lab';
 import { webCrawlerLabDefinition } from './labs/web-crawler-lab';
 import type { SystemDesignLabDefinition } from './lab-types';
+import {
+  defaultSystemDesignLocale,
+  normalizeSystemDesignLocale,
+  type SystemDesignLocale,
+} from './system-design-i18n';
+import { systemDesignLabDefinitions as englishSystemDesignLabDefinitions } from '../system-design-lab-en/lab-definitions';
+
+const systemDesignLabDefinitionAliases: Record<string, string> = {
+  'online-judge': 'leetcode-online-judge',
+};
 
 export const systemDesignLabDefinitions = [
   // Core system design
@@ -54,5 +64,45 @@ export const systemDesignLabDefinitions = [
   agentOrchestrationLabDefinition,
 ];
 
-export const systemDesignLabDefinitionsById: Record<string, SystemDesignLabDefinition> =
-  Object.fromEntries(systemDesignLabDefinitions.map((definition) => [definition.id, definition]));
+export const systemDesignLabDefinitionsById = buildDefinitionsById(systemDesignLabDefinitions);
+
+const englishSystemDesignLabDefinitionsById = buildDefinitionsById(
+  englishSystemDesignLabDefinitions,
+);
+
+export const systemDesignLabDefinitionsByLocale: Record<
+  SystemDesignLocale,
+  Record<string, SystemDesignLabDefinition>
+> = {
+  zh: systemDesignLabDefinitionsById,
+  en: englishSystemDesignLabDefinitionsById,
+};
+
+export function getSystemDesignLabDefinition(
+  id: string,
+  locale: SystemDesignLocale | string | undefined = defaultSystemDesignLocale,
+): SystemDesignLabDefinition {
+  const normalizedLocale = normalizeSystemDesignLocale(locale);
+  const definition = systemDesignLabDefinitionsByLocale[normalizedLocale][id];
+  if (!definition) {
+    throw new Error(`Unknown system design lab id: ${id}`);
+  }
+  return definition;
+}
+
+function buildDefinitionsById(
+  definitions: SystemDesignLabDefinition[],
+): Record<string, SystemDesignLabDefinition> {
+  const definitionsById: Record<string, SystemDesignLabDefinition> = Object.fromEntries(
+    definitions.map((definition) => [definition.id, definition]),
+  );
+
+  Object.entries(systemDesignLabDefinitionAliases).forEach(([alias, canonicalId]) => {
+    const definition = definitionsById[canonicalId];
+    if (definition) {
+      definitionsById[alias] = definition;
+    }
+  });
+
+  return definitionsById;
+}

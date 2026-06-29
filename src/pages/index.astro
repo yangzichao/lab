@@ -8,7 +8,7 @@ const labs = [
     title: 'Quaternion Rotation Lab',
     href: '/quaternions/',
     description:
-      'An interactive 3D teaching lab for quaternion rotations, SLERP, the SU(2) double cover, Pauli matrices, and Bloch-sphere motion.',
+      '一个交互式 3D 教学 lab，讲 quaternion 旋转、SLERP、SU(2) double cover、Pauli matrices 以及 Bloch sphere 上的运动。',
   },
   ...physicsLabCatalog.map((lab) => ({
     title: lab.title,
@@ -25,14 +25,14 @@ const labs = [
 
 <BaseLayout
   title="Lab — Zichao Yang"
-  description="Interactive teaching labs & toys by Zichao Yang: quaternion rotations, physics simulations, and system design playgrounds. Everything runs in your browser."
+  description="Zichao Yang 的交互式教学 lab 与小玩具：quaternion 旋转、物理仿真，以及系统设计的演练场。一切都在你的浏览器里运行。"
 >
   <header class="lab-index__header">
     <a href="https://zichaoyang.com/" class="lab-index__back">&larr; zichaoyang.com</a>
     <h1>Lab</h1>
     <p>
-      Interactive labs &amp; toys — small things I build to understand bigger things.
-      Everything runs entirely in your browser.
+      交互式的 lab 与小玩具 —— 一些为了搞懂更大的东西而做的小东西。
+      一切都完全在你的浏览器里运行。
     </p>
   </header>
 
@@ -43,7 +43,7 @@ const labs = [
           <a href={lab.href} class="lab-index__card">
             <h2>{lab.title}</h2>
             <p>{lab.description}</p>
-            <span class="lab-index__go">Open &rarr;</span>
+            <span class="lab-index__go">打开 &rarr;</span>
           </a>
         </li>
       ))

@@ -40,15 +40,15 @@ const prefillPoolSpeedup = 4;
 
 export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
   id: 'llm-inference',
-  eyebrow: 'System Design Lab',
-  title: 'LLM inference is autoregressive: the KV cache grows per token and dominates GPU memory, so batching and memory layout decide throughput.',
+  eyebrow: '系统设计 Lab',
+  title: 'LLM inference 是 autoregressive 的：KV cache 每个 token 都在长，主导着 GPU memory，所以 batching 和 memory 布局决定了 throughput。',
   summary:
-    'Change request rate, prompt and output lengths, model size, GPU count, and the time-to-first-token target. Toggle continuous batching with paged attention and tensor parallelism. The design moves from one GPU serving one request at a time, to a KV cache with batching, to continuous batching plus paged attention, to tensor-parallel sharding for big models, and finally prefill/decode disaggregation at scale.',
+    '调整 request rate、prompt 和 output 长度、模型大小、GPU 数，以及 time-to-first-token 目标。切换带 paged attention 的 continuous batching 和 tensor parallelism。设计会从一块 GPU 一次只服务一个 request，演进到带 batching 的 KV cache，再到 continuous batching 加 paged attention，再到为大模型做 tensor-parallel sharding，最后在规模化下做 prefill/decode disaggregation。',
   controls: [
     {
       id: 'requestsPerSecond',
       label: 'Request rate',
-      help: 'New generation requests arriving per second. Each runs autoregressively until its output is complete.',
+      help: '每秒到达的新生成 request 数。每个都 autoregressive 地跑，直到它的 output 完成。',
       min: 0.1,
       max: 5_000,
       defaultValue: 5,
@@ -57,8 +57,8 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'promptTokens',
-      label: 'Avg prompt tokens',
-      help: 'Input length processed in the prefill phase; sets the starting size of each KV cache.',
+      label: '平均 prompt token 数',
+      help: 'prefill 阶段处理的输入长度；决定了每个 KV cache 的起始大小。',
       min: 16,
       max: 128_000,
       defaultValue: 1_024,
@@ -68,8 +68,8 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'outputTokens',
-      label: 'Avg output tokens',
-      help: 'Tokens generated one at a time in the decode phase; the KV cache grows for each.',
+      label: '平均 output token 数',
+      help: 'decode 阶段一次生成一个的 token；KV cache 为每个 token 增长。',
       min: 8,
       max: 16_000,
       defaultValue: 256,
@@ -79,8 +79,8 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'modelParams',
-      label: 'Model size',
-      help: 'Parameter count. Weights at 16-bit take ~2 bytes each and must fit in GPU memory before any KV cache.',
+      label: '模型大小',
+      help: 'parameter 数。16-bit 的 weights 每个约 2 bytes，必须先装进 GPU memory，才轮到任何 KV cache。',
       min: 1_000_000_000,
       max: 700_000_000_000,
       defaultValue: 13_000_000_000,
@@ -90,8 +90,8 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'gpuCount',
-      label: 'GPU count',
-      help: 'GPUs available to serve the model. More GPUs add memory and compute, via replicas or tensor-parallel shards.',
+      label: 'GPU 数',
+      help: '可用来服务模型的 GPU 数。更多 GPU 通过 replica 或 tensor-parallel shard 增加 memory 和算力。',
       min: 1,
       max: 256,
       defaultValue: 1,
@@ -102,7 +102,7 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'ttftTargetMs',
       label: 'p99 time-to-first-token',
-      help: 'Latency budget from request arrival to the first streamed token; the prefill phase must fit inside it.',
+      help: '从 request 到达到第一个 stream 出来的 token 的延迟预算；prefill 阶段必须卡在它以内。',
       min: 50,
       max: 10_000,
       defaultValue: 1_000,
@@ -114,13 +114,13 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'continuousBatching',
       label: 'Continuous batching + paged attention',
-      help: 'In-flight batching admits and retires requests every step; paged attention stores the KV cache in fixed pages to avoid fragmentation.',
+      help: 'in-flight batching 每步都 admit 和 retire request；paged attention 把 KV cache 存在固定大小的 page 里，避免碎片化。',
       defaultValue: true,
     },
     {
       id: 'tensorParallel',
       label: 'Tensor-parallel sharding',
-      help: 'Split each layer across GPUs so a model larger than one GPU can run, at the cost of per-step collective communication.',
+      help: '把每层 split 到多块 GPU 上，让一个比单块 GPU 大的模型也能跑，代价是每步的 collective communication。',
       defaultValue: false,
     },
   ],
@@ -128,8 +128,8 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'single-gpu',
       step: '01',
-      title: 'One GPU, one request',
-      summary: 'A small model serving the occasional request sequentially.',
+      title: '一块 GPU，一个 request',
+      summary: '一个小模型顺序地服务偶尔来的 request。',
       values: {
         requestsPerSecond: 0.5,
         promptTokens: 256,
@@ -145,7 +145,7 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
       id: 'kv-static-batch',
       step: '02',
       title: 'KV cache + static batching',
-      summary: 'Steady traffic batched in fixed groups; ragged finish times waste the GPU.',
+      summary: '稳定流量按固定组 batch；参差不齐的完成时间浪费 GPU。',
       values: {
         requestsPerSecond: 6,
         promptTokens: 1_024,
@@ -161,7 +161,7 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
       id: 'continuous-paged',
       step: '03',
       title: 'Continuous batching + paged attention',
-      summary: 'High concurrency packed step-by-step with fragmentation-free KV memory.',
+      summary: '高并发被逐步打包，配上无碎片的 KV memory。',
       values: {
         requestsPerSecond: 90,
         promptTokens: 2_048,
@@ -176,8 +176,8 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'tensor-parallel-big',
       step: '04',
-      title: 'Big model, tensor parallel',
-      summary: 'A model too large for one GPU sharded across GPUs per layer.',
+      title: '大模型，tensor parallel',
+      summary: '一个对单块 GPU 太大的模型，按层 shard 到多块 GPU 上。',
       values: {
         requestsPerSecond: 150,
         promptTokens: 4_096,
@@ -193,7 +193,7 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
       id: 'disaggregated-scale',
       step: '05',
       title: 'Prefill/decode disaggregation',
-      summary: 'Long prompts and tight first-token targets split prefill from decode at fleet scale.',
+      summary: '长 prompt 加严苛的 first-token 目标，在 fleet 规模下把 prefill 和 decode 拆开。',
       values: {
         requestsPerSecond: 220,
         promptTokens: 8_000,
@@ -207,9 +207,9 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'LLM inference serving architecture diagram',
+    title: 'LLM inference serving 架构图',
     description:
-      'Whiteboard-style architecture diagram for LLM inference: clients streaming tokens, an inference gateway, a continuous-batching scheduler, GPU workers holding the paged KV cache, tensor-parallel model shards, and an async metrics stream.',
+      'LLM inference 的白板风格架构图：client stream token、一个 inference gateway、一个 continuous-batching scheduler、持有 paged KV cache 的 GPU worker、tensor-parallel 的 model shard，以及一条异步 metrics stream。',
     columns: [
       {
         id: 'clients',
@@ -220,7 +220,7 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
             id: 'client',
             title: 'Client',
             subtitle: 'streams tokens',
-            summary: 'sends a prompt and reads generated tokens as they stream back',
+            summary: '发送一个 prompt，并在生成的 token stream 回来时读取它们',
             kind: 'client',
           },
         ],
@@ -234,7 +234,7 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
             id: 'gateway',
             title: 'Inference gateway',
             subtitle: 'admits + streams',
-            summary: 'authenticates, queues requests, and streams tokens back over the connection',
+            summary: '做鉴权、把 request 排队，并通过连接把 token stream 回去',
             kind: 'api',
           },
         ],
@@ -248,14 +248,14 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
             id: 'scheduler',
             title: 'Scheduler',
             subtitle: 'continuous batching',
-            summary: 'admits and retires requests every decode step to keep the GPU busy',
+            summary: '每个 decode step 都 admit 和 retire request，让 GPU 一直忙着',
             kind: 'scheduler',
           },
           {
             id: 'prefillPool',
             title: 'Prefill pool',
             subtitle: 'first token',
-            summary: 'runs the compute-heavy prefill so long prompts do not block decode',
+            summary: '跑计算量大的 prefill，让长 prompt 不会卡住 decode',
             kind: 'gpu',
           },
         ],
@@ -269,14 +269,14 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
             id: 'gpuWorker',
             title: 'GPU worker',
             subtitle: 'decode loop',
-            summary: 'generates tokens autoregressively for the current batch',
+            summary: '为当前 batch autoregressive 地生成 token',
             kind: 'gpu',
           },
           {
             id: 'kvCache',
             title: 'Paged KV cache',
             subtitle: 'per-token state',
-            summary: 'stores attention keys and values in fixed pages to avoid fragmentation',
+            summary: '把 attention 的 key 和 value 存在固定 page 里，避免碎片化',
             kind: 'cache',
           },
         ],
@@ -290,14 +290,14 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
             id: 'modelShards',
             title: 'Model shards',
             subtitle: 'tensor parallel',
-            summary: 'splits each layer across GPUs so a large model fits and runs',
+            summary: '把每层 split 到多块 GPU 上，让大模型装得下也跑得动',
             kind: 'gpu',
           },
           {
             id: 'metrics',
             title: 'Metrics stream',
             subtitle: 'async telemetry',
-            summary: 'collects throughput and latency off the hot path for autoscaling',
+            summary: '在热路径之外收集 throughput 和 latency，供 autoscaling 用',
             kind: 'stream',
           },
         ],
@@ -315,14 +315,14 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'kvMemory', label: 'KV cache pressure' },
-    { id: 'weightMemory', label: 'Per-GPU weight footprint (falls as you shard)' },
-    { id: 'throughput', label: 'Decode throughput vs capacity' },
-    { id: 'batchEfficiency', label: 'Batch slot saturation' },
+    { id: 'kvMemory', label: 'KV cache 压力' },
+    { id: 'weightMemory', label: '每 GPU weight 占用（shard 后会下降）' },
+    { id: 'throughput', label: 'Decode throughput vs 容量' },
+    { id: 'batchEfficiency', label: 'Batch slot 饱和度' },
     { id: 'ttft', label: 'Time-to-first-token' },
   ],
   decisions: [
-    { id: 'kvManagement', title: 'KV cache management' },
+    { id: 'kvManagement', title: 'KV cache 管理' },
     { id: 'batching', title: 'Continuous batching' },
     { id: 'sharding', title: 'Tensor-parallel sharding' },
     { id: 'prefillSplit', title: 'Prefill/decode split' },
@@ -331,50 +331,50 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
   ],
   sourceBackedRules: [
     {
-      title: 'PagedAttention stores the KV cache in fixed pages to eliminate fragmentation',
+      title: 'PagedAttention 把 KV cache 存在固定 page 里，消除碎片化',
       source: 'vLLM (PagedAttention)',
       url: 'https://arxiv.org/abs/2309.06180',
       summary:
-        'Borrowing OS virtual-memory paging, vLLM stores the KV cache in non-contiguous fixed-size blocks, cutting waste from fragmentation and raising serving throughput 2-4x.',
+        '借用 OS 虚拟内存的 paging，vLLM 把 KV cache 存在不连续的固定大小块里，削掉碎片化造成的浪费，把 serving throughput 提高 2-4 倍。',
     },
     {
-      title: 'vLLM combines continuous batching with paged attention for high-throughput serving',
+      title: 'vLLM 把 continuous batching 和 paged attention 结合起来做高 throughput serving',
       source: 'vLLM Docs',
       url: 'https://docs.vllm.ai/en/latest/',
       summary:
-        'The documentation describes continuous (in-flight) batching and PagedAttention as the core mechanisms that keep the GPU busy across requests of different lengths.',
+        '文档把 continuous（in-flight）batching 和 PagedAttention 描述为核心机制，让 GPU 在不同长度的 request 之间一直忙着。',
     },
     {
-      title: 'TensorRT-LLM shards large models across GPUs with tensor and pipeline parallelism',
+      title: 'TensorRT-LLM 用 tensor 和 pipeline parallelism 把大模型 shard 到多块 GPU 上',
       source: 'NVIDIA TensorRT-LLM',
       url: 'https://github.com/NVIDIA/TensorRT-LLM',
       summary:
-        'For models too large for one GPU, TensorRT-LLM splits each layer across devices and supports multi-GPU and multi-node parallelism plus disaggregated serving.',
+        '对于太大、一块 GPU 装不下的模型，TensorRT-LLM 把每层切分到多设备上，支持 multi-GPU、multi-node parallelism 以及 disaggregated serving。',
     },
     {
-      title: 'Triton Inference Server schedules and batches inference requests in production',
+      title: 'Triton Inference Server 在生产中调度并 batch inference request',
       source: 'NVIDIA Triton',
       url: 'https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/index.html',
       summary:
-        'Triton documents dynamic and in-flight batching, scheduling, and multi-backend serving used to run LLM inference at scale behind a single endpoint.',
+        'Triton 记录了 dynamic 和 in-flight batching、调度，以及 multi-backend serving，用于在单个 endpoint 背后大规模运行 LLM inference。',
     },
   ],
   teachingAssumptions: [
-    'Per-GPU memory, token throughput, and batching efficiency are conservative teaching numbers for one modern data-center GPU, not vendor benchmarks.',
-    'KV cache size is approximated as proportional to sequence length and sub-linear in model scale; modern frontier models use Grouped-Query Attention (GQA/MQA) to share key/value heads, which shrinks the KV cache by roughly 8x and is folded into the coefficient here.',
-    'Prefill is modeled as the compute-bound first-token phase and decode as the memory-bound token loop; their relative cost varies by hardware and kernel.',
+    '每 GPU memory、token throughput、batching 效率都是针对一块现代数据中心 GPU 的保守教学数字，不是 vendor benchmark。',
+    'KV cache 大小被近似成与 sequence length 成正比、对模型规模 sub-linear；现代 frontier 模型用 Grouped-Query Attention（GQA/MQA）共享 key/value head，把 KV cache 缩小约 8 倍，这里已经折进系数里了。',
+    'prefill 被建模成 compute-bound 的 first-token 阶段，decode 被建模成 memory-bound 的 token loop；它们的相对成本随硬件和 kernel 而变。',
   ],
   teachingWalkthrough: [
     {
       id: 'one-request',
       step: '01',
-      focus: 'One GPU, one request',
+      focus: '一块 GPU，一个 request',
       scenarioId: 'single-gpu',
       question:
-        'A 7B model serves about one request every two seconds. Do you need batching, paging, or multiple GPUs yet?',
+        '一个 7B 模型大约每两秒服务一个 request。现在你需要 batching、paging 或多块 GPU 吗？',
       reveal:
-        'No. The weights fit in one GPU and a single short generation barely touches memory or compute. Each request runs to completion before the next starts; batching machinery and sharding would add complexity with no load to justify them.',
-      takeaway: 'Start with one GPU running requests sequentially when load and model size are both small.',
+        '不需要。weights 装得进一块 GPU，单个短生成几乎碰不到 memory 或算力。每个 request 跑完才开始下一个；batching 那套机制和 sharding 只会徒增复杂度，却没有负载来支撑它们。',
+      takeaway: '当负载和模型大小都小的时候，就用一块 GPU 顺序地跑 request。',
     },
     {
       id: 'static-batch',
@@ -382,10 +382,10 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
       focus: 'KV cache + static batching',
       scenarioId: 'kv-static-batch',
       question:
-        'Traffic rises to several requests per second. If you batch a fixed group and run them together, why does the GPU still sit partly idle?',
+        '流量涨到每秒好几个 request。如果你把固定一组 batch 起来一起跑，为什么 GPU 还是会有一部分闲着？',
       reveal:
-        'Generations finish at different times, but a static batch waits for the slowest member. Short requests stall behind long ones, so effective utilisation is low. The KV cache also now holds growing per-token state for every active sequence, eating memory fast.',
-      takeaway: 'Static batching wastes GPU because ragged finish times leave finished slots idle until the batch drains.',
+        '各个生成在不同时刻完成，但 static batch 要等最慢的那个成员。短 request 卡在长 request 后面，所以有效利用率很低。而且现在 KV cache 还要为每个活跃 sequence 持有不断增长的 per-token state，吃 memory 很快。',
+      takeaway: 'static batching 浪费 GPU，因为参差不齐的完成时间让已完成的 slot 一直闲到整个 batch 排空。',
     },
     {
       id: 'continuous',
@@ -393,21 +393,21 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
       step: '03',
       scenarioId: 'continuous-paged',
       question:
-        'At high concurrency, what lets you pack many requests onto a GPU without running out of KV memory or stalling?',
+        '在高并发下，是什么让你能把很多 request 塞进一块 GPU，又不会耗尽 KV memory 或卡住？',
       reveal:
-        'Continuous (in-flight) batching admits and retires requests every decode step, so a finished sequence frees its slot immediately. Paged attention stores the KV cache in fixed pages, so memory is not fragmented and you fit many more concurrent sequences. Together they multiply throughput on the same hardware.',
-      takeaway: 'Continuous batching plus paged attention is the workhorse: step-level scheduling with fragmentation-free KV memory.',
+        'Continuous（in-flight）batching 每个 decode step 都 admit 和 retire request，所以一个完成的 sequence 会立刻释放它的 slot。Paged attention 把 KV cache 存在固定 page 里，所以 memory 不会碎片化，你能塞下多得多的并发 sequence。两者合起来在同样的硬件上把 throughput 翻好几倍。',
+      takeaway: 'continuous batching 加 paged attention 是主力：step 级的调度配上无碎片的 KV memory。',
     },
     {
       id: 'tensor-parallel',
       step: '04',
-      focus: 'Big model, tensor parallel',
+      focus: '大模型，tensor parallel',
       scenarioId: 'tensor-parallel-big',
       question:
-        'A 175B model needs ~350 GB just for 16-bit weights. One 80 GB GPU cannot hold it — what changes?',
+        '一个 175B 模型光 16-bit weights 就要约 350 GB。一块 80 GB 的 GPU 装不下它——要变什么？',
       reveal:
-        'The model must be split. Tensor parallelism shards each layer across several GPUs so the weights and KV cache fit collectively, at the cost of a collective communication step every layer. Grouped-Query Attention (GQA) helps here too: by sharing key/value heads it shrinks the KV cache ~8x, so each shard holds far more concurrent sequences. You trade extra GPUs and inter-GPU bandwidth for the ability to run the model at all.',
-      takeaway: 'When weights exceed one GPU, tensor-parallel sharding makes the model runnable but adds per-step communication.',
+        '模型必须切开。Tensor parallelism 把每层 shard 到几块 GPU 上，让 weights 和 KV cache 合起来装得下，代价是每层都有一次 collective communication。Grouped-Query Attention（GQA）在这里也帮得上忙：靠共享 key/value head 把 KV cache 缩小约 8 倍，所以每个 shard 能容纳多得多的并发 sequence。你用额外的 GPU 和 GPU 间带宽，换来「模型能跑起来」本身。',
+      takeaway: '当 weights 超出一块 GPU 时，tensor-parallel sharding 让模型能跑，但加上了每步的 communication。',
     },
     {
       id: 'disaggregated',
@@ -415,10 +415,10 @@ export const llmInferenceLabDefinition: SystemDesignLabDefinition = {
       focus: 'Prefill/decode split',
       scenarioId: 'disaggregated-scale',
       question:
-        'With 16k-token prompts and a 300 ms first-token target at fleet scale, why not run prefill and decode on the same GPUs?',
+        '在 fleet 规模下，有 16k token 的 prompt 和 300 ms 的 first-token 目标，为什么不把 prefill 和 decode 跑在同一批 GPU 上？',
       reveal:
-        'Prefill is compute-bound and bursty; decode is memory-bound and steady. Mixed on one pool, a long prefill blocks ongoing decodes and blows the time-to-first-token budget. Disaggregating prefill and decode onto separate GPU pools lets each scale and be tuned independently, protecting both first-token latency and decode throughput.',
-      takeaway: 'At scale, separate prefill from decode so compute-heavy first tokens never stall the steady decode loop.',
+        'prefill 是 compute-bound 且突发的；decode 是 memory-bound 且平稳的。混在一个 pool 里，一个长 prefill 会卡住正在进行的 decode，把 time-to-first-token 预算冲爆。把 prefill 和 decode disaggregate 到各自独立的 GPU pool，让两者能独立扩容和调优，同时保住 first-token 延迟和 decode throughput。',
+      takeaway: '到了规模化，把 prefill 和 decode 分开，让计算量大的 first token 永远不会卡住平稳的 decode loop。',
     },
   ],
   analyze: analyzeLlmInferenceWorkload,
@@ -548,36 +548,36 @@ function analyzeLlmInferenceWorkload(workload: WorkloadValues): LabAnalysis {
         ratio: kvRatio,
         valueText: formatRatio(Math.min(kvRatio, 9.99)),
         copy: continuousBatching
-          ? `~${formatCount(concurrentSequences)} concurrent sequences in paged KV memory; misses spill to recompute or eviction.`
-          : `Naive KV allocation wastes ~${Math.round((1 - naiveKvUtilisation) * 100)}% to fragmentation while holding ${formatCount(concurrentSequences)} sequences.`,
+          ? `约 ${formatCount(concurrentSequences)} 个并发 sequence 在 paged KV memory 里；miss 会回退到重算或 eviction。`
+          : `Naive KV 分配在持有 ${formatCount(concurrentSequences)} 个 sequence 时，因碎片化浪费约 ${Math.round((1 - naiveKvUtilisation) * 100)}%。`,
       },
       weightMemory: {
         ratio: weightRatio,
         valueText: formatRatio(Math.min(weightRatio, 9.99)),
         copy: needsSharding
           ? tensorParallel
-            ? `${formatCount(modelParams)} params split ${formatCount(shardCount)}-way drop the per-GPU weight footprint to ${formatRatio(weightRatio)} of a GPU, leaving room for the KV cache.`
-            : `${formatCount(modelParams)} params at 16-bit exceed one GPU; tensor parallelism is required to fit the weights.`
-          : `${formatCount(modelParams)} params at 16-bit occupy ${formatRatio(weightRatio)} of a single GPU before any KV cache.`,
+            ? `${formatCount(modelParams)} 个 param 做 ${formatCount(shardCount)}-way 切分，把每 GPU 的 weight 占用降到一块 GPU 的 ${formatRatio(weightRatio)}，给 KV cache 腾出空间。`
+            : `${formatCount(modelParams)} 个 16-bit param 超出了一块 GPU；需要 tensor parallelism 才能装下 weights。`
+          : `${formatCount(modelParams)} 个 16-bit param 在还没算 KV cache 之前就占了单块 GPU 的 ${formatRatio(weightRatio)}。`,
       },
       throughput: {
         ratio: throughputRatio,
         valueText: `${formatRate(demandedTokensPerSecond)} tok/s`,
-        copy: `${formatRate(requestsPerSecond)} req/s x ${formatCount(tokensPerRequest)} tokens demanded against ~${formatRate(fleetTokensPerSecond)} tok/s of capacity.`,
+        copy: `${formatRate(requestsPerSecond)} req/s x ${formatCount(tokensPerRequest)} token 的需求，对上约 ${formatRate(fleetTokensPerSecond)} tok/s 的容量。`,
       },
       batchEfficiency: {
         ratio: batchSaturationRatio,
         valueText: `${formatRatio(batchSaturationRatio)} full`,
         copy: continuousBatching
-          ? `Continuous batching packs ~${formatCount(concurrentSequences)} sequences into the batch slots, keeping the GPU near full utilisation.`
-          : `Static batching wastes ~${Math.round((1 - decodeEfficiency) * 100)}% of the slots on ragged finish times, so the same ${formatCount(concurrentSequences)} sequences saturate it faster.`,
+          ? `Continuous batching 把约 ${formatCount(concurrentSequences)} 个 sequence 塞进 batch slot，让 GPU 接近满负荷。`
+          : `Static batching 因参差不齐的完成时间浪费约 ${Math.round((1 - decodeEfficiency) * 100)}% 的 slot，所以同样的 ${formatCount(concurrentSequences)} 个 sequence 会更快把它打满。`,
       },
       ttft: {
         ratio: ttftRatio,
         valueText: `~${Math.round(estimatedTtftMs)} ms`,
         copy: needsPrefillSplit
-          ? 'Long prompts make prefill expensive; splitting prefill from decode protects the first-token budget.'
-          : 'Prefill fits inside the first-token target on the shared pool.',
+          ? '长 prompt 让 prefill 很贵；把 prefill 和 decode 拆开能保住 first-token 预算。'
+          : 'prefill 在共享 pool 上就能卡进 first-token 目标。',
       },
     },
     decisions: buildDecisions({
@@ -640,17 +640,17 @@ function buildReasons(
   if (analysis.kvRatio > 1) {
     reasons.push({
       severity: 'danger',
-      text: `KV cache for ~${formatCount(analysis.concurrentSequences)} concurrent sequences is ${formatRatio(analysis.kvRatio)} of GPU memory; admit fewer, page the cache, or add GPUs.`,
+      text: `约 ${formatCount(analysis.concurrentSequences)} 个并发 sequence 的 KV cache 占了 GPU memory 的 ${formatRatio(analysis.kvRatio)}；少 admit 一些、给 cache 上 paging，或者加 GPU。`,
     });
   } else if (analysis.kvRatio > 0.7) {
     reasons.push({
       severity: 'warning',
-      text: `KV cache is filling GPU memory at ${formatRatio(analysis.kvRatio)} for ~${formatCount(analysis.concurrentSequences)} sequences; paged attention and admission control keep it from overflowing.`,
+      text: `KV cache 正在填满 GPU memory，约 ${formatCount(analysis.concurrentSequences)} 个 sequence 时占到 ${formatRatio(analysis.kvRatio)}；paged attention 和 admission control 让它不至于溢出。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `KV cache fits comfortably (${formatRatio(analysis.kvRatio)} of memory) for ~${formatCount(analysis.concurrentSequences)} concurrent sequences, helped by GQA.`,
+      text: `约 ${formatCount(analysis.concurrentSequences)} 个并发 sequence 的 KV cache 装得很宽裕（占 memory 的 ${formatRatio(analysis.kvRatio)}），GQA 也帮了忙。`,
     });
   }
 
@@ -658,17 +658,17 @@ function buildReasons(
   if (analysis.continuousBatching) {
     reasons.push({
       severity: 'ok',
-      text: 'Continuous batching admits and retires requests every step, keeping GPU utilisation high across uneven request lengths.',
+      text: 'Continuous batching 每步都 admit 和 retire request，让 GPU 利用率在长短不一的 request 之间保持高位。',
     });
   } else if (analysis.needsBatching) {
     reasons.push({
       severity: 'warning',
-      text: `${formatRate(analysis.requestsPerSecond)} req/s with ragged generation lengths waste the GPU under static batching; turn on continuous batching.`,
+      text: `${formatRate(analysis.requestsPerSecond)} req/s 加上参差不齐的生成长度，在 static batching 下浪费 GPU；打开 continuous batching。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Load is low enough to run requests one at a time; batching machinery is not justified yet.',
+      text: '负载足够低，可以一次跑一个 request；batching 那套机制还不值得上。',
     });
   }
 
@@ -676,17 +676,17 @@ function buildReasons(
   if (analysis.needsSharding && !analysis.tensorParallel) {
     reasons.push({
       severity: 'danger',
-      text: `${formatCount(analysis.modelParams)} params at 16-bit do not fit in one GPU; enable tensor-parallel sharding to run the model at all.`,
+      text: `${formatCount(analysis.modelParams)} 个 16-bit param 装不进一块 GPU；打开 tensor-parallel sharding，模型才跑得起来。`,
     });
   } else if (analysis.tensorParallel) {
     reasons.push({
       severity: 'ok',
-      text: 'Each layer is sharded tensor-parallel so weights and KV fit collectively, at the cost of a per-step collective communication.',
+      text: '每层都做 tensor-parallel sharding，让 weights 和 KV 合起来装得下，代价是每步一次 collective communication。',
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `${formatCount(analysis.modelParams)} params fit on a single GPU, so no sharding is needed yet.`,
+      text: `${formatCount(analysis.modelParams)} 个 param 能装进单块 GPU，所以还不需要 sharding。`,
     });
   }
 
@@ -694,17 +694,17 @@ function buildReasons(
   if (analysis.throughputRatio > 1) {
     reasons.push({
       severity: 'danger',
-      text: `Token demand (~${formatRate(analysis.demandedTokensPerSecond)} tok/s) exceeds fleet decode capacity at ${formatRatio(analysis.throughputRatio)}; add GPU replicas or autoscale.`,
+      text: `token 需求（约 ${formatRate(analysis.demandedTokensPerSecond)} tok/s）超出 fleet 的 decode 容量，达到 ${formatRatio(analysis.throughputRatio)}；加 GPU replica 或 autoscale。`,
     });
   } else if (analysis.throughputRatio > 0.7) {
     reasons.push({
       severity: 'warning',
-      text: `Decode demand is ${formatRatio(analysis.throughputRatio)} of fleet capacity; headroom is thin, so plan to autoscale replicas.`,
+      text: `decode 需求是 fleet 容量的 ${formatRatio(analysis.throughputRatio)}；余量很薄，所以要规划 autoscale replica。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `Decode capacity covers demand at ${formatRatio(analysis.throughputRatio)} of the fleet; throughput has room to spare.`,
+      text: `decode 容量覆盖需求，占 fleet 的 ${formatRatio(analysis.throughputRatio)}；throughput 还有余量。`,
     });
   }
 
@@ -712,12 +712,12 @@ function buildReasons(
   if (analysis.needsPrefillSplit) {
     reasons.push({
       severity: 'warning',
-      text: `${formatCount(analysis.promptTokens)}-token prompts push first-token latency to ~${Math.round(analysis.estimatedTtftMs)} ms; disaggregate prefill from decode to protect the budget.`,
+      text: `${formatCount(analysis.promptTokens)} token 的 prompt 把 first-token 延迟推到约 ${Math.round(analysis.estimatedTtftMs)} ms；把 prefill 和 decode disaggregate 开来保住预算。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `Prefill resolves the first token in ~${Math.round(analysis.estimatedTtftMs)} ms on the shared pool, inside the latency budget.`,
+      text: `prefill 在共享 pool 上约 ${Math.round(analysis.estimatedTtftMs)} ms 就解出第一个 token，卡在延迟预算以内。`,
     });
   }
 
@@ -725,7 +725,7 @@ function buildReasons(
   if (analysis.needsAutoscaling) {
     reasons.push({
       severity: 'ok',
-      text: 'Throughput and latency telemetry feed autoscaling so GPU replicas track the live request rate.',
+      text: 'throughput 和 latency 的 telemetry 喂给 autoscaling，让 GPU replica 跟上实时的 request rate。',
     });
   }
 
@@ -733,7 +733,7 @@ function buildReasons(
   if (analysis.streamingHelps) {
     reasons.push({
       severity: 'ok',
-      text: `Stream the ~${formatCount(analysis.outputTokens)} output tokens as they generate so users see progress before completion.`,
+      text: `把约 ${formatCount(analysis.outputTokens)} 个 output token 边生成边 stream，让用户在完成前就看到进展。`,
     });
   }
 
@@ -753,42 +753,42 @@ function buildDecisions(
     kvManagement: {
       state: flags.continuousBatching ? 'needed' : 'useful',
       copy: flags.continuousBatching
-        ? 'Paged attention stores the KV cache in fixed pages, so concurrency is bounded by memory, not fragmentation.'
-        : 'Without paging, the KV cache is allocated contiguously and loses memory to fragmentation as sequences vary in length.',
+        ? 'Paged attention 把 KV cache 存在固定 page 里，所以并发由 memory 决定，而不是碎片化。'
+        : '不做 paging 的话，KV cache 是连续分配的，随着 sequence 长度不一会因碎片化损失 memory。',
     },
     batching: {
       state: flags.continuousBatching ? 'needed' : flags.needsBatching ? 'needed' : 'not-yet',
       copy: flags.continuousBatching
-        ? 'Continuous (in-flight) batching schedules admissions and retirements every decode step for high utilisation.'
+        ? 'Continuous（in-flight）batching 每个 decode step 都调度 admit 和 retire，达到高利用率。'
         : flags.needsBatching
-          ? 'Static batching is leaving the GPU idle; move to continuous batching to pack uneven requests.'
-          : 'Load is low enough to run requests one at a time without batching.',
+          ? 'Static batching 正让 GPU 闲着；改用 continuous batching 来打包长短不一的 request。'
+          : '负载足够低，可以一次跑一个 request，不用 batching。',
     },
     sharding: {
       state: flags.tensorParallel ? 'needed' : flags.needsSharding ? 'needed' : 'not-yet',
       copy: flags.tensorParallel
-        ? `Each layer is split across ${formatCount(flags.shardCount)} GPUs so a model larger than one GPU fits and runs.`
+        ? `每层都 split 到 ${formatCount(flags.shardCount)} 块 GPU 上，让一个比单块 GPU 大的模型装得下也跑得动。`
         : flags.needsSharding
-          ? 'The model exceeds one GPU; enable tensor parallelism to shard the weights across devices.'
-          : 'The model fits on a single GPU, so no sharding is needed yet.',
+          ? '模型超出了一块 GPU；打开 tensor parallelism 把 weights 切分到多设备上。'
+          : '模型能装进单块 GPU，所以还不需要 sharding。',
     },
     prefillSplit: {
       state: flags.needsPrefillSplit ? 'needed' : 'not-yet',
       copy: flags.needsPrefillSplit
-        ? 'Disaggregate prefill and decode onto separate pools so long compute-bound prefills do not stall the decode loop.'
-        : 'Prefill and decode share the same GPUs; prompts are short enough that first-token latency stays within budget.',
+        ? '把 prefill 和 decode disaggregate 到各自独立的 pool，让长的、compute-bound 的 prefill 不会卡住 decode loop。'
+        : 'prefill 和 decode 共用同一批 GPU；prompt 足够短，first-token 延迟还在预算以内。',
     },
     autoscaling: {
       state: flags.needsAutoscaling ? 'needed' : 'not-yet',
       copy: flags.needsAutoscaling
-        ? `Autoscale GPU replicas from live telemetry to track ${formatRate(flags.requestsPerSecond)} req/s of demand.`
-        : 'A fixed pool covers the load; autoscaling is not justified yet.',
+        ? `根据实时 telemetry autoscale GPU replica，跟上 ${formatRate(flags.requestsPerSecond)} req/s 的需求。`
+        : '一个固定 pool 就能覆盖负载；autoscaling 还不值得上。',
     },
     streaming: {
       state: flags.streamingHelps ? 'useful' : 'not-yet',
       copy: flags.streamingHelps
-        ? `Stream the ~${formatCount(flags.outputTokens)} output tokens as they are generated so users see progress before completion.`
-        : 'Outputs are short enough that streaming adds little over returning the full response.',
+        ? `把约 ${formatCount(flags.outputTokens)} 个 output token 边生成边 stream，让用户在完成前就看到进展。`
+        : 'output 足够短，stream 相比直接返回完整响应没多大意义。',
     },
   };
 }
@@ -798,34 +798,34 @@ function chooseArchitectureTitle(flags: ArchitectureFlags, gpuCount: number): st
     return 'Disaggregated prefill/decode + tensor-parallel fleet';
   }
   if (flags.tensorParallel || flags.needsSharding) {
-    return 'Tensor-parallel serving with continuous batching';
+    return '带 continuous batching 的 tensor-parallel serving';
   }
   if (flags.continuousBatching) {
     const gpus = Math.max(1, Math.round(gpuCount));
     return gpus > 1
-      ? `Continuous batching + paged attention across ${formatCount(gpus)} GPU replicas`
-      : 'Continuous batching + paged attention on one GPU';
+      ? `Continuous batching + paged attention，跨 ${formatCount(gpus)} 个 GPU replica`
+      : '一块 GPU 上的 continuous batching + paged attention';
   }
   if (flags.needsBatching) {
-    return 'Static batching with a KV cache';
+    return '带 KV cache 的 static batching';
   }
-  return 'Single GPU, one request at a time';
+  return '单块 GPU，一次一个 request';
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (flags.needsPrefillSplit && (flags.tensorParallel || flags.needsSharding)) {
-    return 'Prefill and decode run on separate GPU pools, the model is sharded tensor-parallel, and continuous batching with paged attention keeps each pool saturated.';
+    return 'prefill 和 decode 跑在各自独立的 GPU pool 上，模型做 tensor-parallel sharding，带 paged attention 的 continuous batching 让每个 pool 都保持饱和。';
   }
   if (flags.tensorParallel || flags.needsSharding) {
-    return 'The model is split across GPUs so it fits, and continuous batching with paged attention packs many concurrent sequences onto the shards.';
+    return '模型被 split 到多块 GPU 上才装得下，带 paged attention 的 continuous batching 把很多并发 sequence 塞到各 shard 上。';
   }
   if (flags.continuousBatching) {
-    return 'A single GPU runs continuous batching with paged attention, retiring and admitting requests every step so the KV cache never fragments.';
+    return '一块 GPU 跑带 paged attention 的 continuous batching，每步 retire 和 admit request，让 KV cache 永远不碎片化。';
   }
   if (flags.needsBatching) {
-    return 'A KV cache holds per-sequence state and requests are batched in fixed groups, but ragged finish times leave the GPU partly idle.';
+    return '一个 KV cache 持有 per-sequence 的 state，request 按固定组 batch，但参差不齐的完成时间让 GPU 有一部分闲着。';
   }
-  return 'One GPU runs each request to completion before the next; no batching or sharding is justified yet.';
+  return '一块 GPU 把每个 request 跑完才开始下一个；还不需要任何 batching 或 sharding。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {

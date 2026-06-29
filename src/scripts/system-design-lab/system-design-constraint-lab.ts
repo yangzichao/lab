@@ -1,5 +1,10 @@
 import { formatControlValue, clamp } from './lab-formatters';
-import { systemDesignLabDefinitionsById } from './lab-definitions';
+import { getSystemDesignLabDefinition } from './lab-definitions';
+import { getSystemDesignLabUiCopy } from './system-design-lab-copy';
+import {
+  normalizeSystemDesignLocale,
+  type SystemDesignLocale,
+} from './system-design-i18n';
 import type {
   DecisionState,
   FlowState,
@@ -23,17 +28,24 @@ export function initSystemDesignConstraintLabs(): void {
         return;
       }
 
-      const definition = systemDesignLabDefinitionsById[labId];
-      if (!definition) {
+      let definition: SystemDesignLabDefinition;
+      const locale = normalizeSystemDesignLocale(labElement.dataset.locale);
+      try {
+        definition = getSystemDesignLabDefinition(labId, locale);
+      } catch {
         return;
       }
 
       labElement.dataset.initialized = 'true';
-      initLab(definition, labElement);
+      initLab(definition, labElement, locale);
     });
 }
 
-function initLab(definition: SystemDesignLabDefinition, labElement: HTMLElement): void {
+function initLab(
+  definition: SystemDesignLabDefinition,
+  labElement: HTMLElement,
+  locale: SystemDesignLocale,
+): void {
   const rangeControls = Array.from(
     labElement.querySelectorAll<HTMLInputElement>('input[type="range"][data-control]'),
   );
@@ -51,7 +63,13 @@ function initLab(definition: SystemDesignLabDefinition, labElement: HTMLElement)
   let activeScenarioId: string | null = definition.scenarios[0]?.id ?? null;
 
   const render = (): void => {
-    const workload = readWorkloadValues(definition, rangeControls, toggleControls, labElement);
+    const workload = readWorkloadValues(
+      definition,
+      rangeControls,
+      toggleControls,
+      labElement,
+      locale,
+    );
     const analysis = definition.analyze(workload);
 
     setText(labElement, '[data-architecture-title]', analysis.architectureTitle);
@@ -121,7 +139,7 @@ function initLab(definition: SystemDesignLabDefinition, labElement: HTMLElement)
     });
   });
 
-  const walkthroughActive = setupWalkthrough(definition, labElement, applyScenario);
+  const walkthroughActive = setupWalkthrough(definition, labElement, applyScenario, locale);
 
   if (walkthroughActive) {
     // The first walkthrough step already applied its scenario and rendered.
@@ -136,12 +154,14 @@ function setupWalkthrough(
   definition: SystemDesignLabDefinition,
   labElement: HTMLElement,
   applyScenario: (scenarioId: string) => void,
+  locale: SystemDesignLocale,
 ): boolean {
   const walkthrough = definition.teachingWalkthrough;
   const root = labElement.querySelector<HTMLElement>('[data-walkthrough]');
   if (!walkthrough || walkthrough.length === 0 || !root) {
     return false;
   }
+  const copy = getSystemDesignLabUiCopy(locale);
 
   const positionElement = root.querySelector<HTMLElement>('[data-walkthrough-position]');
   const focusElement = root.querySelector<HTMLElement>('[data-walkthrough-focus]');
@@ -162,7 +182,7 @@ function setupWalkthrough(
     }
     if (revealButton) {
       revealButton.setAttribute('aria-expanded', String(visible));
-      revealButton.textContent = visible ? 'Hide the reasoning' : 'Reveal the reasoning';
+      revealButton.textContent = visible ? copy.hideReasoning : copy.revealReasoning;
     }
   };
 
@@ -174,7 +194,7 @@ function setupWalkthrough(
     currentIndex = index;
 
     if (positionElement) {
-      positionElement.textContent = `Step ${index + 1} / ${walkthrough.length}`;
+      positionElement.textContent = copy.walkthroughPosition(index, walkthrough.length);
     }
     if (focusElement) {
       focusElement.textContent = step.focus;
@@ -229,6 +249,7 @@ function readWorkloadValues(
   rangeControls: HTMLInputElement[],
   toggleControls: HTMLInputElement[],
   labElement: HTMLElement,
+  locale: SystemDesignLocale,
 ): WorkloadValues {
   const values: WorkloadValues = {};
 
@@ -245,7 +266,7 @@ function readWorkloadValues(
       `[data-control-output="${control.id}"]`,
     );
     if (outputElement) {
-      outputElement.value = formatControlValue(control, value);
+      outputElement.value = formatControlValue(control, value, locale);
     }
   });
 

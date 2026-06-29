@@ -20,16 +20,16 @@ const metadataRowsPerGigabyte = 1_200_000;
 
 export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
   id: 'leetcode-online-judge',
-  eyebrow: 'System Design Lab',
-  title: 'Online Judge scaling is mostly worker economics, not API traffic.',
+  eyebrow: '系统设计 Lab',
+  title: 'Online Judge 的扩展主要是 worker 经济学，而不是 API 流量。',
   summary:
-    'Move the sliders from a toy judge to a LeetCode-like workload. The design changes when compilation and sandboxed execution dominate: submit asynchronously, queue work, prewarm containers, cache immutable results, and split heavy submit from light run-code traffic.',
+    '把滑块从一个玩具 judge 推到接近 LeetCode 的工作负载。当 compilation 和 sandbox 执行成为主导时，设计就变了：异步提交、把活儿排进 queue、预热 container、缓存不可变的结果，并把重型 submit 和轻量 run-code 流量拆开。',
   articleHref: '/blog/system-design/leetcode-online-judge/',
   controls: [
     {
       id: 'submissionsPerMinute',
-      label: 'Submissions',
-      help: 'Formal submit requests entering the judge pipeline.',
+      label: '提交量',
+      help: '进入 judge pipeline 的正式 submit 请求。',
       min: 1,
       max: 200_000,
       defaultValue: 240,
@@ -38,8 +38,8 @@ export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'workerSecondsPerSubmission',
-      label: 'Worker time',
-      help: 'Average compile plus test execution time for one submission.',
+      label: 'Worker 时间',
+      help: '一次 submission 的平均 compile 加测试执行时间。',
       min: 0.2,
       max: 60,
       defaultValue: 2,
@@ -48,41 +48,41 @@ export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'testCasesPerSubmission',
-      label: 'Test cases',
-      help: 'How many tests a full submission may run before a final verdict.',
+      label: 'Test case',
+      help: '一次完整 submission 在出最终 verdict 前可能跑多少个测试。',
       min: 1,
       max: 500,
       defaultValue: 40,
       scale: 'log',
-      unit: 'cases',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'languageCount',
-      label: 'Languages',
-      help: 'Each language tends to need its own runtime image and warm pool.',
+      label: '语言数',
+      help: '每种语言往往需要自己的 runtime image 和 warm pool。',
       min: 1,
       max: 30,
       defaultValue: 6,
       scale: 'linear',
-      unit: 'languages',
+      unit: '种',
       format: 'count',
     },
     {
       id: 'resultPollsPerSubmission',
-      label: 'Result polls',
-      help: 'Average GET /submissions/{token} calls before the user sees a final result.',
+      label: 'Result poll 次数',
+      help: '用户看到最终结果前，平均的 GET /submissions/{token} 调用次数。',
       min: 1,
       max: 30,
       defaultValue: 4,
       scale: 'linear',
-      unit: 'polls',
+      unit: '次',
       format: 'count',
     },
     {
       id: 'queueSlaSeconds',
-      label: 'Queue wait target',
-      help: 'How long users should wait in queue before execution starts.',
+      label: 'Queue 等待目标',
+      help: '执行开始前，用户应该在 queue 里等多久。',
       min: 1,
       max: 600,
       defaultValue: 30,
@@ -93,14 +93,14 @@ export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
   toggles: [
     {
       id: 'strictSandbox',
-      label: 'Strict sandbox isolation',
-      help: 'User code runs with resource limits, filesystem isolation, and blocked dangerous syscalls.',
+      label: '严格 sandbox 隔离',
+      help: '用户代码在 resource limit、文件系统隔离和拦截危险 syscall 的条件下运行。',
       defaultValue: true,
     },
     {
       id: 'persistEverySubmission',
-      label: 'Persist every submission',
-      help: 'The final verdict and source metadata must survive cache expiry and worker failure.',
+      label: '持久化每一次 submission',
+      help: '最终 verdict 和源码 metadata 必须能熬过 cache 过期和 worker 故障。',
       defaultValue: true,
     },
   ],
@@ -108,8 +108,8 @@ export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'toy',
       step: '01',
-      title: 'Toy judge',
-      summary: 'A synchronous prototype is still possible.',
+      title: '玩具 judge',
+      summary: '一个同步原型还行得通。',
       values: {
         submissionsPerMinute: 4,
         workerSecondsPerSubmission: 0.4,
@@ -124,8 +124,8 @@ export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'async',
       step: '02',
-      title: 'Async submit',
-      summary: 'POST returns a token; workers finish later.',
+      title: '异步 submit',
+      summary: 'POST 返回一个 token；worker 稍后才完成。',
       values: {
         submissionsPerMinute: 240,
         workerSecondsPerSubmission: 2,
@@ -140,8 +140,8 @@ export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'contest',
       step: '03',
-      title: 'Contest spike',
-      summary: 'Queue depth, not API CPU, controls user wait time.',
+      title: '比赛尖峰',
+      summary: '决定用户等待时间的是 queue depth，而不是 API CPU。',
       values: {
         submissionsPerMinute: 8_000,
         workerSecondsPerSubmission: 3,
@@ -156,8 +156,8 @@ export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'many-languages',
       step: '04',
-      title: 'Many languages',
-      summary: 'Runtime images and cold starts push toward language-specific pools.',
+      title: '多语言',
+      summary: 'runtime image 和 cold start 把设计推向按语言划分的 pool。',
       values: {
         submissionsPerMinute: 18_000,
         workerSecondsPerSubmission: 4,
@@ -172,8 +172,8 @@ export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'leetcode-scale',
       step: '05',
-      title: 'LeetCode scale',
-      summary: 'Workers, result cache, metadata partitions, and queue isolation all matter.',
+      title: 'LeetCode 规模',
+      summary: 'worker、result cache、metadata partition 和 queue 隔离全都重要。',
       values: {
         submissionsPerMinute: 90_000,
         workerSecondsPerSubmission: 5,
@@ -187,16 +187,16 @@ export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: {
-    title: 'Online Judge architecture diagram',
+    title: 'Online Judge 架构图',
     description:
-      'Whiteboard-style architecture diagram for asynchronous code submission, queueing, sandbox workers, result cache, and persistent submission metadata.',
+      '白板风格的架构图，展示异步代码提交、queueing、sandbox worker、result cache 和持久化的 submission metadata。',
     viewBox: '0 0 1040 560',
     zones: [
-      { id: 'clients', label: 'Clients', x: 20, y: 70, width: 150, height: 360, variant: 'clients' },
+      { id: 'clients', label: '客户端', x: 20, y: 70, width: 150, height: 360, variant: 'clients' },
       { id: 'api', label: 'API', x: 210, y: 45, width: 185, height: 410, variant: 'edge' },
       { id: 'queue', label: 'Queueing', x: 435, y: 70, width: 170, height: 385, variant: 'backbone' },
-      { id: 'execution', label: 'Execution', x: 645, y: 70, width: 185, height: 385, variant: 'processing' },
-      { id: 'storage', label: 'Storage + results', x: 870, y: 45, width: 150, height: 440, variant: 'storage' },
+      { id: 'execution', label: '执行', x: 645, y: 70, width: 185, height: 385, variant: 'processing' },
+      { id: 'storage', label: '存储 + 结果', x: 870, y: 45, width: 150, height: 440, variant: 'storage' },
     ],
     flows: [
       { id: 'clientToApi', path: 'M155 245 C190 245 190 160 225 160', variant: 'primary' },
@@ -212,152 +212,152 @@ export const onlineJudgeLabDefinition: SystemDesignLabDefinition = {
       { id: 'syncDirect', path: 'M155 276 C420 210 540 325 660 325', variant: 'direct' },
     ],
     nodes: [
-      { id: 'client', title: 'User', subtitle: 'submit + poll', x: 48, y: 210, width: 108, height: 92, kind: 'client' },
-      { id: 'api', title: 'API server', subtitle: '202 token + status', x: 225, y: 125, width: 140, height: 92, kind: 'api' },
+      { id: 'client', title: '用户', subtitle: 'submit + poll', x: 48, y: 210, width: 108, height: 92, kind: 'client' },
+      { id: 'api', title: 'API server', subtitle: '202 token + 状态', x: 225, y: 125, width: 140, height: 92, kind: 'api' },
       { id: 'metadataDb', title: 'Submission DB', subtitle: 'append metadata', x: 885, y: 85, width: 120, height: 86, kind: 'db' },
       { id: 'queue', title: 'Queue', subtitle: 'backpressure', x: 450, y: 165, width: 120, height: 90, kind: 'queue' },
       { id: 'scheduler', title: 'Scheduler', subtitle: 'priority + fairness', x: 660, y: 135, width: 150, height: 92, kind: 'scheduler' },
       { id: 'workers', title: 'Worker pool', subtitle: 'compile + run', x: 660, y: 285, width: 150, height: 96, kind: 'compute' },
-      { id: 'containers', title: 'Warm runners', subtitle: 'per language', x: 660, y: 420, width: 150, height: 82, kind: 'container' },
-      { id: 'resultCache', title: 'Result cache', subtitle: 'immutable verdicts', x: 885, y: 250, width: 120, height: 90, kind: 'cache' },
-      { id: 'objectStore', title: 'Object store', subtitle: 'code + tests', x: 885, y: 400, width: 120, height: 82, kind: 'objectstore' },
+      { id: 'containers', title: 'Warm runner', subtitle: '按语言', x: 660, y: 420, width: 150, height: 82, kind: 'container' },
+      { id: 'resultCache', title: 'Result cache', subtitle: '不可变 verdict', x: 885, y: 250, width: 120, height: 90, kind: 'cache' },
+      { id: 'objectStore', title: 'Object store', subtitle: '代码 + 测试', x: 885, y: 400, width: 120, height: 82, kind: 'objectstore' },
     ],
     mobileStages: [
       {
-        label: 'Clients',
-        nodes: [{ id: 'client', title: 'User', summary: 'submits code and polls for immutable verdicts' }],
+        label: '客户端',
+        nodes: [{ id: 'client', title: '用户', summary: '提交代码，并轮询不可变的 verdict' }],
       },
       {
         label: 'API',
-        nodes: [{ id: 'api', title: 'API server', summary: 'validates request, stores metadata, and returns a token' }],
+        nodes: [{ id: 'api', title: 'API server', summary: '校验请求、存 metadata，并返回一个 token' }],
       },
       {
         label: 'Queueing',
-        nodes: [{ id: 'queue', title: 'Queue', summary: 'absorbs spikes and gives workers a pull-based backlog' }],
+        nodes: [{ id: 'queue', title: 'Queue', summary: '吸收尖峰，并给 worker 一个 pull-based 的 backlog' }],
       },
       {
-        label: 'Execution',
+        label: '执行',
         nodes: [
-          { id: 'scheduler', title: 'Scheduler', summary: 'applies fairness, priority, and queue selection' },
-          { id: 'workers', title: 'Worker pool', summary: 'CPU and memory heavy compilation and execution' },
-          { id: 'containers', title: 'Warm runners', summary: 'language-specific sandbox containers' },
+          { id: 'scheduler', title: 'Scheduler', summary: '施加 fairness、priority 和 queue 选择' },
+          { id: 'workers', title: 'Worker pool', summary: 'CPU 和内存吃重的 compilation 与执行' },
+          { id: 'containers', title: 'Warm runner', summary: '按语言划分的 sandbox container' },
         ],
       },
       {
-        label: 'Storage + results',
+        label: '存储 + 结果',
         nodes: [
-          { id: 'metadataDb', title: 'Submission DB', summary: 'durable append-only verdict history' },
-          { id: 'resultCache', title: 'Result cache', summary: 'cheap polling reads with TTL' },
-          { id: 'objectStore', title: 'Object store', summary: 'large source, problem, and testcase blobs' },
+          { id: 'metadataDb', title: 'Submission DB', summary: 'durable 的 append-only verdict 历史' },
+          { id: 'resultCache', title: 'Result cache', summary: '带 TTL 的廉价轮询读取' },
+          { id: 'objectStore', title: 'Object store', summary: '大块的源码、题目和 testcase blob' },
         ],
       },
     ],
   },
   meters: [
-    { id: 'workerCapacity', label: 'Worker capacity' },
-    { id: 'queuePressure', label: 'Queue pressure' },
+    { id: 'workerCapacity', label: 'Worker 容量' },
+    { id: 'queuePressure', label: 'Queue 压力' },
     { id: 'resultLookup', label: 'Result lookup' },
     { id: 'sandboxPool', label: 'Sandbox pool' },
-    { id: 'submissionStorage', label: 'Submission storage' },
+    { id: 'submissionStorage', label: 'Submission 存储' },
   ],
   decisions: [
-    { id: 'asyncApi', title: 'Async API' },
+    { id: 'asyncApi', title: '异步 API' },
     { id: 'messageQueue', title: 'Message queue' },
-    { id: 'prewarmedContainers', title: 'Pre-warmed runners' },
-    { id: 'sandbox', title: 'Sandbox isolation' },
+    { id: 'prewarmedContainers', title: '预热 runner' },
+    { id: 'sandbox', title: 'Sandbox 隔离' },
     { id: 'resultCache', title: 'Result cache' },
-    { id: 'runSubmitSplit', title: 'Run / submit split' },
+    { id: 'runSubmitSplit', title: 'Run / submit 拆分' },
   ],
   sourceBackedRules: [
     {
-      title: 'Container resource limits are the unit of TLE and MLE enforcement',
+      title: 'container 的 resource limit 是执行 TLE 和 MLE 的单位',
       source: 'Docker Docs',
       url: 'https://docs.docker.com/engine/containers/resource_constraints/',
       summary:
-        'CPU and memory limits give worker infrastructure a concrete way to stop submissions that exceed problem constraints.',
+        'CPU 和内存 limit 给 worker 基础设施一个具体手段，去中止那些超出题目约束的 submission。',
     },
     {
-      title: 'Seccomp reduces the syscall surface for untrusted code',
+      title: 'Seccomp 缩小了不可信代码的 syscall 攻击面',
       source: 'Docker Docs',
       url: 'https://docs.docker.com/engine/security/seccomp/',
       summary:
-        'A sandbox should block dangerous system calls instead of merely trusting language runtimes or process permissions.',
+        'sandbox 应该拦截危险的 system call，而不是仅仅信任语言 runtime 或进程权限。',
     },
     {
-      title: 'Queues decouple submit traffic from worker execution',
+      title: 'queue 把 submit 流量和 worker 执行解耦',
       source: 'AWS SQS Docs',
       url: 'https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html',
       summary:
-        'A queue absorbs bursts and lets workers consume at their own pace, which matches asynchronous judging.',
+        'queue 吸收突发流量，让 worker 按自己的节奏消费，这正好契合异步判题。',
     },
     {
-      title: 'TTL-backed key-value results make polling cheap',
+      title: '带 TTL 的 key-value 结果让轮询很廉价',
       source: 'Redis Docs',
       url: 'https://redis.io/docs/latest/commands/expire/',
       summary:
-        'A final verdict is immutable, so short polling can read a small cached object until the key expires.',
+        '最终 verdict 是不可变的，所以短轮询可以一直读一个小的缓存对象，直到这个 key 过期。',
     },
   ],
   teachingAssumptions: [
-    'Worker slot thresholds are teaching thresholds; real capacity depends on language mix, testcase size, CPU model, and isolation overhead.',
-    'The result cache stores final or in-progress verdict objects, not the source code blob.',
-    'Kafka is deliberately not required here unless the design needs replay, analytics fanout, or multiple consumers.',
+    'worker slot 的阈值是教学阈值；真实容量取决于语言组合、testcase 大小、CPU 型号和隔离开销。',
+    'result cache 存的是最终或进行中的 verdict 对象，不是源码 blob。',
+    '这里故意不要求 Kafka，除非设计需要 replay、分析 fanout 或多个 consumer。',
   ],
   teachingWalkthrough: [
     {
       id: 'toy',
       step: '01',
-      focus: 'A prototype',
+      focus: '一个原型',
       scenarioId: 'toy',
       question:
-        'A toy judge gets a handful of submissions. Can the API just compile, run, and return the verdict in the same request?',
+        '一个玩具 judge 只收到零星几次 submission。API 能不能就在同一个请求里 compile、运行并返回 verdict？',
       reveal:
-        'At this volume, yes — a synchronous run is the simplest correct design. But notice the request is now held open for seconds of untrusted code execution, which is exactly what breaks as soon as traffic arrives.',
-      takeaway: 'Synchronous execution is fine at toy scale but couples request time to run time.',
+        '在这个量级，可以——同步运行是最简单的正确设计。但要注意，现在请求要为数秒的不可信代码执行一直挂着，而这恰恰是流量一来就会崩的地方。',
+      takeaway: '同步执行在玩具规模没问题，但它把请求时间和运行时间耦在了一起。',
     },
     {
       id: 'async',
       step: '02',
-      focus: 'Decouple run time',
+      focus: '解耦运行时间',
       scenarioId: 'async',
       question:
-        'Submissions climb and runs take seconds. Why return a token immediately instead of the verdict?',
+        'submission 上来了，单次运行要好几秒。为什么要立刻返回一个 token，而不是返回 verdict？',
       reveal:
-        'Holding a request open for seconds ties up API capacity and times out under load. Accept the submission, persist metadata, return a token, and let workers execute asynchronously while the client polls.',
-      takeaway: 'Decouple submission from execution: accept fast, run async, poll for the verdict.',
+        '把请求挂上好几秒会占着 API 容量，负载一高就 timeout。应该接收 submission、持久化 metadata、返回一个 token，让 worker 异步执行，客户端这边轮询。',
+      takeaway: '把 submission 和执行解耦：快速接收、异步运行、轮询 verdict。',
     },
     {
       id: 'contest',
       step: '03',
-      focus: 'Contest spike',
+      focus: '比赛尖峰',
       scenarioId: 'contest',
       question:
-        'A contest starts and submissions spike 50x. What actually determines how long users wait — API CPU or something else?',
+        '比赛一开始，submission 暴涨 50 倍。真正决定用户等多久的，是 API CPU 还是别的东西？',
       reveal:
-        'The API is cheap; the cost is sandboxed execution. A queue absorbs the spike and gives workers a pull-based backlog, so user wait time is governed by queue depth and worker count, not API throughput.',
-      takeaway: 'In an online judge, queue depth and worker slots — not API CPU — set the wait.',
+        'API 很便宜；成本在 sandbox 执行上。queue 吸收尖峰，给 worker 一个 pull-based 的 backlog，于是用户等待时间由 queue depth 和 worker 数量决定，而不是 API throughput。',
+      takeaway: '在 online judge 里，决定等待的是 queue depth 和 worker slot，而不是 API CPU。',
     },
     {
       id: 'many-languages',
       step: '04',
-      focus: 'Many runtimes',
+      focus: '多种 runtime',
       scenarioId: 'many-languages',
       question:
-        'Now you support many languages. Why can a single generic worker pool make latency worse?',
+        '现在你要支持很多语言。为什么单一通用的 worker pool 反而会让延迟更糟？',
       reveal:
-        'Each language needs its runtime image, and cold-starting the wrong one adds seconds. Language-specific warm pools keep runners hot so a submission lands on a ready sandbox instead of paying a cold start.',
-      takeaway: 'Per-language warm pools beat one generic pool once runtimes and cold starts diverge.',
+        '每种语言都需要自己的 runtime image，cold-start 错的那个会平白多出几秒。按语言划分的 warm pool 让 runner 保持热着，于是一次 submission 落到一个就绪的 sandbox 上，而不必付 cold start。',
+      takeaway: '一旦 runtime 和 cold start 分化，按语言的 warm pool 就胜过单一通用 pool。',
     },
     {
       id: 'leetcode-scale',
       step: '05',
-      focus: 'Full platform scale',
+      focus: '完整平台规模',
       scenarioId: 'leetcode-scale',
       question:
-        'At platform scale, what has to scale beyond just adding workers?',
+        '到了平台规模，除了加 worker，还有什么必须扩展？',
       reveal:
-        'Verdicts are immutable, so a result cache absorbs polling; submission metadata is partitioned; and contest traffic gets isolated queues so a spike in one event cannot starve everyone else.',
-      takeaway: 'Scale the judge with cached immutable verdicts, partitioned metadata, and isolated queues.',
+        'verdict 是不可变的，所以 result cache 吸收轮询；submission metadata 做 partition；比赛流量拿到隔离的 queue，这样某个赛事的尖峰不会饿死所有人。',
+      takeaway: '用缓存不可变 verdict、partition 的 metadata 和隔离的 queue 来扩展这个 judge。',
     },
   ],
   analyze: analyzeOnlineJudgeWorkload,
@@ -441,30 +441,30 @@ function analyzeOnlineJudgeWorkload(workload: WorkloadValues): LabAnalysis {
     meters: {
       workerCapacity: {
         ratio: workerPressure,
-        valueText: `${formatCount(workerSlotDemand)} slots`,
-        copy: `${formatRate(submissionsPerSecond)} submissions/s times ${formatDuration(
+        valueText: `${formatCount(workerSlotDemand)} 个 slot`,
+        copy: `${formatRate(submissionsPerSecond)} submissions/s 乘以 ${formatDuration(
           workerSecondsPerSubmission,
-        )} average worker time.`,
+        )} 的平均 worker 时间。`,
       },
       queuePressure: {
         ratio: workerPressure * (30 / Math.max(queueSlaSeconds, 1)),
         valueText: formatDuration(queueSlaSeconds),
-        copy: 'Tighter queue wait targets require more idle worker headroom before spikes arrive.',
+        copy: 'queue 等待目标越紧，尖峰来临前需要预留的空闲 worker 余量就越多。',
       },
       resultLookup: {
         ratio: pollingReadsPerSecond / resultLookupBudgetPerSecond,
         valueText: `${formatRate(pollingReadsPerSecond)}/s`,
-        copy: 'Polling stays cheap when it is a TTL key-value lookup against immutable verdict objects.',
+        copy: '当轮询只是对不可变 verdict 对象做一次 TTL key-value lookup 时，它就一直很廉价。',
       },
       sandboxPool: {
         ratio: coldStartRisk,
-        valueText: `${formatCount(languageCount)} languages`,
-        copy: 'More languages and tighter wait targets make cold starts visible to users.',
+        valueText: `${formatCount(languageCount)} 种语言`,
+        copy: '语言越多、等待目标越紧，cold start 就越会让用户感知到。',
       },
       submissionStorage: {
         ratio: submissionMetadataGigabytesPerDay / 50,
         valueText: `${formatStorageGigabytes(submissionMetadataGigabytesPerDay)}/day`,
-        copy: `${formatCount(dailySubmissions)} daily submission rows before source and testcase blobs.`,
+        copy: `${formatCount(dailySubmissions)} 行/天的 submission row，这还不算源码和 testcase blob。`,
       },
     },
     decisions: buildDecisions({
@@ -518,39 +518,39 @@ function buildReasons(analysis: {
   if (analysis.needsAsyncApi) {
     reasons.push({
       severity: 'warning',
-      text: `Each submission holds worker resources for about ${formatDuration(
+      text: `每次 submission 都会占用 worker 资源大约 ${formatDuration(
         analysis.workerSecondsPerSubmission,
-      )}. Return 202 plus a token instead of keeping the API request open.`,
+      )}。返回 202 加一个 token，而不是把 API 请求一直挂着。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'A tiny prototype can run synchronously, but this stops being attractive as soon as execution time dominates request time.',
+      text: '一个极小的原型可以同步运行，但一旦执行时间盖过请求时间，这种做法就不再有吸引力。',
     });
   }
 
   if (analysis.needsQueue) {
     reasons.push({
       severity: analysis.workerPressure > 1 ? 'danger' : 'warning',
-      text: `The workload needs about ${formatCount(
+      text: `这个工作负载大约需要 ${formatCount(
         analysis.workerSlotDemand,
-      )} concurrent worker slots. Queue depth is the direct signal for scale-out.`,
+      )} 个并发 worker slot。queue depth 是扩容的直接信号。`,
     });
   }
 
   if (analysis.needsPrewarmedContainers) {
     reasons.push({
       severity: 'warning',
-      text: `${formatCount(
+      text: `支持 ${formatCount(
         analysis.languageCount,
-      )} supported languages make cold starts and image management visible. Keep language-specific warm runner pools.`,
+      )} 种语言让 cold start 和 image 管理变得显眼。保留按语言划分的 warm runner pool。`,
     });
   }
 
   if (analysis.strictSandbox) {
     reasons.push({
       severity: 'warning',
-      text: 'Strict sandboxing is non-negotiable for untrusted code: resource limits, filesystem/network isolation, and syscall filtering belong in the worker path.',
+      text: '对不可信代码来说，严格 sandbox 没有商量余地：resource limit、文件系统/网络隔离和 syscall 过滤都该在 worker 路径里。',
     });
   }
 
@@ -559,16 +559,16 @@ function buildReasons(analysis: {
       severity: analysis.pollingReadsPerSecond > resultLookupBudgetPerSecond ? 'danger' : 'ok',
       text: `${formatRate(
         analysis.pollingReadsPerSecond,
-      )} result polls/s should be cheap key-value reads. The verdict is immutable, so polling does not need to hit workers or heavy application logic.`,
+      )} 次 result poll/s 应该是廉价的 key-value 读取。verdict 是不可变的，所以轮询不必打到 worker 或重型应用逻辑上。`,
     });
   }
 
   if (analysis.needsPriorityScheduling) {
     reasons.push({
       severity: 'warning',
-      text: `A ${formatDuration(
+      text: `在尖峰流量下，${formatDuration(
         analysis.queueSlaSeconds,
-      )} queue target under spike traffic needs priority queues or a split Run Code / Submit pipeline.`,
+      )} 的 queue 目标需要 priority queue，或者拆分 Run Code / Submit pipeline。`,
     });
   }
 
@@ -577,7 +577,7 @@ function buildReasons(analysis: {
       severity: analysis.testBlobReadsPerSecond > testBlobReadBudgetPerSecond ? 'danger' : 'warning',
       text: `${formatRate(
         analysis.testBlobReadsPerSecond,
-      )} testcase reads/s should come from object storage or local worker cache, not from the metadata database.`,
+      )} 次 testcase 读取/s 应该来自 object storage 或本地 worker cache，而不是 metadata database。`,
     });
   }
 
@@ -597,38 +597,38 @@ function buildDecisions(flags: {
     asyncApi: {
       state: flags.needsAsyncApi ? 'needed' : 'not-yet',
       copy: flags.needsAsyncApi
-        ? 'POST should return 202 and a token because compile and execution are much heavier than API validation.'
-        : 'Synchronous execution is acceptable only for a local prototype with tiny jobs.',
+        ? 'POST 应该返回 202 和一个 token，因为 compile 和执行远比 API 校验重得多。'
+        : '只有在本地、任务极小的原型里，同步执行才可以接受。',
     },
     messageQueue: {
       state: flags.needsQueue ? 'needed' : 'not-yet',
       copy: flags.needsQueue
-        ? 'Use a queue to absorb spikes, apply backpressure, and let workers pull at their real capacity.'
-        : 'A queue adds little value while there is no meaningful backlog or worker pool.',
+        ? '用一个 queue 来吸收尖峰、施加 backpressure，并让 worker 按自己的真实容量 pull。'
+        : '在还没有像样的 backlog 或 worker pool 时，queue 价值不大。',
     },
     prewarmedContainers: {
       state: flags.needsPrewarmedContainers ? 'needed' : 'useful',
       copy: flags.needsPrewarmedContainers
-        ? 'Prewarm per-language runner containers so cold starts do not become false latency or TLE signals.'
-        : 'Cold starts are tolerable while language count and latency expectations are small.',
+        ? '预热按语言划分的 runner container，免得 cold start 变成虚假的延迟或 TLE 信号。'
+        : '在语言数和延迟预期都还小时，cold start 是可以忍的。',
     },
     sandbox: {
       state: flags.strictSandbox ? 'needed' : 'tradeoff',
       copy: flags.strictSandbox
-        ? 'Run untrusted code inside constrained containers with CPU, memory, filesystem, network, and syscall boundaries.'
-        : 'Turning sandboxing off is only acceptable for a trusted classroom prototype.',
+        ? '把不可信代码放进受约束的 container 里运行，带 CPU、内存、文件系统、网络和 syscall 边界。'
+        : '只有在可信的课堂原型里，关掉 sandbox 才可以接受。',
     },
     resultCache: {
       state: flags.needsResultCache ? 'needed' : 'not-yet',
       copy: flags.needsResultCache
-        ? 'Store in-progress and final verdict objects in a TTL cache so polling is a cheap lookup.'
-        : 'The API can read its local result for a toy synchronous judge.',
+        ? '把进行中和最终的 verdict 对象存进带 TTL 的 cache，让轮询变成一次廉价的 lookup。'
+        : '对玩具式的同步 judge，API 读自己的本地结果就行。',
     },
     runSubmitSplit: {
       state: flags.needsPriorityScheduling ? 'needed' : 'useful',
       copy: flags.needsPriorityScheduling
-        ? 'Split Run Code from Submit so light sample runs do not block heavyweight judged submissions.'
-        : 'A split pipeline is useful later, but one queue is enough before traffic classes diverge.',
+        ? '把 Run Code 和 Submit 拆开，免得轻量的样例运行挡住重型的判题 submission。'
+        : '拆分 pipeline 以后有用，但在流量类别分化之前，一个 queue 就够了。',
     },
   };
 }
@@ -641,18 +641,18 @@ function chooseArchitectureTitle(flags: {
   needsResultCache: boolean;
 }): string {
   if (!flags.needsAsyncApi) {
-    return 'Synchronous API prototype';
+    return '同步 API 原型';
   }
   if (!flags.needsQueue) {
-    return 'Async API with lightweight worker handoff';
+    return '异步 API + 轻量 worker handoff';
   }
   if (!flags.needsPrewarmedContainers) {
-    return 'Async submit + queue + worker pool';
+    return '异步 submit + queue + worker pool';
   }
   if (!flags.needsPriorityScheduling && flags.needsResultCache) {
-    return 'Queue-backed judge with warm sandbox runners';
+    return '基于 queue 的 judge + warm sandbox runner';
   }
-  return 'Priority queues + warm runner pools + cached verdicts';
+  return 'priority queue + warm runner pool + 缓存的 verdict';
 }
 
 function chooseArchitectureSummary(flags: {
@@ -663,18 +663,18 @@ function chooseArchitectureSummary(flags: {
   needsResultCache: boolean;
 }): string {
   if (!flags.needsAsyncApi) {
-    return 'For a toy workload, the API can execute and return a result directly. This is useful for proving the judging logic, not for production.';
+    return '对玩具工作负载，API 可以直接执行并返回结果。这用来验证判题逻辑还行，但不适合生产。';
   }
   if (!flags.needsQueue) {
-    return 'The API should stop holding the client request open, but the worker path is still simple enough to hand off directly.';
+    return 'API 应该不再把客户端请求挂着，但 worker 路径仍然简单到可以直接 handoff。';
   }
   if (!flags.needsPrewarmedContainers) {
-    return 'The queue decouples user traffic from worker throughput. Scale decisions now follow queue depth and worker slot demand.';
+    return 'queue 把用户流量和 worker throughput 解耦。扩展决策现在跟着 queue depth 和 worker slot 需求走。';
   }
   if (!flags.needsPriorityScheduling && flags.needsResultCache) {
-    return 'Workers pull jobs, run code in warm sandbox containers, and write immutable verdicts into a cache for polling.';
+    return 'worker 拉取任务，在 warm sandbox container 里运行代码，并把不可变的 verdict 写进 cache 供轮询。';
   }
-  return 'At scale, independent queues, fair scheduling, warm language pools, result cache, and durable metadata protect each workload class from the others.';
+  return '到了规模阶段，独立的 queue、公平调度、warm 语言 pool、result cache 和 durable metadata 让各类工作负载互不干扰。';
 }
 
 function chooseArchitecturePath(flags: {

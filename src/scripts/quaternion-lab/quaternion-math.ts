@@ -124,6 +124,6 @@ export function formatAxisAngleFormula(axis: AxisComponents, angleDegrees: numbe
 
 export function formatSpinorPhase(angleDegrees: number): string {
   const phaseDegrees = ((angleDegrees / 2) % 360 + 360) % 360;
-  const sign = Math.cos(degreesToRadians(angleDegrees / 2)) < 0 ? 'negative sheet' : 'positive sheet';
+  const sign = Math.cos(degreesToRadians(angleDegrees / 2)) < 0 ? '负半叶' : '正半叶';
   return `${formatDegrees(phaseDegrees, 0)} / ${sign}`;
 }

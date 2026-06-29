@@ -31,38 +31,38 @@ function softCapRatio(rawRatio: number): number {
 
 export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
   id: 'recommendation-system',
-  eyebrow: 'System Design Lab',
+  eyebrow: '系统设计 Lab',
   title:
-    'A recommendation system is a funnel: cheap retrieval narrows millions of items to hundreds, then an expensive ranker scores what survives.',
+    '推荐系统是一个 funnel：廉价的 retrieval 把数百万 item 收窄到几百个，然后一个昂贵的 ranker 给幸存者打分。',
   summary:
-    'Change users, catalog size, request rate, candidates retrieved per request, ranking-model latency, embedding dimensions, and feature count. The design moves from a popularity list to collaborative filtering, then two-tower embeddings with ANN retrieval, then a ranking model backed by a feature store, and finally real-time features and full multi-stage serving at scale.',
+    '调节用户数、catalog 大小、请求速率、每请求 retrieve 的 candidate 数、ranking 模型延迟、embedding 维度和 feature 数量。设计会从一个 popularity list，走到 collaborative filtering，再到带 ANN retrieval 的 two-tower embedding，然后是由 feature store 支撑的 ranking model，最后到 real-time feature 和规模化的完整 multi-stage serving。',
   controls: [
     {
       id: 'activeUsers',
-      label: 'Active users',
-      help: 'Users who can request recommendations; drives request volume and per-user state.',
+      label: '活跃用户',
+      help: '能够请求推荐的用户；驱动请求量和 per-user 状态。',
       min: 1_000,
       max: 2_000_000_000,
       defaultValue: 1_000_000,
       scale: 'log',
-      unit: 'users',
+      unit: '人',
       format: 'count',
     },
     {
       id: 'catalogItems',
-      label: 'Catalog size',
-      help: 'Total items (videos, products, posts) that could be recommended. This is the haystack retrieval searches.',
+      label: 'Catalog 大小',
+      help: '可能被推荐的全部 item（视频、商品、帖子）。这是 retrieval 要在里面找的草垛。',
       min: 1_000,
       max: 5_000_000_000,
       defaultValue: 10_000_000,
       scale: 'log',
-      unit: 'items',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'recsQps',
-      label: 'Recommendation rate',
-      help: 'Requests per second asking for a ranked list. The dominant online traffic.',
+      label: '推荐请求速率',
+      help: '每秒请求一个排好序的列表的请求数。主导的 online 流量。',
       min: 10,
       max: 2_000_000,
       defaultValue: 5_000,
@@ -71,19 +71,19 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'candidatesPerRequest',
-      label: 'Candidates per request',
-      help: 'Items retrieval hands to the ranker per request. More candidates means better recall but more scoring work.',
+      label: '每请求 candidate 数',
+      help: 'retrieval 每请求交给 ranker 的 item 数。candidate 越多 recall 越好，但打分的活儿也越多。',
       min: 50,
       max: 50_000,
       defaultValue: 500,
       scale: 'log',
-      unit: 'candidates',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'rankingLatencyMs',
-      label: 'Ranking model latency',
-      help: 'Time the ranking model needs to score one candidate batch. Tighter targets force smaller models or more servers.',
+      label: 'Ranking 模型延迟',
+      help: 'ranking model 给一个 candidate batch 打分所需的时间。目标越紧，就越逼着用更小的模型或更多 server。',
       min: 2,
       max: 200,
       defaultValue: 30,
@@ -92,38 +92,38 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'embeddingDim',
-      label: 'Embedding dimensions',
-      help: 'Vector width for two-tower user/item embeddings. Wider vectors cost more memory and ANN compute.',
+      label: 'Embedding 维度',
+      help: 'two-tower 的 user/item embedding 的向量宽度。向量越宽，内存和 ANN 计算成本越高。',
       min: 16,
       max: 1_024,
       defaultValue: 128,
       scale: 'log',
-      unit: 'dims',
+      unit: '维',
       format: 'count',
     },
     {
       id: 'featureCount',
-      label: 'Features per candidate',
-      help: 'Features the ranker pulls per user-item pair. Each one is a feature-store lookup on the hot path.',
+      label: '每 candidate 的 feature 数',
+      help: 'ranker 为每个 user-item pair 拉取的 feature 数。每一个都是 hot path 上的一次 feature-store lookup。',
       min: 5,
       max: 2_000,
       defaultValue: 100,
       scale: 'log',
-      unit: 'features',
+      unit: '个',
       format: 'count',
     },
   ],
   toggles: [
     {
       id: 'realtimeFeatures',
-      label: 'Real-time features',
-      help: 'Update features from live interactions (last clicks, session) instead of only batch-computed ones.',
+      label: 'Real-time feature',
+      help: '从实时交互（最近的点击、session）更新 feature，而不只是用 batch 算出来的那些。',
       defaultValue: false,
     },
     {
       id: 'twoTowerAnn',
       label: 'Two-tower ANN retrieval',
-      help: 'Retrieve candidates by approximate nearest neighbor over learned embeddings instead of a popularity or co-visitation list.',
+      help: '用 approximate nearest neighbor 在学到的 embedding 上 retrieve candidate，而不是用 popularity 或 co-visitation list。',
       defaultValue: false,
     },
   ],
@@ -132,7 +132,7 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
       id: 'popularity-baseline',
       step: '01',
       title: 'Popularity baseline',
-      summary: 'Everyone gets the same top items from a small catalog.',
+      summary: '所有人都从一个小 catalog 里拿到相同的 top item。',
       values: {
         activeUsers: 20_000,
         catalogItems: 5_000,
@@ -149,7 +149,7 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
       id: 'collaborative-filtering',
       step: '02',
       title: 'Collaborative filtering',
-      summary: 'Co-visitation gives per-user lists, but recall is thin.',
+      summary: 'co-visitation 给出 per-user 列表，但 recall 很薄。',
       values: {
         activeUsers: 2_000_000,
         catalogItems: 500_000,
@@ -166,7 +166,7 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
       id: 'two-tower-ann',
       step: '03',
       title: 'Two-tower + ANN retrieval',
-      summary: 'Learned embeddings retrieve candidates across a large catalog.',
+      summary: '学到的 embedding 在一个大 catalog 上 retrieve candidate。',
       values: {
         activeUsers: 50_000_000,
         catalogItems: 50_000_000,
@@ -183,7 +183,7 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
       id: 'ranking-feature-store',
       step: '04',
       title: 'Ranking model + feature store',
-      summary: 'A heavy ranker scores candidates with many stored features.',
+      summary: '一个重型 ranker 用大量存储的 feature 给 candidate 打分。',
       values: {
         activeUsers: 200_000_000,
         catalogItems: 300_000_000,
@@ -199,8 +199,8 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'realtime-multistage',
       step: '05',
-      title: 'Real-time multi-stage at scale',
-      summary: 'Live features, billions of items, sub-30 ms full funnel.',
+      title: '规模化的 real-time multi-stage',
+      summary: '实时 feature、数十亿 item、整条 funnel 控制在 30 ms 以内。',
       values: {
         activeUsers: 1_500_000_000,
         catalogItems: 3_000_000_000,
@@ -215,21 +215,21 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'Recommendation system architecture diagram',
+    title: '推荐系统架构图',
     description:
-      'Whiteboard-style architecture diagram for a multi-stage recommender: clients, a serving API, candidate retrieval with a two-tower model and an ANN index, a ranking model with a feature store, the item index and feature store, and an async interaction-logging and training-data path.',
+      '白板风格的架构图，展示一个 multi-stage 推荐系统：客户端、serving API、用 two-tower model 和 ANN index 做的 candidate retrieval、带 feature store 的 ranking model、item index 和 feature store，以及一条异步的 interaction-logging 和训练数据路径。',
     columns: [
       {
         id: 'clients',
-        label: 'Clients',
+        label: '客户端',
         variant: 'clients',
         nodes: [
           {
             id: 'client',
             title: 'Client',
-            subtitle: 'feed + clicks',
+            subtitle: 'feed + 点击',
             kind: 'client',
-            summary: 'requests a ranked list and emits clicks, watches, and other interactions',
+            summary: '请求一个排好序的列表，并发出点击、观看等交互',
           },
         ],
       },
@@ -241,16 +241,16 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'servingApi',
             title: 'Serving API',
-            subtitle: 'orchestrates funnel',
+            subtitle: '编排 funnel',
             kind: 'api',
-            summary: 'fans a request through retrieval, ranking, and re-ranking under a latency budget',
+            summary: '在 latency budget 内把一个请求扇过 retrieval、ranking 和 re-ranking',
           },
           {
             id: 'reranker',
             title: 'Re-ranker',
-            subtitle: 'rules + diversity',
+            subtitle: '规则 + diversity',
             kind: 'service',
-            summary: 'applies business rules, diversity, and freshness to the ranked list before returning it',
+            summary: '在返回前给排好序的列表施加业务规则、diversity 和新鲜度',
           },
         ],
       },
@@ -264,14 +264,14 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
             title: 'Two-tower model',
             subtitle: 'user embedding',
             kind: 'gpu',
-            summary: 'embeds the user query so similar item vectors can be found by distance',
+            summary: '把 user query 嵌入成向量，好按距离找到相似的 item 向量',
           },
           {
             id: 'annIndex',
             title: 'ANN search',
-            subtitle: 'nearest items',
+            subtitle: '最近的 item',
             kind: 'search',
-            summary: 'finds approximate nearest item vectors over millions of items in milliseconds',
+            summary: '在数百万 item 上以毫秒级找到近似最近邻的 item 向量',
           },
         ],
       },
@@ -283,43 +283,43 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'rankingModel',
             title: 'Ranking model',
-            subtitle: 'scores candidates',
+            subtitle: '给 candidate 打分',
             kind: 'gpu',
-            summary: 'scores each candidate with a heavy model using many user-item features',
+            summary: '用一个重型模型、借助大量 user-item feature 给每个 candidate 打分',
           },
           {
             id: 'featureStore',
             title: 'Feature store',
-            subtitle: 'online features',
+            subtitle: 'online feature',
             kind: 'cache',
-            summary: 'serves precomputed and live features for each user-item pair at low latency',
+            summary: '低延迟地为每个 user-item pair 提供预计算和实时的 feature',
           },
         ],
       },
       {
         id: 'stores',
-        label: 'Stores',
+        label: '存储',
         variant: 'storage',
         nodes: [
           {
             id: 'itemIndex',
             title: 'Item index',
-            subtitle: 'vectors + meta',
+            subtitle: '向量 + meta',
             kind: 'search',
-            summary: 'holds item embeddings and metadata, sharded as the catalog grows',
+            summary: '保存 item embedding 和 metadata，随 catalog 增长做 shard',
           },
           {
             id: 'featureDb',
             title: 'Feature DB',
-            subtitle: 'feature values',
+            subtitle: 'feature 值',
             kind: 'db',
-            summary: 'durable store of batch and streaming features behind the online feature store',
+            summary: 'online feature store 背后的 batch 和 streaming feature 的 durable 存储',
           },
         ],
       },
       {
         id: 'async',
-        label: 'Training loop',
+        label: '训练回路',
         variant: 'processing',
         nodes: [
           {
@@ -327,14 +327,14 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
             title: 'Interaction log',
             subtitle: 'click stream',
             kind: 'stream',
-            summary: 'captures impressions and engagement off the hot path for training and live features',
+            summary: '在 hot path 之外捕获 impression 和参与度，供训练和实时 feature 使用',
           },
           {
             id: 'trainer',
-            title: 'Training jobs',
-            subtitle: 'embeddings + ranker',
+            title: 'Training job',
+            subtitle: 'embedding + ranker',
             kind: 'compute',
-            summary: 'rebuilds embeddings and the ranking model from logged interactions',
+            summary: '从记录的交互里重建 embedding 和 ranking model',
           },
         ],
       },
@@ -354,19 +354,19 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'retrievalLoad', label: 'Retrieval scan cost' },
-    { id: 'rankingCompute', label: 'Ranking compute' },
-    { id: 'featureLoad', label: 'Feature-store load' },
-    { id: 'indexMemory', label: 'Item index memory' },
-    { id: 'latencyBudget', label: 'End-to-end latency budget' },
+    { id: 'retrievalLoad', label: 'Retrieval 扫描成本' },
+    { id: 'rankingCompute', label: 'Ranking 计算' },
+    { id: 'featureLoad', label: 'Feature-store 负载' },
+    { id: 'indexMemory', label: 'Item index 内存' },
+    { id: 'latencyBudget', label: '端到端延迟预算' },
   ],
   decisions: [
     { id: 'candidateGen', title: 'Candidate generation' },
     { id: 'rankingServing', title: 'Ranking model serving' },
     { id: 'featureStore', title: 'Feature store' },
     { id: 'annIndex', title: 'ANN index' },
-    { id: 'reranking', title: 'Re-ranking + business rules' },
-    { id: 'trainingLog', title: 'Training-data logging' },
+    { id: 'reranking', title: 'Re-ranking + 业务规则' },
+    { id: 'trainingLog', title: '训练数据 logging' },
   ],
   sourceBackedRules: [
     {
@@ -374,90 +374,90 @@ export const recommendationSystemLabDefinition: SystemDesignLabDefinition = {
       source: 'Google Research',
       url: 'https://research.google/pubs/sampling-bias-corrected-neural-modeling-for-large-corpus-item-recommendations/',
       summary:
-        'Separate user and item towers produce embeddings whose dot product approximates relevance, so retrieval becomes a nearest-neighbor search over precomputed item vectors.',
+        '分开的 user tower 和 item tower 产出 embedding，其点积近似相关性，于是 retrieval 就变成在预计算好的 item 向量上做 nearest-neighbor 搜索。',
     },
     {
-      title: 'ANN search makes nearest-neighbor retrieval scale to billions of vectors',
+      title: 'ANN 搜索让 nearest-neighbor retrieval 扩展到数十亿向量',
       source: 'ScaNN (Google Research)',
       url: 'https://github.com/google-research/google-research/tree/master/scann',
       summary:
-        'Approximate nearest neighbor libraries (ScaNN, FAISS) and vector databases trade a little recall for orders-of-magnitude faster similarity search, which is what lets retrieval scan a huge catalog in milliseconds.',
+        'approximate nearest neighbor 库（ScaNN、FAISS）和 vector database 用一点点 recall 换来快几个数量级的相似度搜索，正是这点让 retrieval 能在毫秒内扫过一个巨大的 catalog。',
     },
     {
-      title: 'A feature store serves the same features online and offline',
+      title: 'feature store 在 online 和 offline 提供同一套 feature',
       source: 'Feast',
       url: 'https://docs.feast.dev/',
       summary:
-        'A feature store provides low-latency online feature lookups for serving and consistent historical features for training, avoiding training/serving skew.',
+        'feature store 为 serving 提供低延迟的 online feature lookup，为训练提供一致的历史 feature，从而避免 training/serving skew。',
     },
     {
-      title: 'Large-scale recommendation is staged: candidate generation then ranking',
+      title: '大规模推荐是分阶段的：先 candidate generation 再 ranking',
       source: 'System Design Primer',
       url: 'https://github.com/donnemartin/system-design-primer',
       summary:
-        'The canonical pattern narrows a huge item set with a cheap retrieval stage before a more expensive ranking stage scores the survivors, so heavy compute only touches a few hundred items.',
+        '经典模式是先用一个廉价的 retrieval 阶段把巨大的 item 集合收窄，再让更昂贵的 ranking 阶段给幸存者打分，于是重型计算只触及几百个 item。',
     },
   ],
   teachingAssumptions: [
-    'Retrieval cost is modeled as a per-request scan that ANN turns from linear in catalog size into roughly logarithmic, so brute force only survives on small catalogs.',
-    'Ranking throughput per server scales down with model latency and feature count; the numbers are conservative teaching budgets, not vendor benchmarks.',
-    'Feature-store load counts one lookup per feature per candidate per request, the worst case before batching and caching.',
+    'retrieval 成本被建模成一次 per-request 扫描，ANN 把它从随 catalog 大小线性变成大致对数级，所以 brute force 只在小 catalog 上还活得下去。',
+    '每台 server 的 ranking throughput 会随模型延迟和 feature 数量下降；这些数字是保守的教学预算，不是厂商 benchmark。',
+    'feature-store 负载按每请求每 candidate 每 feature 一次 lookup 来算，是 batching 和 caching 之前的最坏情况。',
   ],
   teachingWalkthrough: [
     {
       id: 'baseline',
       step: '01',
-      focus: 'Same list for everyone',
+      focus: '所有人同一个列表',
       scenarioId: 'popularity-baseline',
       question:
-        'A few requests per second over 5k items, and you just want "good enough" recs. Do you need embeddings, ANN, or a ranking model at all?',
+        '每秒几个请求、5k 个 item，你只想要"够用"的推荐。你真的需要 embedding、ANN 或 ranking model 吗？',
       reveal:
-        'No. A precomputed popularity or trending list, recomputed periodically, answers every request from a tiny cache. There is no per-user signal to model and no catalog too big to enumerate — embeddings and a ranker would be pure overhead.',
-      takeaway: 'Start with a popularity baseline; personalization only earns its complexity once it beats it.',
+        '不需要。一个预计算的 popularity 或 trending 列表，定期重算，就能从一个很小的 cache 里回答每个请求。这里没有 per-user 信号可建模，catalog 也没大到无法枚举——embedding 和 ranker 纯属额外开销。',
+      takeaway: '从 popularity baseline 起步；personalization 只有在能打败它之后，才配得上它的复杂度。',
     },
     {
       id: 'cf',
       step: '02',
-      focus: 'Per-user lists',
+      focus: 'Per-user 列表',
       scenarioId: 'collaborative-filtering',
       question:
-        'Now 2M users want personalized lists. Co-visitation ("people who watched X watched Y") gives each user candidates. Why does this start to hurt as the catalog grows?',
+        '现在 2M 用户想要个性化列表。co-visitation（"看了 X 的人也看了 Y"）给每个用户一批 candidate。为什么 catalog 一变大这套就开始出问题？',
       reveal:
-        'Co-visitation only recommends items that co-occur with what a user already touched, so cold items and long-tail interests are invisible and recall stays thin. It also needs a big precomputed item-item table. It works, but it cannot generalize the way a learned embedding can.',
-      takeaway: 'Collaborative filtering personalizes cheaply but has poor recall and no generalization to cold items.',
+        'co-visitation 只推荐和用户已经接触过的东西共同出现的 item，所以 cold item 和长尾兴趣是看不见的，recall 一直很薄。它还需要一张很大的预计算 item-item 表。它能用，但没法像学到的 embedding 那样泛化。',
+      takeaway: 'collaborative filtering 个性化便宜，但 recall 差，且无法泛化到 cold item。',
     },
     {
       id: 'twotower',
       step: '03',
-      focus: 'Retrieval over millions',
+      focus: '在数百万 item 上做 retrieval',
       scenarioId: 'two-tower-ann',
       question:
-        'The catalog is now 50M items. To find the best candidates you would score the user against every item. What breaks, and what replaces the brute-force scan?',
+        'catalog 现在有 50M item。要找出最好的 candidate，你得拿 user 和每个 item 打分。哪里会崩，又用什么替掉 brute-force 扫描？',
       reveal:
-        'Scoring 50M items per request is far too expensive online. A two-tower model embeds users and items into the same space, and an ANN index (HNSW, IVF) finds approximate nearest neighbors in roughly logarithmic time. Retrieval narrows millions to a few hundred candidates in milliseconds.',
-      takeaway: 'Two-tower embeddings plus ANN turn retrieval from a full scan into a fast nearest-neighbor lookup.',
+        '每请求给 50M item 打分在 online 太昂贵了。two-tower model 把 user 和 item 嵌入到同一个空间，ANN index（HNSW、IVF）以大致对数级的时间找到近似最近邻。retrieval 在毫秒内把数百万收窄到几百个 candidate。',
+      takeaway: 'two-tower embedding 加 ANN 把 retrieval 从全量扫描变成一次快速的 nearest-neighbor lookup。',
     },
     {
       id: 'ranking',
       step: '04',
-      focus: 'Scoring the survivors',
+      focus: '给幸存者打分',
       scenarioId: 'ranking-feature-store',
       question:
-        'Retrieval gives 2,000 candidates. A heavy ranking model with 400 features per candidate now scores them under 20 ms. Where does that load land, and why a separate stage?',
+        'retrieval 给出 2,000 个 candidate。一个每 candidate 带 400 个 feature 的重型 ranking model 现在要在 20 ms 内给它们打分。这部分负载落在哪，为什么要单独一个阶段？',
       reveal:
-        'Ranking is far too expensive to run on the whole catalog, which is exactly why retrieval went first. On a few hundred candidates it is affordable, but each candidate needs hundreds of feature lookups, so a low-latency feature store on the hot path becomes essential and ranking servers must be fanned out to hold the latency budget.',
-      takeaway: 'Ranking is the expensive stage; it only works because retrieval shrank the input, and it lives or dies on the feature store.',
+        'ranking 太昂贵，没法在整个 catalog 上跑，这正是 retrieval 先行的原因。在几百个 candidate 上它还负担得起，但每个 candidate 都需要上百次 feature lookup，于是 hot path 上一个低延迟的 feature store 变得不可或缺，ranking server 也必须 fanout 才能守住 latency budget。',
+      takeaway: 'ranking 是昂贵的那个阶段；它能成立只因为 retrieval 缩小了输入，而它的生死系于 feature store。',
     },
     {
       id: 'realtime',
       step: '05',
-      focus: 'Live, billions, sub-30 ms',
+      focus: '实时、数十亿、30 ms 以内',
       scenarioId: 'realtime-multistage',
       question:
-        'Billions of items, real-time features from the current session, and a sub-30 ms full funnel. What does adding live features cost that batch features did not?',
+        '数十亿 item、来自当前 session 的 real-time feature，以及整条 funnel 控制在 30 ms 以内。加上实时 feature 会带来 batch feature 没有的什么成本？',
       reveal:
-        'Real-time features close the loop from interaction log to feature store within seconds, so the funnel reflects the current session — but it adds a streaming pipeline and tighter feature-store write/read paths on the hot path. The item index must shard across nodes, retrieval and ranking both fan out, and re-ranking enforces diversity and business rules within the same tight budget.',
-      takeaway: 'Real-time features add a streaming pipeline for freshness; at scale every stage shards and the latency budget governs the whole funnel.',
+        'real-time feature 在数秒内闭合从 interaction log 到 feature store 的回路，于是 funnel 反映当前 session——但它在 hot path 上加了一条 streaming pipeline 和更紧的 feature-store 读写路径。item index 必须跨节点 shard，retrieval 和 ranking 都要 fanout，re-ranking 还要在同样紧的预算内执行 diversity 和业务规则。',
+      takeaway: 'real-time feature 为新鲜度加了一条 streaming pipeline；到了规模阶段，每个阶段都 shard，latency budget 掌管整条 funnel。',
     },
   ],
   analyze: analyzeRecommendationWorkload,
@@ -585,50 +585,50 @@ function analyzeRecommendationWorkload(workload: WorkloadValues): LabAnalysis {
       retrievalLoad: {
         ratio: softCapRatio(retrievalCost / retrievalBudget),
         valueText: twoTowerAnn
-          ? `ANN, ~${formatCount(catalogItems)} items`
+          ? `ANN，~${formatCount(catalogItems)} 个 item`
           : `${formatRate(retrievalCost)} lookups/s`,
         copy: twoTowerAnn
-          ? `ANN search (ScaNN, FAISS, or a vector DB) over ~${formatCount(catalogItems)} item vectors keeps retrieval roughly logarithmic instead of scanning everything.`
+          ? `在约 ${formatCount(catalogItems)} 个 item 向量上做 ANN search（ScaNN、FAISS 或 vector DB），让 retrieval 大致保持对数级，而不是把所有东西都扫一遍。`
           : needsAnn
-            ? `A precomputed list answers each request cheaply, but brute-force scoring all ${formatCount(catalogItems)} items would be ${formatRate(bruteForceScansPerSecond)} comparisons/s — far past budget, which is why scale forces learned ANN retrieval.`
-            : `A precomputed popularity or co-visitation list answers each request from a small cache; no per-request catalog scan.`,
+            ? `一个预计算的列表能廉价地回答每个请求，但对全部 ${formatCount(catalogItems)} 个 item 做 brute-force 打分会是 ${formatRate(bruteForceScansPerSecond)} 次比较/s——远超预算，这正是规模逼着改用学到的 ANN retrieval 的原因。`
+            : `一个预计算的 popularity 或 co-visitation 列表从一个小 cache 里回答每个请求；没有 per-request 的 catalog 扫描。`,
       },
       rankingCompute: {
         ratio: needsRankingModel
           ? softCapRatio(rankingServersNeeded / rankingServerBudget)
           : softCapRatio(rankingScoresPerSecond / (bruteForceScoreBudget / 4)),
         valueText: needsRankingModel
-          ? `~${formatCount(Math.max(rankingServersNeeded, 1))} servers`
+          ? `~${formatCount(Math.max(rankingServersNeeded, 1))} 台 server`
           : `${formatRate(rankingScoresPerSecond)} scores/s`,
         copy: needsRankingModel
-          ? `Scoring ${formatRate(rankingScoresPerSecond)} candidates/s at ${Math.round(rankingLatencyMs)} ms with ${formatCount(featureCount)} features needs about ${formatCount(Math.max(rankingServersNeeded, 1))} ranking servers.`
-          : `${formatRate(rankingScoresPerSecond)} candidate scores/s is light enough that retrieval order (or a trivial scorer) suffices.`,
+          ? `以 ${Math.round(rankingLatencyMs)} ms、${formatCount(featureCount)} 个 feature 给 ${formatRate(rankingScoresPerSecond)} 个 candidate/s 打分，大约需要 ${formatCount(Math.max(rankingServersNeeded, 1))} 台 ranking server。`
+          : `${formatRate(rankingScoresPerSecond)} 次 candidate 打分/s 足够轻，retrieval 的顺序（或一个简单 scorer）就够了。`,
       },
       featureLoad: {
         ratio: needsFeatureStore
           ? Math.min(softCapRatio(featureLookupsPerSecond / (featureLookupsPerServerSecond * 20)), 9)
           : 0.05,
-        valueText: needsFeatureStore ? `${formatRate(featureLookupsPerSecond)} reads/s` : 'no ranker yet',
+        valueText: needsFeatureStore ? `${formatRate(featureLookupsPerSecond)} reads/s` : '还没有 ranker',
         copy: needsFeatureStore
-          ? `${formatCount(featureCount)} features per candidate is ${formatRate(featureLookupsPerSecond)} online lookups/s; a low-latency feature store on the hot path is required.`
-          : `No ranking model is pulling per-candidate features yet, so there is no feature-store load on the hot path.`,
+          ? `每 candidate ${formatCount(featureCount)} 个 feature，就是 ${formatRate(featureLookupsPerSecond)} 次 online lookup/s；hot path 上需要一个低延迟的 feature store。`
+          : `还没有 ranking model 在拉取 per-candidate 的 feature，所以 hot path 上没有 feature-store 负载。`,
       },
       indexMemory: {
         ratio: softCapRatio(itemIndexMemoryRatio),
-        valueText: twoTowerAnn ? `${formatCount(catalogItems)} vectors` : 'no vector index',
+        valueText: twoTowerAnn ? `${formatCount(catalogItems)} 个向量` : '没有 vector index',
         copy: needsIndexSharding
-          ? `${formatCount(catalogItems)} item vectors at ${Math.round(embeddingDim)} dims exceed one index node; shard the item index.`
+          ? `${formatCount(catalogItems)} 个 item 向量、${Math.round(embeddingDim)} 维，超过单个 index node 的容量；给 item index 做 shard。`
           : twoTowerAnn
-            ? `${formatCount(catalogItems)} vectors at ${Math.round(embeddingDim)} dims still fit one ANN index node.`
-            : `No vector index is built while retrieval is non-embedding.`,
+            ? `${formatCount(catalogItems)} 个向量、${Math.round(embeddingDim)} 维，仍然能放进一个 ANN index node。`
+            : `retrieval 不基于 embedding 时，不会构建 vector index。`,
       },
       latencyBudget: {
         ratio: latencyPressure,
-        valueText: `${stagesActive}-stage funnel`,
+        valueText: `${stagesActive} 阶段 funnel`,
         copy:
           latencyPressure > 1
-            ? `${stagesActive} active stages scoring ${formatCount(candidatesPerRequest)} candidates/request at ${formatRate(impliedServingQps)} req/s push the funnel past its ${endToEndLatencyBudgetMs} ms end-to-end budget; stages must fan out.`
-            : `A ${stagesActive}-stage funnel scoring ${formatCount(candidatesPerRequest)} candidates/request fits comfortably inside the ${endToEndLatencyBudgetMs} ms end-to-end budget.`,
+            ? `${stagesActive} 个活跃阶段，以 ${formatRate(impliedServingQps)} req/s 给每请求 ${formatCount(candidatesPerRequest)} 个 candidate 打分，把 funnel 推过了它 ${endToEndLatencyBudgetMs} ms 的端到端预算；各阶段必须 fanout。`
+            : `一个 ${stagesActive} 阶段的 funnel，每请求给 ${formatCount(candidatesPerRequest)} 个 candidate 打分，能舒适地待在 ${endToEndLatencyBudgetMs} ms 的端到端预算内。`,
       },
     },
     decisions: buildDecisions({ ...flags, activeUsers, catalogItems, recsQps, candidatesPerRequest, featureCount, rankingServersNeeded }),
@@ -691,25 +691,25 @@ function buildReasons(
   if (analysis.twoTowerAnn) {
     reasons.push({
       severity: 'ok',
-      text: `Two-tower ANN retrieval (ScaNN/FAISS or a vector DB) narrows ${formatCount(
+      text: `Two-tower ANN retrieval（ScaNN/FAISS 或 vector DB）每请求以大致对数级的时间，把 ${formatCount(
         analysis.catalogItems,
-      )} items to ${formatCount(analysis.candidatesPerRequest)} candidates in roughly logarithmic time per request.`,
+      )} 个 item 收窄到 ${formatCount(analysis.candidatesPerRequest)} 个 candidate。`,
     });
   } else if (analysis.needsAnn) {
     reasons.push({
       severity: 'warning',
-      text: `A precomputed list still answers each request, but brute-force scoring all ${formatCount(
+      text: `预计算的列表仍能回答每个请求，但对全部 ${formatCount(
         analysis.catalogItems,
-      )} items would be ${formatRate(
+      )} 个 item 做 brute-force 打分会是 ${formatRate(
         analysis.bruteForceScansPerSecond,
-      )} comparisons/s — at this scale, move retrieval to two-tower embeddings + ANN.`,
+      )} 次比较/s——在这个规模，把 retrieval 换成 two-tower embedding + ANN。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `A precomputed popularity or co-visitation list answers every request from cache; ${formatCount(
+      text: `预计算的 popularity 或 co-visitation 列表从 cache 里回答每个请求；${formatCount(
         analysis.catalogItems,
-      )} items is small enough to enumerate offline.`,
+      )} 个 item 小到可以 offline 枚举。`,
     });
   }
 
@@ -717,28 +717,28 @@ function buildReasons(
   reasons.push({
     severity: 'ok',
     text: analysis.personalizes
-      ? `${formatCount(analysis.activeUsers)} active users need per-user candidates, so retrieval is personalized rather than one global list.`
-      : `${formatCount(analysis.activeUsers)} users with no strong per-user signal yet — a shared list beats the complexity of a personalized model.`,
+      ? `${formatCount(analysis.activeUsers)} 个活跃用户需要 per-user 的 candidate，所以 retrieval 是个性化的，而不是一个全局列表。`
+      : `${formatCount(analysis.activeUsers)} 个用户，还没有强的 per-user 信号——一个共享列表胜过个性化模型的复杂度。`,
   });
 
   // 3. Ranking.
   if (analysis.needsRankingModel) {
     reasons.push({
       severity: analysis.needsRankingFanout ? 'warning' : 'ok',
-      text: `A ranking model scores ${formatRate(analysis.rankingScoresPerSecond)} candidates/s at ${Math.round(
+      text: `一个 ranking model 以 ${Math.round(
         analysis.rankingLatencyMs,
-      )} ms${
+      )} ms 给 ${formatRate(analysis.rankingScoresPerSecond)} 个 candidate/s 打分${
         analysis.needsRankingFanout
-          ? ` and must fan out to ~${formatCount(Math.max(analysis.rankingServersNeeded, 1))} servers`
+          ? `，并且必须 fanout 到约 ${formatCount(Math.max(analysis.rankingServersNeeded, 1))} 台 server`
           : ''
-      }.`,
+      }。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
       text: `${formatRate(
         analysis.rankingScoresPerSecond,
-      )} candidate scores/s is light enough that retrieval order (or a trivial scorer) is good enough — no separate ranking model yet.`,
+      )} 次 candidate 打分/s 足够轻，retrieval 的顺序（或一个简单 scorer）就够用了——还不需要单独的 ranking model。`,
     });
   }
 
@@ -746,9 +746,9 @@ function buildReasons(
   if (analysis.needsFeatureStore) {
     reasons.push({
       severity: analysis.featureLookupsPerSecond > featureLookupsPerServerSecond * 20 ? 'danger' : 'warning',
-      text: `${formatCount(analysis.featureCount)} features per candidate means ${formatRate(
+      text: `每 candidate ${formatCount(analysis.featureCount)} 个 feature，意味着 ${formatRate(
         analysis.featureLookupsPerSecond,
-      )} online lookups/s — a low-latency feature store sits on the hot path.`,
+      )} 次 online lookup/s——一个低延迟的 feature store 坐在 hot path 上。`,
     });
   }
 
@@ -756,9 +756,9 @@ function buildReasons(
   if (analysis.needsIndexSharding) {
     reasons.push({
       severity: 'warning',
-      text: `${formatCount(analysis.catalogItems)} item vectors at ${Math.round(
+      text: `${formatCount(analysis.catalogItems)} 个 item 向量、${Math.round(
         analysis.embeddingDim,
-      )} dims exceed one index node; shard the ANN item index.`,
+      )} 维，超过单个 index node 的容量；给 ANN 的 item index 做 shard。`,
     });
   }
 
@@ -766,7 +766,7 @@ function buildReasons(
   if (analysis.realtimeFeatures) {
     reasons.push({
       severity: 'warning',
-      text: 'Real-time features add a streaming path from the interaction log into the feature store so the funnel reflects the current session.',
+      text: 'real-time feature 加了一条从 interaction log 到 feature store 的 streaming 路径，好让 funnel 反映当前 session。',
     });
   }
 
@@ -775,19 +775,19 @@ function buildReasons(
     severity: analysis.latencyPressure > 1 ? 'warning' : 'ok',
     text:
       analysis.latencyPressure > 1
-        ? `A ${analysis.stagesActive}-stage funnel at ${formatRate(
+        ? `一个 ${analysis.stagesActive} 阶段的 funnel 在 ${formatRate(
             analysis.impliedServingQps,
-          )} req/s is at the edge of its end-to-end latency budget; stages must fan out and serve in parallel.`
-        : `A ${analysis.stagesActive}-stage funnel at ${formatRate(
+          )} req/s 下已逼近它的端到端延迟预算；各阶段必须 fanout 并并行 serve。`
+        : `一个 ${analysis.stagesActive} 阶段的 funnel 在 ${formatRate(
             analysis.impliedServingQps,
-          )} req/s fits comfortably inside its end-to-end latency budget.`,
+          )} req/s 下能舒适地待在它的端到端延迟预算内。`,
   });
 
   // Training log — only added if there is still room, so it never inflates a busy scenario past 7.
   if (analysis.needsTrainingLog && reasons.length < 7) {
     reasons.push({
       severity: 'ok',
-      text: 'Interactions are logged asynchronously to retrain embeddings and the ranker without touching the serving hot path.',
+      text: '交互被异步记录下来，用于重训 embedding 和 ranker，而不触碰 serving 的 hot path。',
     });
   }
 
@@ -808,44 +808,44 @@ function buildDecisions(
     candidateGen: {
       state: flags.twoTowerAnn ? 'needed' : flags.personalizes ? 'tradeoff' : 'not-yet',
       copy: flags.twoTowerAnn
-        ? `Two-tower embeddings + ANN retrieve candidates across ${formatCount(flags.catalogItems)} items with high recall and generalization to cold items.`
+        ? `two-tower embedding + ANN 在 ${formatCount(flags.catalogItems)} 个 item 上 retrieve candidate，recall 高，还能泛化到 cold item。`
         : flags.personalizes
-          ? 'Collaborative filtering (co-visitation) personalizes cheaply but has thin recall and cannot generalize to cold items — embeddings are the next step.'
-          : 'A precomputed popularity or trending list is enough; there is no per-user signal to model yet.',
+          ? 'collaborative filtering（co-visitation）个性化便宜，但 recall 薄，无法泛化到 cold item——embedding 是下一步。'
+          : '一个预计算的 popularity 或 trending 列表就够了；还没有 per-user 信号可建模。',
     },
     rankingServing: {
       state: flags.needsRankingModel ? (flags.needsRankingFanout ? 'needed' : 'useful') : 'not-yet',
       copy: flags.needsRankingModel
-        ? `Serve a ranking model over the ${formatCount(flags.candidatesPerRequest)} retrieved candidates${flags.needsRankingFanout ? `, fanned out to ~${formatCount(Math.max(flags.rankingServersNeeded, 1))} servers to hold latency` : ''}.`
-        : 'No separate ranking model yet — retrieval order is good enough for the load.',
+        ? `在 retrieve 出来的 ${formatCount(flags.candidatesPerRequest)} 个 candidate 上 serve 一个 ranking model${flags.needsRankingFanout ? `，并 fanout 到约 ${formatCount(Math.max(flags.rankingServersNeeded, 1))} 台 server 以守住延迟` : ''}。`
+        : '还不需要单独的 ranking model——对当前负载，retrieval 的顺序已经够好。',
     },
     featureStore: {
       state: flags.needsFeatureStore ? 'needed' : 'not-yet',
       copy: flags.needsFeatureStore
-        ? `An online feature store serves ${formatCount(flags.featureCount)} features per candidate at low latency, kept consistent with offline training features.`
-        : 'Few features and low scoring volume mean no dedicated online feature store is justified.',
+        ? `一个 online feature store 低延迟地为每 candidate 提供 ${formatCount(flags.featureCount)} 个 feature，并与 offline 训练 feature 保持一致。`
+        : 'feature 少、打分量低，意味着不值得专门上一个 online feature store。',
     },
     annIndex: {
       state: flags.twoTowerAnn ? (flags.needsIndexSharding ? 'needed' : 'useful') : 'not-yet',
       copy: flags.twoTowerAnn
         ? flags.needsIndexSharding
-          ? 'Use a sharded ANN index (ScaNN, FAISS/HNSW/IVF, or a managed vector DB) so item vectors and search scale beyond one node.'
-          : 'A single ANN index (ScaNN, FAISS/HNSW/IVF, or a vector DB) over item vectors serves nearest-neighbor retrieval.'
-        : 'No vector index needed while retrieval is non-embedding.',
+          ? '用一个 sharded 的 ANN index（ScaNN、FAISS/HNSW/IVF 或托管 vector DB），让 item 向量和搜索能扩展到单节点之外。'
+          : '在 item 向量上用单个 ANN index（ScaNN、FAISS/HNSW/IVF 或 vector DB）来 serve nearest-neighbor retrieval。'
+        : 'retrieval 不基于 embedding 时不需要 vector index。',
     },
     reranking: {
       state: flags.needsReranking ? 'needed' : 'not-yet',
       copy: flags.needsReranking
-        ? 'Re-rank the scored list for diversity, freshness, and business rules before returning it.'
-        : 'No re-ranking layer yet; the popularity list is returned directly.',
+        ? '在返回前，为 diversity、新鲜度和业务规则对打好分的列表做 re-rank。'
+        : '还没有 re-ranking 层；直接返回 popularity 列表。',
     },
     trainingLog: {
       state: flags.needsTrainingLog ? (flags.realtimeFeatures ? 'tradeoff' : 'useful') : 'not-yet',
       copy: flags.needsTrainingLog
         ? flags.realtimeFeatures
-          ? 'Log interactions to a stream that feeds both offline training and real-time features — the latter adds a low-latency pipeline on the hot path.'
-          : 'Log impressions and engagement asynchronously to retrain embeddings and the ranker.'
-        : 'No training loop yet; the popularity list is recomputed on a simple schedule.',
+          ? '把交互记录到一个 stream，同时喂给 offline 训练和 real-time feature——后者在 hot path 上加了一条低延迟 pipeline。'
+          : '异步记录 impression 和参与度，用于重训 embedding 和 ranker。'
+        : '还没有训练回路；popularity 列表按一个简单的计划重算。',
     },
   };
 }
@@ -855,7 +855,7 @@ function chooseArchitectureTitle(flags: ArchitectureFlags): string {
     return 'Popularity list';
   }
   if (flags.realtimeFeatures && flags.needsIndexSharding) {
-    return 'Real-time multi-stage funnel at scale';
+    return '规模化的 real-time multi-stage funnel';
   }
   if (flags.twoTowerAnn && flags.needsRankingModel) {
     return 'Two-tower retrieval + ranking model';
@@ -871,21 +871,21 @@ function chooseArchitectureTitle(flags: ArchitectureFlags): string {
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (!flags.twoTowerAnn && !flags.needsRankingModel && !flags.personalizes) {
-    return 'A precomputed popularity or trending list answers every request from cache. No per-user model is justified yet.';
+    return '一个预计算的 popularity 或 trending 列表从 cache 里回答每个请求。现在还不值得做 per-user 模型。';
   }
   if (flags.realtimeFeatures && flags.needsIndexSharding) {
-    return 'A sharded ANN index retrieves over billions of items, a fanned-out ranking model scores candidates with an online feature store fed by real-time interactions, and re-ranking enforces diversity within a tight latency budget.';
+    return '一个 sharded 的 ANN index 在数十亿 item 上做 retrieve，一个 fanout 的 ranking model 借助由实时交互喂养的 online feature store 给 candidate 打分，re-ranking 在紧的 latency budget 内执行 diversity。';
   }
   if (flags.twoTowerAnn && flags.needsRankingModel) {
-    return 'Two-tower embeddings and an ANN index retrieve candidates, then a ranking model scores them using features from an online feature store, with re-ranking before the response.';
+    return 'two-tower embedding 和一个 ANN index 做 retrieve candidate，然后一个 ranking model 用来自 online feature store 的 feature 给它们打分，响应前再做 re-ranking。';
   }
   if (flags.twoTowerAnn) {
-    return 'Two-tower embeddings feed an ANN index so retrieval narrows a large catalog to a few hundred candidates in milliseconds.';
+    return 'two-tower embedding 喂给一个 ANN index，让 retrieval 在毫秒内把一个大 catalog 收窄到几百个 candidate。';
   }
   if (flags.personalizes) {
-    return 'Collaborative filtering builds per-user candidate lists from co-visitation, personalizing cheaply but with limited recall.';
+    return 'collaborative filtering 从 co-visitation 构建 per-user 的 candidate 列表，个性化便宜但 recall 有限。';
   }
-  return 'A precomputed popularity list still covers the workload.';
+  return '一个预计算的 popularity 列表仍然能覆盖这个工作负载。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {

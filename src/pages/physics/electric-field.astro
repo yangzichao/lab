@@ -9,46 +9,46 @@ const entry = findPhysicsLab('electric-field')!;
 <BaseLayout title={`${entry.title} — Lab`} description={entry.tagline}>
   <PhysicsLabShell entry={entry}>
     <Fragment slot="readouts">
-      <div class="plab__readout"><span>Potential V</span><strong data-readout="potential">+0.0</strong></div>
-      <div class="plab__readout"><span>Field |E|</span><strong data-readout="fieldStrength">0.00</strong></div>
-      <div class="plab__readout"><span>Charges</span><strong data-readout="charges">2</strong></div>
-      <div class="plab__readout"><span>Net charge</span><strong data-readout="netCharge">0</strong></div>
+      <div class="plab__readout"><span>电势 V</span><strong data-readout="potential">+0.0</strong></div>
+      <div class="plab__readout"><span>场强 |E|</span><strong data-readout="fieldStrength">0.00</strong></div>
+      <div class="plab__readout"><span>电荷数</span><strong data-readout="charges">2</strong></div>
+      <div class="plab__readout"><span>净电荷</span><strong data-readout="netCharge">0</strong></div>
     </Fragment>
 
-    <form class="plab__panel" slot="controls" aria-label="Electric field controls">
+    <form class="plab__panel" slot="controls" aria-label="电场控制">
       <div class="plab__panel-head">
-        <p>Controls</p>
+        <p>控制</p>
         <h2>Electric Field</h2>
       </div>
 
       <div class="plab__actions">
         <button class="plab__button is-primary" type="button" data-action="toggle">
-          <i class="ph ph-pause" aria-hidden="true"></i><span>Pause</span>
+          <i class="ph ph-pause" aria-hidden="true"></i><span>暂停</span>
         </button>
         <button class="plab__button" type="button" data-action="reset">
-          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>Reset</span>
+          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>重置</span>
         </button>
       </div>
 
       <div class="plab__presets">
-        <button class="plab__preset" type="button" data-preset="dipole">Dipole</button>
-        <button class="plab__preset" type="button" data-preset="like">Like pair</button>
-        <button class="plab__preset" type="button" data-preset="quadrupole">Quadrupole</button>
+        <button class="plab__preset" type="button" data-preset="dipole">偶极子</button>
+        <button class="plab__preset" type="button" data-preset="like">同号电荷对</button>
+        <button class="plab__preset" type="button" data-preset="quadrupole">四极子</button>
       </div>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showEquipotentials" checked />
-        <span><strong>Equipotential lines</strong><small>Contours where the potential is level.</small></span>
+        <span><strong>等势线</strong><small>电势相等处的等高线。</small></span>
       </label>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showFieldLines" checked />
-        <span><strong>Field lines</strong><small>Streamlines flowing from + to −.</small></span>
+        <span><strong>电场线</strong><small>从 + 流向 − 的流线。</small></span>
       </label>
 
       <p class="plab__notice">
         <i class="ph ph-hand-pointing" aria-hidden="true"></i>
-        <span>Drag any charge on the canvas to reshape the field. The teal dot is a positive test charge drifting along E.</span>
+        <span>在画布上拖动任意电荷即可重塑场。teal 色圆点是沿 E 漂移的正测试电荷。</span>
       </p>
     </form>
   </PhysicsLabShell>

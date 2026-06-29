@@ -16,16 +16,16 @@ const comfortableGraphEntities = 5_000_000;
 
 export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
   id: 'fraud-detection',
-  eyebrow: 'System Design Lab',
+  eyebrow: '系统设计 Lab',
   title:
-    'Real-time fraud detection is a tight synchronous latency budget wrapped around streaming features and a model.',
+    '实时 fraud detection 就是把 streaming features 和一个 model 裹进一个很紧的 synchronous latency 预算里。',
   summary:
-    'Tune transaction rate, the decision latency budget, the feature window, model inference time, entities tracked, and feedback delay. The design evolves from static rules, to batch ML scoring, to streaming features with synchronous scoring, to a feedback loop with retraining, and finally to graph features at scale.',
+    '调节交易速率、decision latency 预算、feature window、model inference 时间、追踪的 entity 数，以及 feedback 延迟。架构会从 static rules，演进到 batch ML scoring，再到带 synchronous scoring 的 streaming features，再到带 retraining 的 feedback loop，最终到大规模的 graph features。',
   controls: [
     {
       id: 'transactionsPerSecond',
-      label: 'Transaction rate',
-      help: 'Transactions arriving on the scoring path; every one needs an allow/deny/review decision.',
+      label: '交易速率',
+      help: '到达 scoring 路径的交易；每一笔都需要一个 allow/deny/review 决策。',
       min: 10,
       max: 2_000_000,
       defaultValue: 5_000,
@@ -34,8 +34,8 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'decisionLatencyMs',
-      label: 'Decision latency target',
-      help: 'End-to-end budget to return a decision before the transaction is held up.',
+      label: 'Decision latency 目标',
+      help: '在交易被卡住之前返回决策的端到端预算。',
       min: 5,
       max: 2_000,
       defaultValue: 200,
@@ -45,7 +45,7 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'featureWindowSeconds',
       label: 'Feature window',
-      help: 'Lookback for velocity counts and aggregates (e.g. spend in the last N seconds).',
+      help: 'velocity 计数和聚合的回看窗口（比如最近 N 秒的消费额）。',
       min: 1,
       max: 604_800,
       defaultValue: 3_600,
@@ -55,7 +55,7 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'modelLatencyMs',
       label: 'Model latency',
-      help: 'Time the scoring model spends per transaction inside the decision budget.',
+      help: 'scoring model 在 decision 预算内每笔交易花的时间。',
       min: 1,
       max: 1_000,
       defaultValue: 30,
@@ -64,19 +64,19 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'entitiesTracked',
-      label: 'Entities tracked',
-      help: 'Distinct cards, accounts, devices, and merchants with live aggregate state.',
+      label: '追踪的 entity 数',
+      help: '带实时聚合状态的 distinct 卡、账户、设备和商户。',
       min: 10_000,
       max: 5_000_000_000,
       defaultValue: 5_000_000,
       scale: 'log',
-      unit: 'entities',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'feedbackDelaySeconds',
-      label: 'Label feedback delay',
-      help: 'Lag before confirmed-fraud labels (chargebacks, disputes) come back to retrain.',
+      label: 'Label feedback 延迟',
+      help: '确认欺诈的 label（chargeback、争议）回流来 retrain 之前的延迟。',
       min: 60,
       max: 7_776_000,
       defaultValue: 86_400,
@@ -88,13 +88,13 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'streamingAggregations',
       label: 'Streaming aggregations',
-      help: 'Maintain velocity counts in a stream processor instead of recomputing per request.',
+      help: '在 stream processor 里维护 velocity 计数，而不是每个请求都重算。',
       defaultValue: true,
     },
     {
       id: 'graphFeatures',
       label: 'Graph features',
-      help: 'Link entities (shared device, card, address) to catch coordinated fraud rings.',
+      help: '把 entity（共享的设备、卡、地址）连起来，抓出有组织的 fraud ring。',
       defaultValue: false,
     },
   ],
@@ -103,7 +103,7 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
       id: 'static-rules',
       step: '01',
       title: 'Static rule engine',
-      summary: 'A handful of hard rules on a trickle of transactions.',
+      summary: '在稀稀拉拉的交易上跑几条 hard rule。',
       values: {
         transactionsPerSecond: 50,
         decisionLatencyMs: 500,
@@ -119,7 +119,7 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
       id: 'batch-scoring',
       step: '02',
       title: 'Batch ML scoring',
-      summary: 'A model scores transactions, but features are computed in batch.',
+      summary: '一个 model 给交易打分，但 feature 是 batch 算出来的。',
       values: {
         transactionsPerSecond: 800,
         decisionLatencyMs: 1_000,
@@ -134,8 +134,8 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'realtime-streaming',
       step: '03',
-      title: 'Real-time streaming features',
-      summary: 'Velocity counts in a stream feed a synchronous score under a tight budget.',
+      title: '实时 streaming features',
+      summary: 'stream 里的 velocity 计数在很紧的预算下喂给一次 synchronous 打分。',
       values: {
         transactionsPerSecond: 6_000,
         decisionLatencyMs: 150,
@@ -151,7 +151,7 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
       id: 'feedback-loop',
       step: '04',
       title: 'Feedback loop + retraining',
-      summary: 'Confirmed labels flow back to retrain against drifting fraud patterns.',
+      summary: '确认的 label 回流，针对漂移的 fraud 模式做 retrain。',
       values: {
         transactionsPerSecond: 120_000,
         decisionLatencyMs: 80,
@@ -166,8 +166,8 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'graph-at-scale',
       step: '05',
-      title: 'Graph features at scale',
-      summary: 'Entity linking catches rings while the decision stays within a sub-25 ms budget.',
+      title: '大规模 graph features',
+      summary: 'entity linking 抓出 ring，同时决策守在 25 ms 以内的预算。',
       values: {
         transactionsPerSecond: 1_000_000,
         decisionLatencyMs: 25,
@@ -181,9 +181,9 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'Real-time fraud detection architecture diagram',
+    title: '实时 fraud detection 架构图',
     description:
-      'Whiteboard-style architecture diagram for real-time fraud detection: clients, a synchronous scoring API, a stream processor with a feature store, a model and rules engine with an optional graph store, and an async label-feedback and retraining pipeline.',
+      '实时 fraud detection 的白板式架构图：客户端、一个 synchronous scoring API、带 feature store 的 stream processor、一个 model 与 rules engine 加上可选的 graph store，以及一条异步的 label-feedback 与 retraining pipeline。',
     columns: [
       {
         id: 'clients',
@@ -193,8 +193,8 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'client',
             title: 'Payment client',
-            subtitle: 'authorize txn',
-            summary: 'submits each transaction and waits for an allow, deny, or review decision',
+            subtitle: '授权 txn',
+            summary: '提交每一笔交易，等一个 allow、deny 或 review 决策',
             kind: 'client',
           },
         ],
@@ -207,15 +207,15 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'scoringApi',
             title: 'Scoring API',
-            subtitle: 'sync decision',
-            summary: 'orchestrates the synchronous decision within the latency budget',
+            subtitle: 'sync 决策',
+            summary: '在 latency 预算内编排这次 synchronous 决策',
             kind: 'api',
           },
           {
             id: 'decisionGate',
             title: 'Decision gate',
             subtitle: 'allow / deny / review',
-            summary: 'applies fail-open or fail-closed policy and returns the verdict',
+            summary: '执行 fail-open 或 fail-closed 策略，返回最终裁决',
             kind: 'service',
           },
         ],
@@ -228,15 +228,15 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'streamProcessor',
             title: 'Stream processor',
-            subtitle: 'velocity aggregates',
-            summary: 'maintains windowed velocity counts and aggregates from the event stream',
+            subtitle: 'velocity 聚合',
+            summary: '从 event stream 维护按窗口的 velocity 计数和聚合',
             kind: 'compute',
           },
           {
             id: 'featureStore',
             title: 'Feature store',
-            subtitle: 'fast lookup',
-            summary: 'serves precomputed per-entity features at low latency to the scorer',
+            subtitle: '快速 lookup',
+            summary: '低延迟地把预算好的 per-entity feature 提供给 scorer',
             kind: 'cache',
           },
         ],
@@ -249,22 +249,22 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'rulesEngine',
             title: 'Rules engine',
-            subtitle: 'hard rules',
-            summary: 'evaluates deterministic rules and hard blocks before or beside the model',
+            subtitle: 'hard rule',
+            summary: '在 model 之前或并行地评估确定性 rule 和 hard block',
             kind: 'service',
           },
           {
             id: 'modelService',
             title: 'Model service',
             subtitle: 'risk score',
-            summary: 'returns a fraud probability the gate combines with the rules verdict',
+            summary: '返回一个欺诈概率，gate 把它和 rule 的裁决合并',
             kind: 'gpu',
           },
           {
             id: 'graphStore',
             title: 'Graph store',
             subtitle: 'entity linking',
-            summary: 'links shared cards, devices, and addresses to expose coordinated rings',
+            summary: '把共享的卡、设备和地址连起来，暴露有组织的 ring',
             kind: 'db',
           },
         ],
@@ -277,15 +277,15 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'labelStore',
             title: 'Label store',
-            subtitle: 'confirmed outcomes',
-            summary: 'collects chargebacks and dispute outcomes as ground-truth labels',
+            subtitle: '确认的结果',
+            summary: '把 chargeback 和争议结果收集为 ground-truth label',
             kind: 'db',
           },
           {
             id: 'trainingPipeline',
             title: 'Training pipeline',
-            subtitle: 'retrain + deploy',
-            summary: 'retrains on fresh labels to track drifting fraud patterns and ships new models',
+            subtitle: 'retrain + 部署',
+            summary: '用新 label 做 retrain 以跟上漂移的 fraud 模式，并发布新 model',
             kind: 'compute',
           },
         ],
@@ -304,110 +304,110 @@ export const fraudDetectionLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'scoringLoad', label: 'Scoring path load' },
-    { id: 'latencyBudget', label: 'Decision budget headroom' },
-    { id: 'streamState', label: 'Stream state size' },
-    { id: 'graphLoad', label: 'Graph linking load' },
-    { id: 'modelFreshness', label: 'Model drift risk' },
+    { id: 'scoringLoad', label: 'Scoring 路径负载' },
+    { id: 'latencyBudget', label: 'Decision 预算余量' },
+    { id: 'streamState', label: 'Stream state 体量' },
+    { id: 'graphLoad', label: 'Graph linking 负载' },
+    { id: 'modelFreshness', label: 'Model drift 风险' },
   ],
   decisions: [
-    { id: 'streamingFeatures', title: 'Real-time feature computation' },
-    { id: 'scoringBudget', title: 'Synchronous scoring budget' },
-    { id: 'hybrid', title: 'Rules + model hybrid' },
+    { id: 'streamingFeatures', title: '实时 feature 计算' },
+    { id: 'scoringBudget', title: 'Synchronous scoring 预算' },
+    { id: 'hybrid', title: 'Rules + model 混合' },
     { id: 'graph', title: 'Graph features' },
     { id: 'feedbackLoop', title: 'Feedback loop / retraining' },
     { id: 'failPolicy', title: 'Fail-open vs fail-closed' },
   ],
   sourceBackedRules: [
     {
-      title: 'Stateful stream processing maintains windowed aggregates in real time',
+      title: '有状态的 stream processing 实时维护按窗口的聚合',
       source: 'Apache Flink Docs',
       url: 'https://nightlies.apache.org/flink/flink-docs-stable/',
       summary:
-        'Flink keeps keyed state and windows per entity so velocity counts and aggregates update continuously instead of being recomputed per request.',
+        'Flink 为每个 entity 保留 keyed state 和窗口，于是 velocity 计数和聚合持续更新，而不是每个请求都重算。',
     },
     {
-      title: 'A durable, replayable log backs the feature and feedback streams',
+      title: '一个持久、可重放的 log 支撑 feature 和 feedback 这两条 stream',
       source: 'Apache Kafka Docs',
       url: 'https://kafka.apache.org/documentation/',
       summary:
-        'Kafka gives the transaction and label streams an ordered, replayable backbone, which is what lets features be recomputed and models retrained from history.',
+        'Kafka 给交易和 label 两条 stream 提供了有序、可重放的骨干，正是它让 feature 能被重算、model 能从历史 retrain。',
     },
     {
-      title: 'A feature store serves the same features online at low latency and offline for training',
+      title: '一个 feature store 把同一套 feature 既低延迟地 online 服务，又 offline 供 training',
       source: 'Feast Docs',
       url: 'https://docs.feast.dev/',
       summary:
-        'A feature store solves online/offline skew: the synchronous scorer reads fresh features fast while training reads consistent historical values.',
+        'feature store 解决 online/offline skew：synchronous scorer 快速读到新鲜 feature，而 training 读到一致的历史值。',
     },
     {
-      title: 'Fraud detection is an anomaly / novelty-detection problem with drift',
+      title: 'Fraud detection 是一个带 drift 的 anomaly / novelty-detection 问题',
       source: 'scikit-learn',
       url: 'https://scikit-learn.org/stable/modules/outlier_detection.html',
       summary:
-        'Fraud is rare and the patterns shift over time, so detection is framed as outlier/novelty detection that needs fresh labels and frequent retraining rather than one static model.',
+        '欺诈很罕见、模式还随时间漂移，所以检测被框定为 outlier/novelty detection，需要新鲜 label 和频繁 retraining，而不是一个静态 model。',
     },
   ],
   teachingAssumptions: [
-    'The decision budget is split across feature lookup, model inference, and rules; remaining headroom is what is left after model latency.',
-    'Single-node scoring, feature-lookup, and stream-state budgets are conservative teaching numbers, not vendor limits.',
-    'Graph linking cost is modeled as growing with both entities tracked and transaction rate; real systems precompute much of it offline.',
+    'decision 预算被拆给 feature lookup、model inference 和 rules；剩余余量就是扣掉 model latency 之后还剩的部分。',
+    '单节点的 scoring、feature-lookup 和 stream-state 预算都是保守的教学数字，不是厂商上限。',
+    'graph linking 成本被建模为随追踪的 entity 数和交易速率一起增长；真实系统会把其中大部分 offline 预算好。',
   ],
   teachingWalkthrough: [
     {
       id: 'rules-only',
       step: '01',
-      focus: 'A few hard rules',
+      focus: '几条 hard rule',
       scenarioId: 'static-rules',
       question:
-        'At 50 transactions/s with a 500 ms budget, do you need a model, a stream processor, or a feature store at all?',
+        '在 50 交易/s、500 ms 预算下，你真的需要 model、stream processor 或 feature store 吗？',
       reveal:
-        'No. A handful of deterministic rules ("deny if amount > X from a new device") on one box catches the obvious cases. With this little traffic and a relaxed budget, streaming infra and an ML model are pure overhead — and rules stay explainable to fraud analysts.',
-      takeaway: 'Start with explainable static rules; reach for ML only when rules stop catching enough.',
+        '不需要。一台机器上几条确定性 rule（「新设备且金额 > X 就 deny」）就能抓住明显的情况。流量这么小、预算又宽松时，streaming 基础设施和 ML model 纯属累赘——而且 rule 对欺诈分析师仍然可解释。',
+      takeaway: '从可解释的 static rule 起步；只有当 rule 抓不住足够多时才上 ML。',
     },
     {
       id: 'add-model',
       step: '02',
-      focus: 'Add an ML model',
+      focus: '加一个 ML model',
       scenarioId: 'batch-scoring',
       question:
-        'You add a model but compute its features in a nightly batch. Why does that miss fast-moving fraud?',
+        '你加了一个 model，但它的 feature 是每晚 batch 算的。为什么这会漏掉快速移动的欺诈？',
       reveal:
-        'Batch features are stale by hours. A card tested with ten tiny charges in a minute looks fine to features computed last night. Velocity is the strongest signal, so you need aggregates over a recent window — which batch cannot provide on the transaction path.',
-      takeaway: 'Stale features blind you to velocity; recent-window aggregates are the core fraud signal.',
+        'batch feature 滞后好几个小时。一张卡在一分钟里被试了十笔小额扣款，在昨晚算出来的 feature 看来一切正常。velocity 是最强的信号，所以你需要在最近窗口上的聚合——而 batch 在交易路径上给不了。',
+      takeaway: '陈旧的 feature 让你看不见 velocity；最近窗口的聚合才是核心 fraud 信号。',
     },
     {
       id: 'go-realtime',
       step: '03',
-      focus: 'Streaming + sync score',
+      focus: 'Streaming + sync 打分',
       scenarioId: 'realtime-streaming',
       question:
-        'Now 6k txn/s with a 150 ms budget. Where do you compute velocity counts, and what must stay inside the budget?',
+        '现在 6k txn/s、150 ms 预算。你在哪里算 velocity 计数，又有什么必须留在预算之内？',
       reveal:
-        'A stream processor maintains per-entity windowed counts continuously and writes them to a fast feature store. On the request the scorer reads features and runs the model synchronously — feature lookup plus model inference must both fit under the budget, so the model is kept small and the store is in-memory.',
-      takeaway: 'Compute features async in a stream; on the request only do a fast lookup plus a bounded model call.',
+        '一个 stream processor 持续维护 per-entity 的窗口计数，并写进一个快速的 feature store。请求来时 scorer 读 feature 并 synchronous 跑 model——feature lookup 加 model inference 必须都塞进预算，所以 model 要保持小、store 放在内存里。',
+      takeaway: '在 stream 里异步算 feature；请求上只做一次快速 lookup 加一次有上界的 model 调用。',
     },
     {
       id: 'feedback',
       step: '04',
-      focus: 'Close the loop',
+      focus: '闭合这个 loop',
       scenarioId: 'feedback-loop',
       question:
-        'Fraudsters adapt within days. If labels arrive 6 hours later, what do you build so the model keeps up?',
+        '骗子几天内就会变招。如果 label 6 小时后才到，你要搭什么让 model 跟得上？',
       reveal:
-        'A feedback loop: confirmed outcomes (chargebacks, dispute resolutions) land in a label store and a training pipeline retrains regularly. Faster label feedback means you can retrain sooner against drift. The replayable stream lets you rebuild features for those historical transactions consistently.',
-      takeaway: 'Fraud drifts, so a label-feedback loop and regular retraining are part of the system, not an afterthought.',
+        '一个 feedback loop：确认的结果（chargeback、争议处理结果）落进 label store，一个 training pipeline 定期 retrain。label feedback 越快，你就能越早针对 drift 做 retrain。可重放的 stream 让你能为那些历史交易一致地重建 feature。',
+      takeaway: '欺诈会漂移，所以 label-feedback loop 和定期 retraining 是系统的一部分，而不是事后补丁。',
     },
     {
       id: 'graph',
       step: '05',
-      focus: 'Link the entities',
+      focus: '把 entity 连起来',
       scenarioId: 'graph-at-scale',
       question:
-        'Individual transactions look clean but a ring shares one device across many cards. How do you catch it within a 25 ms budget?',
+        '单笔交易看着都干净，但一个 ring 用一台设备跨很多张卡。你怎么在 25 ms 预算内抓到它？',
       reveal:
-        'Graph features link entities (shared device, card, address) so a ring lights up even when each transaction looks fine alone. The expensive linking is precomputed offline and the connected-component signals are pushed into the feature store, so the synchronous path still just does a fast lookup under the tight budget.',
-      takeaway: 'Graph features expose coordinated rings; precompute the linking offline to keep the hot path fast.',
+        'graph features 把 entity（共享的设备、卡、地址）连起来，于是哪怕每笔交易单看都正常，一个 ring 也会亮起来。昂贵的 linking 在 offline 预算好，connected-component 信号被推进 feature store，所以 synchronous 路径在紧预算下仍然只做一次快速 lookup。',
+      takeaway: 'graph features 暴露有组织的 ring；把 linking offline 预算好，hot path 才能保持快。',
     },
   ],
   analyze: analyzeFraudDetectionWorkload,
@@ -506,52 +506,52 @@ function analyzeFraudDetectionWorkload(workload: WorkloadValues): LabAnalysis {
         ratio: effectiveScoringPerSecond / comfortableScoringQpsPerNode,
         valueText: `${formatRate(transactionsPerSecond)}/s`,
         copy: recomputesInline
-          ? 'Recomputing velocity aggregates inline (streaming aggregations off) multiplies the scoring-path cost; turn on streaming to push it off the hot path.'
+          ? '在请求里 inline 重算 velocity 聚合（streaming aggregations 关着）会成倍放大 scoring 路径的成本；打开 streaming 把它挪出 hot path。'
           : effectiveScoringPerSecond > comfortableScoringQpsPerNode
-            ? 'The scoring path must shard across nodes to hold this transaction rate.'
-            : 'One scoring node comfortably handles the transaction rate.',
+            ? 'scoring 路径必须跨节点 shard 才扛得住这个交易速率。'
+            : '一个 scoring 节点就能从容处理这个交易速率。',
       },
       latencyBudget: {
         ratio: budgetRemainingMs <= 0 ? 2 : modelLatencyMs / decisionLatencyMs,
         valueText:
           budgetRemainingMs <= 0
-            ? `over by ${formatCount(-budgetRemainingMs)} ms`
-            : `${formatCount(budgetRemainingMs)} ms left`,
+            ? `超了 ${formatCount(-budgetRemainingMs)} ms`
+            : `还剩 ${formatCount(budgetRemainingMs)} ms`,
         copy:
           budgetRemainingMs <= 0
-            ? `Model latency (${formatCount(modelLatencyMs)} ms) alone blows the ${formatCount(
+            ? `光是 model latency（${formatCount(modelLatencyMs)} ms）就撑爆了 ${formatCount(
                 decisionLatencyMs,
-              )} ms budget; the model must be smaller or features cached.`
-            : `Model takes ${formatCount(modelLatencyMs)} ms of the ${formatCount(
-                decisionLatencyMs,
-              )} ms budget, leaving room for feature lookup and rules.`,
+              )} ms 预算；model 得更小，或者把 feature 缓存起来。`
+            : `model 占掉 ${formatCount(decisionLatencyMs)} ms 预算里的 ${formatCount(
+                modelLatencyMs,
+              )} ms，给 feature lookup 和 rules 留出了空间。`,
       },
       streamState: {
         ratio: needsStreaming ? streamStateEntries / comfortableStreamStateEntries : 0,
-        valueText: needsStreaming ? `${formatCount(streamStateEntries)} keys` : 'no stream state',
+        valueText: needsStreaming ? `${formatCount(streamStateEntries)} 个 key` : '无 stream state',
         copy: needsStreaming
-          ? `${formatCount(entitiesTracked)} entities over a ${formatWindow(
+          ? `${formatCount(entitiesTracked)} 个 entity 在一个 ${formatWindow(
               featureWindowSeconds,
-            )} window keep keyed state in the stream processor.`
-          : 'Without streaming aggregations there is no keyed window state to hold.',
+            )} 窗口里，在 stream processor 中保留 keyed state。`
+          : '没有 streaming aggregations，就没有 keyed 窗口状态要保留。',
       },
       graphLoad: {
         ratio: graphPressure,
-        valueText: needsGraph ? `${formatCount(entitiesTracked)} linked` : 'graph off',
+        valueText: needsGraph ? `连接 ${formatCount(entitiesTracked)} 个` : 'graph 关闭',
         copy: needsGraph
-          ? 'Entity linking across cards, devices, and addresses must be precomputed offline to stay off the hot path.'
-          : 'Graph features are off, so no entity-linking workload exists yet.',
+          ? '跨卡、设备和地址的 entity linking 必须 offline 预算好，才能不落在 hot path 上。'
+          : 'graph features 关着，所以还不存在 entity-linking 的工作负载。',
       },
       modelFreshness: {
         ratio: freshnessPressure,
-        valueText: needsModel ? `labels in ${formatWindow(feedbackDelaySeconds)}` : 'no model',
+        valueText: needsModel ? `label 在 ${formatWindow(feedbackDelaySeconds)} 内回流` : '无 model',
         copy: needsModel
           ? feedbackDelaySeconds > 172_800
-            ? `Labels lag ${formatWindow(
+            ? `label 滞后 ${formatWindow(
                 feedbackDelaySeconds,
-              )}; the model drifts before it can be retrained on confirmed fraud.`
-            : `Labels return in ${formatWindow(feedbackDelaySeconds)}, fast enough to retrain against drift.`
-          : 'No model yet, so there is nothing to retrain.',
+              )}；model 还没来得及用确认的欺诈 retrain 就已经 drift 了。`
+            : `label 在 ${formatWindow(feedbackDelaySeconds)} 内回来，快到足以针对 drift 做 retrain。`
+          : '还没有 model，所以没什么可 retrain 的。',
       },
     },
     decisions: buildDecisions({
@@ -604,43 +604,43 @@ function buildReasons(
   if (analysis.needsStreaming) {
     reasons.push({
       severity: analysis.featureLookupsPerSecond > comfortableFeatureLookupsPerSecond ? 'warning' : 'ok',
-      text: `Velocity over a ${formatWindow(
+      text: `在一个 ${formatWindow(
         analysis.featureWindowSeconds,
-      )} window needs streaming aggregates; the scorer does about ${formatRate(
+      )} 窗口上算 velocity 需要 streaming 聚合；scorer 每秒大约做 ${formatRate(
         analysis.featureLookupsPerSecond,
-      )}/s of feature lookups.`,
+      )} 次 feature lookup。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Traffic and window are small enough to compute features inline or in batch without a stream processor.',
+      text: '流量和窗口都够小，feature 可以 inline 或 batch 算，不需要 stream processor。',
     });
   }
 
   if (analysis.budgetRemainingMs < 0) {
     reasons.push({
       severity: 'danger',
-      text: `Model latency (${formatCount(
+      text: `光是 model latency（${formatCount(
         analysis.modelLatencyMs,
-      )} ms) exceeds the ${formatCount(
+      )} ms）就超过了 ${formatCount(
         analysis.decisionLatencyMs,
-      )} ms decision budget on its own; shrink the model or precompute more features.`,
+      )} ms 的 decision 预算；缩小 model，或预算更多 feature。`,
     });
   } else if (analysis.tightBudget && analysis.needsModel) {
     reasons.push({
       severity: 'warning',
-      text: `A ${formatCount(
+      text: `${formatCount(
         analysis.decisionLatencyMs,
-      )} ms budget forces synchronous scoring: feature lookup and a bounded model call must both fit.`,
+      )} ms 预算逼出 synchronous scoring：feature lookup 和一次有上界的 model 调用必须都塞得下。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: `A ${formatCount(
+      text: `${formatCount(
         analysis.decisionLatencyMs,
-      )} ms budget is relaxed, leaving ${formatCount(
+      )} ms 预算很宽松，打分后还剩 ${formatCount(
         analysis.budgetRemainingMs,
-      )} ms of headroom after scoring for feature work and retries.`,
+      )} ms 余量留给 feature 处理和重试。`,
     });
   }
 
@@ -649,40 +649,40 @@ function buildReasons(
       severity: analysis.transactionsPerSecond > comfortableScoringQpsPerNode * 10 ? 'danger' : 'warning',
       text: `${formatRate(
         analysis.transactionsPerSecond,
-      )}/s exceeds one scoring node; shard the scoring path and the stream by entity key.`,
+      )}/s 超出单个 scoring 节点；把 scoring 路径和 stream 按 entity key 做 shard。`,
     });
   }
 
   if (analysis.needsFeedback) {
     reasons.push({
       severity: analysis.feedbackDelaySeconds > 172_800 ? 'warning' : 'ok',
-      text: `Confirmed labels return in ${formatWindow(
+      text: `确认的 label 在 ${formatWindow(
         analysis.feedbackDelaySeconds,
-      )}; feed them back to retrain against drifting fraud patterns.`,
+      )} 内回来；把它们回流去针对漂移的 fraud 模式做 retrain。`,
     });
   }
 
   if (analysis.needsGraph) {
     reasons.push({
       severity: 'warning',
-      text: `Graph features link ${formatCount(
+      text: `graph features 连接 ${formatCount(
         analysis.entitiesTracked,
-      )} entities to catch rings; precompute the linking offline to keep the synchronous path fast.`,
+      )} 个 entity 来抓 ring；把 linking offline 预算好，让 synchronous 路径保持快。`,
     });
   }
 
   reasons.push({
     severity: 'ok',
     text: analysis.needsModel
-      ? 'A hybrid decision gate keeps explainable hard rules alongside the model score, so deterministic blocks survive even when the model is uncertain.'
-      : 'Deterministic rules decide every transaction and stay fully explainable to fraud analysts; no model is involved yet.',
+      ? '混合的 decision gate 把可解释的 hard rule 和 model score 并排放着，于是即便 model 拿不准，确定性的 block 也仍然管用。'
+      : '确定性的 rule 决定每一笔交易，对欺诈分析师完全可解释；目前还没有 model 参与。',
   });
 
   reasons.push({
     severity: analysis.failClosed ? 'ok' : 'warning',
     text: analysis.failClosed
-      ? 'With budget headroom the gate could fail closed (deny on error), though card-auth convention often still fails open and catches fraud later via chargebacks, since false declines hurt good customers more.'
-      : 'Under a tight high-volume budget the gate leans fail-open: a scoring timeout allows the transaction to avoid blocking real customers.',
+      ? '有预算余量时 gate 可以 fail closed（出错就 deny），不过卡组织授权惯例往往仍然 fail open，事后通过 chargeback 抓欺诈，因为错误拒付对好客户的伤害更大。'
+      : '在又紧又高量的预算下 gate 偏向 fail-open：打分超时就放行交易，以免挡住真实客户。',
   });
 
   return reasons.slice(0, 7);
@@ -702,8 +702,8 @@ function buildDecisions(
     streamingFeatures: {
       state: flags.needsStreaming ? 'needed' : 'not-yet',
       copy: flags.needsStreaming
-        ? 'Maintain windowed velocity counts in a stream processor and serve them from a fast feature store.'
-        : 'Compute features inline or in batch while volume and window are small.',
+        ? '在 stream processor 里维护按窗口的 velocity 计数，并从一个快速 feature store 提供出去。'
+        : '量和窗口都还小，feature 就 inline 或 batch 算。',
     },
     scoringBudget: {
       state:
@@ -714,42 +714,42 @@ function buildDecisions(
             : 'useful',
       copy:
         flags.budgetRemainingMs < 0
-          ? `The ${formatCount(
+          ? `${formatCount(
               flags.modelLatencyMs,
-            )} ms model does not fit the ${formatCount(
+            )} ms 的 model 塞不进 ${formatCount(
               flags.decisionLatencyMs,
-            )} ms budget; trade model size or precomputed features for latency.`
-          : `Score synchronously inside the ${formatCount(
+            )} ms 预算；拿 model 大小或预算好的 feature 去换 latency。`
+          : `在 ${formatCount(
               flags.decisionLatencyMs,
-            )} ms budget: fast feature lookup plus a bounded model call.`,
+            )} ms 预算内 synchronous 打分：快速 feature lookup 加一次有上界的 model 调用。`,
     },
     hybrid: {
       state: flags.needsModel ? 'needed' : 'useful',
       copy: flags.needsModel
-        ? 'Combine deterministic rules (hard blocks, explainable) with a model risk score at the decision gate.'
-        : 'Static rules alone cover the workload; a model is not justified yet.',
+        ? '在 decision gate 上把确定性 rule（hard block、可解释）和 model 的 risk score 结合起来。'
+        : 'static rule 单独就覆盖了这个工作负载；目前还撑不起一个 model。',
     },
     graph: {
       state: flags.needsGraph ? 'needed' : 'not-yet',
       copy: flags.needsGraph
-        ? `Link ${formatCount(
+        ? `连接 ${formatCount(
             flags.entitiesTracked,
-          )} entities to surface coordinated rings; precompute linking offline.`
-        : 'Graph features add cost and only pay off once coordinated fraud rings appear.',
+          )} 个 entity 来浮现有组织的 ring；把 linking offline 预算好。`
+        : 'graph features 会增加成本，只有当有组织的 fraud ring 出现时才划算。',
     },
     feedbackLoop: {
       state: flags.needsFeedback ? 'needed' : 'not-yet',
       copy: flags.needsFeedback
-        ? `Collect confirmed outcomes (labels in ${formatWindow(
+        ? `收集确认的结果（label 在 ${formatWindow(
             flags.feedbackDelaySeconds,
-          )}) and retrain regularly to track drift.`
-        : 'No retraining loop yet; static rules do not learn from outcomes.',
+          )} 内回来），并定期 retrain 来跟上 drift。`
+        : '还没有 retraining loop；static rule 不会从结果里学习。',
     },
     failPolicy: {
       state: flags.failClosed ? 'useful' : 'tradeoff',
       copy: flags.failClosed
-        ? 'Could fail closed (deny or route to review on a scoring error), but card-auth convention usually fails open and recovers via chargebacks, since false declines cost more than the rare missed fraud.'
-        : 'Fail open under load: a scoring timeout allows the transaction so the budget never blocks real customers, accepting some risk.',
+        ? '可以 fail closed（打分出错就 deny 或转人工 review），但卡组织授权惯例通常 fail open，靠 chargeback 善后，因为错误拒付的代价比偶尔漏掉一笔欺诈更大。'
+        : '负载下 fail open：打分超时就放行交易，让预算永远不会挡住真实客户，代价是接受一点风险。',
     },
   };
 }
@@ -772,34 +772,34 @@ function chooseArchitectureTitle(flags: ArchitectureFlags): string {
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (!flags.needsModel && !flags.needsStreaming) {
-    return 'A handful of deterministic rules on one box decide each transaction. No model or streaming infrastructure is justified yet.';
+    return '一台机器上的几条确定性 rule 决定每一笔交易。目前还撑不起 model 或 streaming 基础设施。';
   }
   if (flags.needsGraph) {
-    return 'Streaming aggregates feed a fast feature store, graph features link entities to expose rings, and a small model scores synchronously while a feedback loop retrains against drift.';
+    return 'streaming 聚合喂给一个快速 feature store，graph features 把 entity 连起来暴露 ring，一个小 model synchronous 打分，同时一个 feedback loop 针对 drift 做 retrain。';
   }
   if (flags.needsFeedback) {
-    return 'A stream processor maintains velocity features, a hybrid of rules and a small model scores within the budget, and confirmed labels flow back to retrain the model.';
+    return '一个 stream processor 维护 velocity feature，rule 和一个小 model 的混合在预算内打分，确认的 label 回流来 retrain 这个 model。';
   }
   if (flags.needsStreaming) {
-    return 'Velocity counts are kept in a stream processor and a fast feature store so the scorer reads features and runs a bounded model synchronously under the budget.';
+    return 'velocity 计数被保存在 stream processor 和一个快速 feature store 里，于是 scorer 读 feature 并在预算内 synchronous 跑一个有上界的 model。';
   }
-  return 'A model scores each transaction, but features are precomputed in batch, so fast-moving velocity fraud can slip through.';
+  return '一个 model 给每笔交易打分，但 feature 是 batch 预算好的，所以快速移动的 velocity 欺诈可能溜过去。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {
   if (!flags.needsModel && !flags.needsStreaming) {
-    return 'Txn -> rules engine -> decision';
+    return 'Txn -> rules engine -> 决策';
   }
   if (flags.needsGraph) {
-    return 'Txn -> features + graph -> rules + model -> decision -> retrain';
+    return 'Txn -> features + graph -> rules + model -> 决策 -> retrain';
   }
   if (flags.needsFeedback) {
-    return 'Txn -> stream features -> rules + model -> decision -> labels -> retrain';
+    return 'Txn -> stream features -> rules + model -> 决策 -> labels -> retrain';
   }
   if (flags.needsStreaming) {
-    return 'Txn -> stream features -> rules + model -> decision';
+    return 'Txn -> stream features -> rules + model -> 决策';
   }
-  return 'Txn -> batch features -> model -> decision';
+  return 'Txn -> batch features -> model -> 决策';
 }
 
 function numericValue(workload: WorkloadValues, key: string): number {
@@ -810,15 +810,15 @@ function numericValue(workload: WorkloadValues, key: string): number {
 function formatWindow(seconds: number): string {
   if (seconds >= 86_400) {
     const days = seconds / 86_400;
-    return `${days % 1 === 0 ? days : days.toFixed(1)} ${Math.round(days) === 1 ? 'day' : 'days'}`;
+    return `${days % 1 === 0 ? days : days.toFixed(1)} 天`;
   }
   if (seconds >= 3600) {
     const hours = seconds / 3600;
-    return `${hours % 1 === 0 ? hours : hours.toFixed(1)} ${Math.round(hours) === 1 ? 'hour' : 'hours'}`;
+    return `${hours % 1 === 0 ? hours : hours.toFixed(1)} 小时`;
   }
   if (seconds >= 60) {
     const minutes = seconds / 60;
-    return `${minutes % 1 === 0 ? minutes : minutes.toFixed(1)} min`;
+    return `${minutes % 1 === 0 ? minutes : minutes.toFixed(1)} 分`;
   }
-  return `${Math.round(seconds)} sec`;
+  return `${Math.round(seconds)} 秒`;
 }

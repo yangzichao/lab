@@ -1,11 +1,16 @@
 import type { WorkloadControlDefinition } from './lab-types';
+import { defaultSystemDesignLocale, type SystemDesignLocale } from './system-design-i18n';
 
-export function formatControlValue(control: WorkloadControlDefinition, value: number): string {
+export function formatControlValue(
+  control: WorkloadControlDefinition,
+  value: number,
+  locale: SystemDesignLocale = defaultSystemDesignLocale,
+): string {
   switch (control.format) {
     case 'count':
       return `${formatCount(value)}${control.unit ? ` ${formatCountUnit(control.unit, value)}` : ''}`;
     case 'duration-seconds':
-      return formatDuration(value);
+      return formatDuration(value, locale);
     case 'kilobytes':
       return formatKilobytes(value);
     case 'milliseconds':
@@ -54,21 +59,30 @@ export function formatCount(value: number): string {
   return `${Math.round(value)}`;
 }
 
-export function formatDuration(seconds: number): string {
+export function formatDuration(
+  seconds: number,
+  locale: SystemDesignLocale = defaultSystemDesignLocale,
+): string {
   if (seconds <= 0) {
-    return '0 sec';
+    return locale === 'en' ? '0 sec' : '0 秒';
   }
   if (seconds >= 86_400) {
-    return `${Math.round(seconds / 86_400)} days`;
+    return locale === 'en'
+      ? `${Math.round(seconds / 86_400)} days`
+      : `${Math.round(seconds / 86_400)} 天`;
   }
   if (seconds >= 3600) {
-    return `${Math.round(seconds / 3600)} hr`;
+    return locale === 'en'
+      ? `${Math.round(seconds / 3600)} hr`
+      : `${Math.round(seconds / 3600)} 小时`;
   }
   if (seconds >= 60) {
-    return `${Math.round(seconds / 60)} min`;
+    return locale === 'en'
+      ? `${Math.round(seconds / 60)} min`
+      : `${Math.round(seconds / 60)} 分`;
   }
   if (seconds >= 1) {
-    return `${Math.round(seconds)} sec`;
+    return locale === 'en' ? `${Math.round(seconds)} sec` : `${Math.round(seconds)} 秒`;
   }
   return `${Math.round(seconds * 1000)} ms`;
 }

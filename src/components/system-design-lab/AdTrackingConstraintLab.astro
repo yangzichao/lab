@@ -4,8 +4,8 @@ import './ad-tracking-constraint-lab.css';
 const workloadControls = [
   {
     id: 'eventsPerSecond',
-    label: 'Normal event rate',
-    help: 'Clicks and impressions arriving each second before traffic spikes.',
+    label: '常态事件速率',
+    help: '流量尖峰前，每秒到达的 click 和 impression。',
     min: 50,
     max: 500_000,
     defaultValue: 300,
@@ -14,8 +14,8 @@ const workloadControls = [
   },
   {
     id: 'peakMultiplier',
-    label: 'Peak multiplier',
-    help: 'Launches, auctions, bot bursts, and retry storms compress traffic into short windows.',
+    label: '峰值倍数',
+    help: '上线、竞价、bot 突发和 retry 风暴会把流量压进很短的时间窗里。',
     min: 1,
     max: 30,
     defaultValue: 1.5,
@@ -24,8 +24,8 @@ const workloadControls = [
   },
   {
     id: 'reportingQueriesPerMinute',
-    label: 'Reporting queries',
-    help: 'Dashboards, advertiser reports, billing checks, and analyst queries.',
+    label: '报表查询',
+    help: 'dashboard、广告主报表、billing 核对和分析师查询。',
     min: 1,
     max: 5_000,
     defaultValue: 12,
@@ -34,18 +34,18 @@ const workloadControls = [
   },
   {
     id: 'retentionDays',
-    label: 'Raw retention',
-    help: 'How long raw events must stay queryable or replayable.',
+    label: '原始数据保留',
+    help: '原始 event 需要保持可查询或可 replay 多久。',
     min: 1,
     max: 365,
     defaultValue: 7,
     scale: 'linear',
-    unit: 'days',
+    unit: '天',
   },
   {
     id: 'hotCampaignShare',
-    label: 'Hottest campaign share',
-    help: 'Traffic owned by the largest campaign, useful for seeing hot partition risk.',
+    label: '最热 campaign 占比',
+    help: '最大 campaign 占的流量份额，用来观察 hot partition 风险。',
     min: 1,
     max: 80,
     defaultValue: 5,
@@ -54,8 +54,8 @@ const workloadControls = [
   },
   {
     id: 'freshnessSeconds',
-    label: 'Metric freshness target',
-    help: 'How quickly counters, billing candidates, or risk signals should update.',
+    label: '指标新鲜度目标',
+    help: 'counter、billing 候选值或风控信号需要多快更新。',
     min: 5,
     max: 3600,
     defaultValue: 900,
@@ -64,8 +64,8 @@ const workloadControls = [
   },
   {
     id: 'duplicatePercent',
-    label: 'Retry / duplicate rate',
-    help: 'Client retries and collector retries create repeated events that need idempotency.',
+    label: 'retry / 重复率',
+    help: '客户端 retry 和 collector retry 会产生重复 event，需要 idempotency 处理。',
     min: 0,
     max: 20,
     defaultValue: 0.4,
@@ -78,105 +78,104 @@ const scenarios = [
   {
     id: 'demo',
     step: '01',
-    title: 'Demo traffic',
-    summary: 'One collector and one database are still enough.',
+    title: 'Demo 流量',
+    summary: '一个 collector 加一个 database 还够用。',
   },
   {
     id: 'growth',
     step: '02',
-    title: 'Product grows',
-    summary: 'The first pressure is host capacity, so collectors scale out.',
+    title: '产品增长',
+    summary: '第一个压力是单机容量，于是 collector 横向扩展。',
   },
   {
     id: 'db-pressure',
     step: '03',
-    title: 'Reports hit writes',
-    summary: 'Shared database contention forces an append-first pipeline.',
+    title: '报表冲击写入',
+    summary: '共享 database 的争用逼出一条「先 append」的 pipeline。',
   },
   {
     id: 'launch-spike',
     step: '04',
-    title: 'Launch spike',
-    summary: 'Peak traffic and freshness make partitioning and streaming visible.',
+    title: '上线尖峰',
+    summary: '峰值流量和新鲜度要求让 partitioning 和 streaming 变得必要。',
   },
   {
     id: 'billing-realtime',
     step: '05',
-    title: 'Billing realtime',
-    summary: 'Audit, replay, hot partitions, and serving views are all required.',
+    title: 'Billing 实时',
+    summary: '审计、replay、hot partition 和 serving view 全都要上。',
   },
 ];
 
 const bottleneckMeters = [
-  ['singleHost', 'Single host ingestion'],
-  ['sharedDatabase', 'Shared DB pressure'],
-  ['storage', 'Raw storage'],
+  ['singleHost', '单机 ingest'],
+  ['sharedDatabase', '共享 DB 压力'],
+  ['storage', '原始数据存储'],
   ['hotPartition', 'Hot partition'],
-  ['freshness', 'Freshness pressure'],
+  ['freshness', '新鲜度压力'],
 ];
 
 const decisionCards = [
-  ['multiHost', 'Multi host collectors'],
-  ['sharedDatabase', 'Shared database'],
-  ['eventLog', 'Durable event log'],
+  ['multiHost', '多机 collector'],
+  ['sharedDatabase', '共享 database'],
+  ['eventLog', '持久化 event log'],
   ['partitioning', 'Partitioning'],
-  ['streaming', 'Stream aggregation'],
-  ['servingStores', 'Serving stores'],
+  ['streaming', 'Stream 聚合'],
+  ['servingStores', 'Serving store'],
 ];
 
 const sourceBackedRules = [
   {
-    title: 'Partitions scale throughput, but ordering is partition-local',
+    title: 'Partition 能扩 throughput，但 ordering 只在 partition 内成立',
     source: 'Apache Kafka docs',
     url: 'https://kafka.apache.org/documentation/',
     summary:
-      'Kafka topics are split into partitions across brokers; consumers see ordered events within a topic-partition. This is why the lab treats partition key as both a scaling tool and an ordering tradeoff.',
+      'Kafka 的 topic 会切成多个 partition 分布在 broker 上；consumer 只在单个 topic-partition 内看到有序的 event。这就是本 lab 把 partition key 既当扩展手段、又当 ordering 取舍的原因。',
   },
   {
-    title: 'Durable queues and streams decouple failure and back pressure',
+    title: '持久化 queue 和 stream 把故障与 back pressure 解耦',
     source: 'AWS Well-Architected',
     url: 'https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_prevent_interaction_failure_loosely_coupled_system.html',
     summary:
-      'Queueing and streaming systems isolate producers from consumers and let components scale or fail independently. This supports the event-log step when direct writes start coupling ingestion to reports.',
+      'queue 和 streaming 系统把 producer 和 consumer 隔开，让各组件独立扩展或独立失败。当直写开始把 ingest 和报表耦在一起时，这支撑了引入 event log 这一步。',
   },
   {
-    title: 'Realtime windows need event time, watermarks, and late-event policy',
+    title: '实时 window 需要 event time、watermark 和 late-event 策略',
     source: 'Apache Flink docs',
     url: 'https://nightlies.apache.org/flink/flink-docs-stable/docs/concepts/time/',
     summary:
-      'Flink uses watermarks to track event-time progress, and late or out-of-order events force latency/correctness tradeoffs. This backs the streaming and freshness parts of the lab.',
+      'Flink 用 watermark 追踪 event-time 的进度，迟到或乱序的 event 会逼出 latency 与正确性之间的取舍。这支撑了本 lab 里 streaming 和新鲜度的部分。',
   },
   {
-    title: 'Realtime analytics is an event-stream serving problem',
+    title: '实时 analytics 本质是 event-stream 的 serving 问题',
     source: 'ClickHouse docs',
     url: 'https://clickhouse.com/docs/cloud/get-started/cloud/use-cases/real-time-analytics',
     summary:
-      'Realtime analytics systems derive insights from event streams soon after generation. This is why dashboard/risk/billing views should split away from the raw ingest path as read pressure grows.',
+      '实时 analytics 系统在 event 产生后很快就从 event stream 里提炼洞察。这就是随着读压力上升，dashboard/risk/billing view 应该从原始 ingest 路径里拆出来的原因。',
   },
 ];
 
 const teachingAssumptions = [
-  'Capacity numbers in the sliders are teaching thresholds, not production benchmarks.',
-  'Real capacity depends on payload size, batching, replication, acks, indexes, query shape, disk, network, and operational SLOs.',
-  'The lab is strongest for interview reasoning: show the simplest design first, then name the exact constraint that forces the next component.',
+  '滑块里的容量数字是教学阈值，不是生产环境的 benchmark。',
+  '真实容量取决于 payload 大小、batching、replication、acks、index、查询形态、磁盘、网络以及运维 SLO。',
+  '这个 lab 最适合用来做面试推演：先给出最简单的设计，再点名那个逼你加下一个组件的具体约束。',
 ];
 ---
 
 <section class="system-lab" id="ad-tracking" data-system-design-lab>
   <div class="system-lab__intro">
-    <p class="system-lab__eyebrow">System Design Lab</p>
-    <h1 class="system-lab__title">Ad tracking architecture changes only when constraints force it.</h1>
+    <p class="system-lab__eyebrow">系统设计 Lab</p>
+    <h1 class="system-lab__title">Ad tracking 架构只在约束逼它变时才变。</h1>
     <p class="system-lab__summary">
-      Start with the simplest click/impression collector. Use the scenarios for a normal evolution
-      path, then adjust the workload to see exactly when one host, one shared database, or one
-      partition stops being a good answer.
+      从最简单的 click/impression collector 开始。用这些 scenario 走一条常规的演化路径，再调
+      workload，看清楚单机、单个共享 database、或单个 partition 究竟在什么时候不再是好答案。
     </p>
   </div>
 
-  <section class="system-lab__scenarios" aria-label="Normal architecture evolution scenarios">
+  <section class="system-lab__scenarios" aria-label="常规架构演化 scenario">
     <div class="system-lab__scenarios-header">
-      <h2>Normal evolution scenarios</h2>
-      <p>Click left to right for the intended demo path. Each card changes the workload inputs.</p>
+      <h2>常规演化 scenario</h2>
+      <p>从左到右点，就是设计好的 demo 路径。每张卡片都会改 workload 输入。</p>
     </div>
     <div class="system-lab__scenario-grid">
       {
@@ -198,10 +197,10 @@ const teachingAssumptions = [
   </section>
 
   <div class="system-lab__workspace">
-    <form class="system-lab__controls" aria-label="Workload controls">
+    <form class="system-lab__controls" aria-label="Workload 控制项">
       <div class="system-lab__controls-header">
         <h2>Workload</h2>
-        <p>These are inputs, not preset architecture stages.</p>
+        <p>这些是输入，不是预设好的架构阶段。</p>
       </div>
 
       {
@@ -232,24 +231,24 @@ const teachingAssumptions = [
       <label class="system-lab__toggle">
         <input type="checkbox" data-control="billingGrade" />
         <span>
-          <strong>Billing-grade durability</strong>
-          <small>Every accepted event must be replayable and auditable.</small>
+          <strong>Billing-grade 持久性</strong>
+          <small>每个被接收的 event 都必须可 replay、可审计。</small>
         </span>
       </label>
     </form>
 
     <div class="system-lab__main">
       <div class="system-lab__verdict">
-        <p class="system-lab__eyebrow">Recommended shape</p>
-        <h2 data-architecture-title>Single host collector</h2>
+        <p class="system-lab__eyebrow">推荐形态</p>
+        <h2 data-architecture-title>单机 collector</h2>
         <p data-architecture-summary>
-          Keep ingestion, validation, and storage together while the workload fits one machine.
+          当 workload 还能塞进一台机器时，把 ingest、校验和存储放在一起。
         </p>
       </div>
 
-      <div class="system-lab__diagram" aria-label="Calculated architecture diagram">
+      <div class="system-lab__diagram" aria-label="计算得出的架构图">
         <div class="system-lab__diagram-caption">
-          <span>Current architecture path</span>
+          <span>当前架构路径</span>
           <strong data-architecture-path>Ad events -> single collector -> shared database</strong>
         </div>
 
@@ -259,9 +258,9 @@ const teachingAssumptions = [
           role="img"
           aria-labelledby="ad-tracking-sketch-title ad-tracking-sketch-description"
         >
-          <title id="ad-tracking-sketch-title">Ad click tracking architecture diagram</title>
+          <title id="ad-tracking-sketch-title">Ad click tracking 架构图</title>
           <desc id="ad-tracking-sketch-description">
-            Whiteboard-style architecture diagram for an ad click and impression tracking pipeline.
+            一条 ad click 与 impression 追踪 pipeline 的白板风格架构图。
           </desc>
 
           <defs>
@@ -292,11 +291,11 @@ const teachingAssumptions = [
           </g>
           <g class="system-lab__sketch-zone system-lab__sketch-zone--processing">
             <rect x="660" y="70" width="165" height="385" rx="10"></rect>
-            <text x="678" y="100">Processing</text>
+            <text x="678" y="100">处理</text>
           </g>
           <g class="system-lab__sketch-zone system-lab__sketch-zone--storage">
             <rect x="865" y="45" width="155" height="440" rx="10"></rect>
-            <text x="883" y="75">Storage + serving</text>
+            <text x="883" y="75">存储 + serving</text>
           </g>
 
           <g class="system-lab__sketch-flows">
@@ -324,21 +323,21 @@ const teachingAssumptions = [
           <g class="system-lab__sketch-node" data-node="loadBalancer" transform="translate(225 120)">
             <rect width="150" height="70" rx="10"></rect>
             <text x="18" y="31">Load balancer</text>
-            <text x="18" y="52" class="system-lab__sketch-small">health + fanout</text>
+            <text x="18" y="52" class="system-lab__sketch-small">健康检查 + fanout</text>
           </g>
 
           <g class="system-lab__sketch-node" data-node="collectors" transform="translate(225 260)">
             <rect width="150" height="92" rx="10"></rect>
-            <text x="18" y="35" data-node-title="collectors">Single collector</text>
+            <text x="18" y="35" data-node-title="collectors">单机 collector</text>
             <text x="18" y="58" class="system-lab__sketch-small" data-node-copy="collectors">
-              validate + write
+              校验 + 写入
             </text>
           </g>
 
           <g class="system-lab__sketch-node" data-node="eventLog" transform="translate(450 180)">
             <rect width="140" height="86" rx="10"></rect>
             <text x="18" y="34">Event log</text>
-            <text x="18" y="57" class="system-lab__sketch-small">buffer + replay</text>
+            <text x="18" y="57" class="system-lab__sketch-small">缓冲 + replay</text>
           </g>
 
           <g class="system-lab__sketch-node" data-node="partitioning" transform="translate(450 330)">
@@ -359,7 +358,7 @@ const teachingAssumptions = [
             <rect width="120" height="80" rx="10"></rect>
             <text x="16" y="32">Primary DB</text>
             <text x="16" y="54" class="system-lab__sketch-small" data-node-copy="sharedDatabase">
-              raw + reports
+              原始 + 报表
             </text>
           </g>
 
@@ -373,16 +372,16 @@ const teachingAssumptions = [
           <g class="system-lab__sketch-node" data-node="warehouse" transform="translate(880 400)">
             <rect width="120" height="78" rx="10"></rect>
             <text x="16" y="32">Warehouse</text>
-            <text x="16" y="54" class="system-lab__sketch-small">offline truth</text>
+            <text x="16" y="54" class="system-lab__sketch-small">离线真值</text>
           </g>
         </svg>
 
-        <div class="system-lab__mobile-flow" aria-label="Calculated mobile architecture flow">
+        <div class="system-lab__mobile-flow" aria-label="计算得出的移动端架构流程">
           <div class="system-lab__mobile-stage">
             <span>Clients</span>
             <div class="system-lab__mobile-node" data-mobile-node="source">
               <strong>Client</strong>
-              <small>ad server emits click/impression events</small>
+              <small>ad server 发出 click/impression event</small>
             </div>
           </div>
 
@@ -390,47 +389,47 @@ const teachingAssumptions = [
             <span>Edge / API</span>
             <div class="system-lab__mobile-node" data-mobile-node="loadBalancer">
               <strong>Load balancer</strong>
-              <small>fanout and health checks once hosts scale out</small>
+              <small>主机扩展后做 fanout 和健康检查</small>
             </div>
             <div class="system-lab__mobile-node" data-mobile-node="collectors">
-              <strong>Collector service</strong>
-              <small>validate, dedupe keys, and accept events</small>
+              <strong>Collector 服务</strong>
+              <small>校验、dedupe key，接收 event</small>
             </div>
           </div>
 
           <div class="system-lab__mobile-stage">
             <span>Event backbone</span>
             <div class="system-lab__mobile-node" data-mobile-node="eventLog">
-              <strong>Durable event log</strong>
-              <small>buffer, replay, and decouple consumers</small>
+              <strong>持久化 event log</strong>
+              <small>缓冲、replay，并让 consumer 解耦</small>
             </div>
             <div class="system-lab__mobile-node" data-mobile-node="partitioning">
               <strong>Partition key</strong>
-              <small>campaign or bucket decides ordering and hot spots</small>
+              <small>按 campaign 还是 bucket 决定 ordering 和热点</small>
             </div>
           </div>
 
           <div class="system-lab__mobile-stage">
-            <span>Processing</span>
+            <span>处理</span>
             <div class="system-lab__mobile-node" data-mobile-node="streaming">
-              <strong>Stream workers</strong>
-              <small>windows, dedupe, counters, and late-event policy</small>
+              <strong>Stream worker</strong>
+              <small>window、dedupe、counter，以及 late-event 策略</small>
             </div>
           </div>
 
           <div class="system-lab__mobile-stage">
-            <span>Storage + serving</span>
+            <span>存储 + serving</span>
             <div class="system-lab__mobile-node" data-mobile-node="sharedDatabase">
               <strong>Primary DB</strong>
-              <small>simple raw store and reports while load is small</small>
+              <small>负载还小时，简单存原始数据和报表</small>
             </div>
             <div class="system-lab__mobile-node" data-mobile-node="servingStores">
-              <strong>Serving stores</strong>
-              <small>OLAP, billing, dashboard, and risk views</small>
+              <strong>Serving store</strong>
+              <small>OLAP、billing、dashboard 和 risk view</small>
             </div>
             <div class="system-lab__mobile-node" data-mobile-node="warehouse">
               <strong>Warehouse</strong>
-              <small>offline truth, retention, audit, and replay checks</small>
+              <small>离线真值、保留、审计和 replay 核对</small>
             </div>
           </div>
         </div>
@@ -438,7 +437,7 @@ const teachingAssumptions = [
 
       <div class="system-lab__analysis-grid">
         <section class="system-lab__panel">
-          <h3>Bottlenecks</h3>
+          <h3>瓶颈</h3>
           <div class="system-lab__meters">
             {
               bottleneckMeters.map(([meterId, meterLabel]) => (
@@ -458,13 +457,13 @@ const teachingAssumptions = [
         </section>
 
         <section class="system-lab__panel">
-          <h3>Why this changes</h3>
+          <h3>为什么会变</h3>
           <ul class="system-lab__reasons" data-reasons></ul>
         </section>
       </div>
 
       <section class="system-lab__panel">
-        <h3>Decision tradeoffs</h3>
+        <h3>决策取舍</h3>
         <div class="system-lab__decision-grid">
           {
             decisionCards.map(([cardId, cardTitle]) => (
@@ -479,10 +478,9 @@ const teachingAssumptions = [
 
       <section class="system-lab__panel system-lab__knowledge">
         <div class="system-lab__knowledge-header">
-          <h3>Source-backed rules</h3>
+          <h3>有出处的规则</h3>
           <p>
-            These are the durable system-design claims behind the model. The exact slider
-            thresholds are deliberately labeled as teaching assumptions.
+            这些是模型背后那些经得起推敲的系统设计结论。而滑块上具体的阈值，是被刻意标注成教学假设的。
           </p>
         </div>
 
@@ -490,7 +488,7 @@ const teachingAssumptions = [
           {
             sourceBackedRules.map((rule) => (
               <article class="system-lab__rule-card">
-                <span>Verified rule</span>
+                <span>已验证规则</span>
                 <h4>{rule.title}</h4>
                 <p>{rule.summary}</p>
                 <a href={rule.url} target="_blank" rel="noreferrer">
@@ -502,7 +500,7 @@ const teachingAssumptions = [
         </div>
 
         <div class="system-lab__assumptions">
-          <h4>Teaching assumptions</h4>
+          <h4>教学假设</h4>
           <ul>
             {teachingAssumptions.map((assumption) => <li>{assumption}</li>)}
           </ul>

@@ -9,51 +9,51 @@ const entry = findPhysicsLab('coupled-oscillators')!;
 <BaseLayout title={`${entry.title} — Lab`} description={entry.tagline}>
   <PhysicsLabShell entry={entry}>
     <Fragment slot="readouts">
-      <div class="plab__readout"><span>Beads</span><strong data-readout="count">6</strong></div>
-      <div class="plab__readout"><span>Excited mode</span><strong data-readout="mode">p = 1</strong></div>
-      <div class="plab__readout"><span>Frequency</span><strong data-readout="frequency">0.000 rad/s</strong></div>
-      <div class="plab__readout"><span>Total energy</span><strong data-readout="energy">0.000</strong></div>
+      <div class="plab__readout"><span>珠子数</span><strong data-readout="count">6</strong></div>
+      <div class="plab__readout"><span>激发模式</span><strong data-readout="mode">p = 1</strong></div>
+      <div class="plab__readout"><span>频率</span><strong data-readout="frequency">0.000 rad/s</strong></div>
+      <div class="plab__readout"><span>总能量</span><strong data-readout="energy">0.000</strong></div>
     </Fragment>
 
-    <form class="plab__panel" slot="controls" aria-label="Coupled oscillators controls">
+    <form class="plab__panel" slot="controls" aria-label="耦合振子控制">
       <div class="plab__panel-head">
-        <p>Controls</p>
+        <p>控制</p>
         <h2>Coupled Oscillators</h2>
       </div>
 
       <div class="plab__actions">
         <button class="plab__button is-primary" type="button" data-action="toggle">
-          <i class="ph ph-pause" aria-hidden="true"></i><span>Pause</span>
+          <i class="ph ph-pause" aria-hidden="true"></i><span>暂停</span>
         </button>
         <button class="plab__button" type="button" data-action="reset">
-          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>Reset</span>
+          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>重置</span>
         </button>
       </div>
 
       <div class="plab__presets">
-        <button class="plab__preset" type="button" data-preset="mode1">Mode 1</button>
-        <button class="plab__preset" type="button" data-preset="mode2">Mode 2</button>
-        <button class="plab__preset" type="button" data-preset="mode3">Mode 3</button>
-        <button class="plab__preset" type="button" data-preset="beats">Beats</button>
+        <button class="plab__preset" type="button" data-preset="mode1">模式 1</button>
+        <button class="plab__preset" type="button" data-preset="mode2">模式 2</button>
+        <button class="plab__preset" type="button" data-preset="mode3">模式 3</button>
+        <button class="plab__preset" type="button" data-preset="beats">拍频</button>
       </div>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showEnvelopes" checked />
-        <span><strong>Show mode envelopes</strong><small>Dashed sine shape sin(pπx/(N+1)) of each excited mode.</small></span>
+        <span><strong>显示模式包络</strong><small>各激发 normal mode 的虚线正弦形 sin(pπx/(N+1))。</small></span>
       </label>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showSprings" checked />
-        <span><strong>Show springs</strong><small>Coils between neighbours and the walls.</small></span>
+        <span><strong>显示弹簧</strong><small>相邻珠子之间以及与墙之间的弹簧圈。</small></span>
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Beads N</span><output data-output="count">6</output></span>
+        <span class="plab__field-label"><span>珠子数 N</span><output data-output="count">6</output></span>
         <input type="range" min="3" max="12" step="1" value="6" data-control="count" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Speed</span><output data-output="speed">1.00×</output></span>
+        <span class="plab__field-label"><span>速度</span><output data-output="speed">1.00×</output></span>
         <input type="range" min="0.2" max="3" step="0.1" value="1" data-control="speed" />
       </label>
     </form>

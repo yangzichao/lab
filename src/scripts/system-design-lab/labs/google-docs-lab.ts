@@ -21,27 +21,27 @@ const operationBytes = 240;
 
 export const googleDocsLabDefinition: SystemDesignLabDefinition = {
   id: 'google-docs',
-  eyebrow: 'System Design Lab',
-  title: 'Google Docs changes shape when edit ordering becomes the constraint.',
+  eyebrow: '系统设计 Lab',
+  title: '当 edit ordering 成为约束时，Google Docs 的设计就会改变形态。',
   summary:
-    'Start with one editable document. Increase collaborators, offline time, and reader fanout to see why the design needs WebSocket routing, a document room, OT/CRDT, an operation log, snapshots, and a separate presence path.',
+    '从一篇可编辑的文档开始。逐步增加协作者、offline 时长和读者 fanout，看看为什么这套设计需要 WebSocket 路由、一个 document room、OT/CRDT、一条 operation log、snapshot，以及一条独立的 presence 路径。',
   articleHref: '/blog/system-design/google-docs/',
   controls: [
     {
       id: 'concurrentEditors',
-      label: 'Concurrent editors',
-      help: 'People actively editing the same document, not total document viewers.',
+      label: '并发编辑者',
+      help: '正在同时编辑同一篇文档的人数，不是文档的总浏览者。',
       min: 1,
       max: 2_000,
       defaultValue: 4,
       scale: 'log',
-      unit: 'editors',
+      unit: '人',
       format: 'count',
     },
     {
       id: 'operationsPerEditorSecond',
-      label: 'Edit rate per editor',
-      help: 'Small operations such as insert, delete, format, or composition batches.',
+      label: '每位编辑者的编辑速率',
+      help: '小型 operation，比如 insert、delete、format，或者输入法 composition 批次。',
       min: 0.2,
       max: 10,
       defaultValue: 2,
@@ -50,8 +50,8 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'documentSizeKilobytes',
-      label: 'Document size',
-      help: 'The current snapshot size; operation history can be much larger.',
+      label: '文档大小',
+      help: '当前 snapshot 的大小；operation 历史可能比它大得多。',
       min: 4,
       max: 50_000,
       defaultValue: 100,
@@ -60,8 +60,8 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'offlineSeconds',
-      label: 'Offline edit window',
-      help: 'How long clients may keep editing locally before reconnecting.',
+      label: 'Offline 编辑窗口',
+      help: '客户端在重连之前可以在本地持续编辑多久。',
       min: 0,
       max: 86_400,
       defaultValue: 300,
@@ -70,8 +70,8 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'presenceUpdatesSecond',
-      label: 'Presence update rate',
-      help: 'Cursor, selection, and typing indicators per active editor.',
+      label: 'Presence 更新速率',
+      help: '每位活跃编辑者的光标、选区和正在输入指示。',
       min: 0,
       max: 20,
       defaultValue: 2,
@@ -80,21 +80,21 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'viewerFanout',
-      label: 'Passive viewers',
-      help: 'Users watching the document without actively editing; important for hot documents.',
+      label: '被动浏览者',
+      help: '只看文档、不主动编辑的用户；对 hot document 很关键。',
       min: 1,
       max: 100_000,
       defaultValue: 8,
       scale: 'log',
-      unit: 'viewers',
+      unit: '人',
       format: 'count',
     },
   ],
   toggles: [
     {
       id: 'durableAck',
-      label: 'Ack after durable append',
-      help: 'The server only confirms an edit after the operation is in a recoverable log.',
+      label: 'durable append 后再 ack',
+      help: '只有当 operation 已写入可恢复的 log 后，server 才确认这次编辑。',
       defaultValue: true,
     },
   ],
@@ -102,8 +102,8 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'solo',
       step: '01',
-      title: 'Solo draft',
-      summary: 'Saving the latest document body is still enough.',
+      title: '单人草稿',
+      summary: '只保存最新的文档正文还够用。',
       values: {
         concurrentEditors: 1,
         operationsPerEditorSecond: 0.5,
@@ -117,8 +117,8 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'team',
       step: '02',
-      title: 'Small team',
-      summary: 'WebSocket routing and one document owner become useful.',
+      title: '小团队',
+      summary: 'WebSocket 路由和单一 document owner 开始有用了。',
       values: {
         concurrentEditors: 4,
         operationsPerEditorSecond: 2,
@@ -132,8 +132,8 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'offline',
       step: '03',
-      title: 'Offline edits',
-      summary: 'Base versions drift, so transformation or merge logic matters.',
+      title: 'Offline 编辑',
+      summary: 'base version 漂移了，于是 transformation 或 merge 逻辑变得重要。',
       values: {
         concurrentEditors: 24,
         operationsPerEditorSecond: 3,
@@ -147,8 +147,8 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'public-doc',
       step: '04',
-      title: 'Public document',
-      summary: 'Presence and broadcast fanout should not overload the edit room.',
+      title: '公开文档',
+      summary: 'presence 和 broadcast fanout 不该把 edit room 压垮。',
       values: {
         concurrentEditors: 220,
         operationsPerEditorSecond: 2,
@@ -163,7 +163,7 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
       id: 'hot-doc',
       step: '05',
       title: 'Hot document',
-      summary: 'One room is still the ordering point, but reads and presence need fanout tiers.',
+      summary: '一个 room 仍是 ordering point，但读取和 presence 需要 fanout 层。',
       values: {
         concurrentEditors: 900,
         operationsPerEditorSecond: 4,
@@ -176,16 +176,16 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: {
-    title: 'Google Docs collaborative editing architecture diagram',
+    title: 'Google Docs 协同编辑架构图',
     description:
-      'Whiteboard-style architecture diagram for real-time document collaboration with room ordering, operation transform, logs, snapshots, and presence fanout.',
+      '白板风格的架构图，展示实时文档协作中的 room ordering、operation transform、log、snapshot 和 presence fanout。',
     viewBox: '0 0 1040 560',
     zones: [
-      { id: 'clients', label: 'Clients', x: 20, y: 65, width: 150, height: 370, variant: 'clients' },
-      { id: 'edge', label: 'Realtime edge', x: 210, y: 45, width: 180, height: 430, variant: 'edge' },
-      { id: 'coordination', label: 'Doc coordination', x: 430, y: 70, width: 205, height: 380, variant: 'backbone' },
-      { id: 'reliability', label: 'Recovery', x: 675, y: 70, width: 165, height: 380, variant: 'processing' },
-      { id: 'serving', label: 'Storage + fanout', x: 875, y: 45, width: 145, height: 430, variant: 'storage' },
+      { id: 'clients', label: '客户端', x: 20, y: 65, width: 150, height: 370, variant: 'clients' },
+      { id: 'edge', label: '实时 edge', x: 210, y: 45, width: 180, height: 430, variant: 'edge' },
+      { id: 'coordination', label: '文档协调', x: 430, y: 70, width: 205, height: 380, variant: 'backbone' },
+      { id: 'reliability', label: '恢复', x: 675, y: 70, width: 165, height: 380, variant: 'processing' },
+      { id: 'serving', label: '存储 + fanout', x: 875, y: 45, width: 145, height: 430, variant: 'storage' },
     ],
     flows: [
       { id: 'clientsToGateway', path: 'M155 238 C190 238 190 150 225 150', variant: 'primary' },
@@ -200,154 +200,154 @@ export const googleDocsLabDefinition: SystemDesignLabDefinition = {
       { id: 'directToStore', path: 'M155 255 C390 175 640 135 890 120', variant: 'direct' },
     ],
     nodes: [
-      { id: 'clients', title: 'Browsers', subtitle: 'local optimistic edits', kind: 'client', x: 48, y: 205, width: 108, height: 92 },
-      { id: 'gateway', title: 'WebSocket', subtitle: 'auth + doc routing', kind: 'lb', x: 225, y: 125, width: 140, height: 92 },
-      { id: 'room', title: 'Doc room', subtitle: 'authoritative order', kind: 'scheduler', x: 445, y: 165, width: 175, height: 96 },
-      { id: 'transform', title: 'OT / CRDT', subtitle: 'stale position repair', kind: 'service', x: 445, y: 315, width: 175, height: 88 },
-      { id: 'operationLog', title: 'Op log', subtitle: 'durable versions', kind: 'stream', x: 690, y: 175, width: 130, height: 88 },
-      { id: 'snapshot', title: 'Snapshotter', subtitle: 'fast recovery', kind: 'compute', x: 690, y: 330, width: 130, height: 82 },
-      { id: 'documentStore', title: 'Doc store', subtitle: 'metadata + blobs', kind: 'db', x: 890, y: 85, width: 112, height: 82 },
+      { id: 'clients', title: 'Browser', subtitle: '本地乐观编辑', kind: 'client', x: 48, y: 205, width: 108, height: 92 },
+      { id: 'gateway', title: 'WebSocket', subtitle: 'auth + 文档路由', kind: 'lb', x: 225, y: 125, width: 140, height: 92 },
+      { id: 'room', title: 'Doc room', subtitle: '权威顺序', kind: 'scheduler', x: 445, y: 165, width: 175, height: 96 },
+      { id: 'transform', title: 'OT / CRDT', subtitle: '修复过期位置', kind: 'service', x: 445, y: 315, width: 175, height: 88 },
+      { id: 'operationLog', title: 'Op log', subtitle: 'durable 版本', kind: 'stream', x: 690, y: 175, width: 130, height: 88 },
+      { id: 'snapshot', title: 'Snapshotter', subtitle: '快速恢复', kind: 'compute', x: 690, y: 330, width: 130, height: 82 },
+      { id: 'documentStore', title: 'Doc store', subtitle: 'metadata + blob', kind: 'db', x: 890, y: 85, width: 112, height: 82 },
       { id: 'presence', title: 'Presence', subtitle: 'best-effort fanout', kind: 'service', x: 890, y: 250, width: 112, height: 92 },
-      { id: 'archive', title: 'History', subtitle: 'versions + audit', kind: 'objectstore', x: 890, y: 375, width: 112, height: 82 },
+      { id: 'archive', title: '历史', subtitle: '版本 + audit', kind: 'objectstore', x: 890, y: 375, width: 112, height: 82 },
     ],
     mobileStages: [
       {
-        label: 'Clients',
-        nodes: [{ id: 'clients', title: 'Browsers', summary: 'optimistically apply local edits and send operations' }],
+        label: '客户端',
+        nodes: [{ id: 'clients', title: 'Browser', summary: '乐观地应用本地编辑并发送 operation' }],
       },
       {
-        label: 'Realtime edge',
-        nodes: [{ id: 'gateway', title: 'WebSocket gateway', summary: 'keeps connections and routes by document id' }],
+        label: '实时 edge',
+        nodes: [{ id: 'gateway', title: 'WebSocket gateway', summary: '维持连接，并按 document id 路由' }],
       },
       {
-        label: 'Document coordination',
+        label: '文档协调',
         nodes: [
-          { id: 'room', title: 'Document room', summary: 'serializes operations for one document' },
-          { id: 'transform', title: 'OT / CRDT', summary: 'repairs stale positions or merges offline edits' },
+          { id: 'room', title: 'Document room', summary: '为单篇文档的 operation 串行排序' },
+          { id: 'transform', title: 'OT / CRDT', summary: '修复过期位置，或合并 offline 编辑' },
         ],
       },
       {
-        label: 'Recovery',
+        label: '恢复',
         nodes: [
-          { id: 'operationLog', title: 'Operation log', summary: 'durable ordered history' },
-          { id: 'snapshot', title: 'Snapshotter', summary: 'periodic full-document checkpoints' },
+          { id: 'operationLog', title: 'Operation log', summary: 'durable 的有序历史' },
+          { id: 'snapshot', title: 'Snapshotter', summary: '定期做整篇文档的 checkpoint' },
         ],
       },
       {
-        label: 'Storage + fanout',
+        label: '存储 + fanout',
         nodes: [
-          { id: 'documentStore', title: 'Document store', summary: 'metadata, permissions, and current body blobs' },
-          { id: 'presence', title: 'Presence fanout', summary: 'ephemeral cursors and viewer broadcast' },
-          { id: 'archive', title: 'History', summary: 'version history and recovery data' },
+          { id: 'documentStore', title: 'Document store', summary: 'metadata、权限和当前正文 blob' },
+          { id: 'presence', title: 'Presence fanout', summary: '短暂的光标和浏览者 broadcast' },
+          { id: 'archive', title: '历史', summary: '版本历史和恢复数据' },
         ],
       },
     ],
   },
   meters: [
     { id: 'roomThroughput', label: 'Room throughput' },
-    { id: 'staleOperations', label: 'Stale-operation risk' },
+    { id: 'staleOperations', label: 'stale-operation 风险' },
     { id: 'operationLog', label: 'Operation log' },
     { id: 'presenceFanout', label: 'Presence fanout' },
-    { id: 'recoveryCost', label: 'Recovery cost' },
+    { id: 'recoveryCost', label: '恢复成本' },
   ],
   decisions: [
     { id: 'websocket', title: 'WebSocket edge' },
     { id: 'documentRoom', title: 'Document room' },
     { id: 'otOrCrdt', title: 'OT / CRDT' },
     { id: 'durableLog', title: 'Durable op log' },
-    { id: 'snapshot', title: 'Snapshots' },
-    { id: 'presence', title: 'Presence path' },
+    { id: 'snapshot', title: 'Snapshot' },
+    { id: 'presence', title: 'Presence 路径' },
   ],
   sourceBackedRules: [
     {
-      title: 'WebSocket fits low-latency bidirectional collaboration',
+      title: 'WebSocket 适合低延迟的双向协作',
       source: 'MDN Web Docs',
       url: 'https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API',
       summary:
-        'The browser and server both need to send messages without opening a fresh HTTP request for every edit or cursor update.',
+        'browser 和 server 都需要发消息，而不必为每次编辑或光标更新都开一个新的 HTTP 请求。',
     },
     {
-      title: 'One authority per file keeps collaboration ordering understandable',
+      title: '每个文件一个权威方，能让协作的 ordering 保持可理解',
       source: 'Figma Engineering',
       url: 'https://www.figma.com/blog/how-figmas-multiplayer-technology-works/',
       summary:
-        'Figma describes routing all clients for a file to a multiplayer server so the system has a clear coordination point for that file.',
+        'Figma 介绍了把同一个文件的所有客户端都路由到一台 multiplayer server，从而让系统对该文件有一个清晰的协调点。',
     },
     {
-      title: 'OT transforms operations generated against older versions',
+      title: 'OT 会对那些基于旧版本生成的 operation 做变换',
       source: 'TinyMCE',
       url: 'https://www.tiny.cloud/blog/real-time-collaboration-ot-vs-crdt/',
       summary:
-        'Operational Transformation adjusts incoming operations against changes that already happened, matching the stale-position risk in the lab.',
+        'operational transform 会把进来的 operation 相对已经发生的改动做调整，正好对应这个 lab 里的 stale-position 风险。',
     },
     {
-      title: 'CRDTs trade central transforms for mergeable data structures',
+      title: 'CRDT 用可合并的数据结构换掉了中心化的 transform',
       source: 'System Design Sandbox',
       url: 'https://www.systemdesignsandbox.com/learn/ot-vs-crdt',
       summary:
-        'CRDT-based editors attach stable ordering metadata so replicas can merge edits and converge even when operations arrive in different orders.',
+        '基于 CRDT 的编辑器会附带稳定的 ordering metadata，于是即便 operation 以不同顺序到达，各 replica 也能合并编辑并最终收敛。',
     },
   ],
   teachingAssumptions: [
-    'The thresholds are teaching thresholds, not Google production numbers.',
-    'One document room is the ordering point for edits; large read or presence fanout can be split away from that room.',
-    'Presence is modeled as best effort because cursor updates are ephemeral, unlike document operations.',
+    '这些阈值是教学用的阈值，不是 Google 的生产数字。',
+    '单个 document room 是编辑的 ordering point；大规模的读取或 presence fanout 可以从这个 room 拆出去。',
+    'presence 被建模成 best effort，因为光标更新是短暂的，跟文档 operation 不一样。',
   ],
   teachingWalkthrough: [
     {
       id: 'solo',
       step: '01',
-      focus: 'One author',
+      focus: '单一作者',
       scenarioId: 'solo',
       question:
-        'A solo writer edits one document. Do you need operational transforms, a WebSocket, or any ordering machinery yet?',
+        '一个人独自编辑一篇文档。现在你需要 operational transform、WebSocket，或者任何 ordering 机制吗？',
       reveal:
-        'No. With one author there are no concurrent edits to reconcile, so periodically saving the latest document body is correct. The collaboration machinery only earns its place once edits can conflict.',
-      takeaway: 'No concurrency means no ordering problem — just persist the latest version.',
+        '不需要。只有一个作者时，没有 concurrent edit 要去调和，所以定期保存最新的文档正文就是对的。只有当编辑可能冲突时，那套协作机制才值得引入。',
+      takeaway: '没有并发就没有 ordering 问题——只要持久化最新版本即可。',
     },
     {
       id: 'team',
       step: '02',
-      focus: 'A few editors',
+      focus: '几个编辑者',
       scenarioId: 'team',
       question:
-        'Now a small team edits together live. What is the first piece you add, and why does one document need a single owner?',
+        '现在一个小团队在实时一起编辑。你加的第一个组件是什么，为什么一篇文档需要单一的 owner？',
       reveal:
-        'A WebSocket layer pushes changes in real time, and each document gets one authoritative room that serializes operations into a single order — without one ordering point, two clients would diverge.',
-      takeaway: 'Live collaboration needs one authoritative ordering point per document.',
+        '一个 WebSocket 层实时推送改动，并且每篇文档都有一个权威 room，把 operation 串行成单一顺序——没有这个 ordering point，两个客户端就会发散。',
+      takeaway: '实时协作需要每篇文档一个权威的 ordering point。',
     },
     {
       id: 'offline',
       step: '03',
-      focus: 'Edits on stale base',
+      focus: '基于过期 base 的编辑',
       scenarioId: 'offline',
       question:
-        'An editor goes offline and edits an old version, then reconnects. Why can you not just append their operations?',
+        '一位编辑者离线后改的是旧版本，然后重连。为什么你不能直接把他的 operation 追加上去？',
       reveal:
-        'Their operations were written against a base that has since moved, so positions are stale. You must transform (OT) or merge (CRDT) the operations against everything that happened meanwhile, or edits land in the wrong place.',
-      takeaway: 'Edits on a drifted base need transformation/merge, not blind append.',
+        '他的 operation 是基于一个之后已经变化的 base 写的，所以位置都过期了。你必须把这些 operation 相对期间发生的一切做 transform（OT）或 merge（CRDT），否则编辑会落到错误的位置。',
+      takeaway: '基于漂移 base 的编辑需要 transform/merge，而不是盲目追加。',
     },
     {
       id: 'public-doc',
       step: '04',
-      focus: 'Many viewers',
+      focus: '大量浏览者',
       scenarioId: 'public-doc',
       question:
-        'A document is shared widely; most connections only watch. Should presence and broadcast run through the edit room?',
+        '一篇文档被广泛分享，大多数连接只是在看。presence 和 broadcast 该不该走 edit room？',
       reveal:
-        'No — presence and view fanout are high-volume and best-effort, while the edit room is the scarce ordering point. Split presence/broadcast into their own tier so spectators never slow down the authoritative ordering.',
-      takeaway: 'Keep best-effort fanout off the scarce ordering path.',
+        '不该——presence 和浏览 fanout 量大且是 best-effort，而 edit room 是稀缺的 ordering point。把 presence/broadcast 拆到它们自己的层，这样旁观者永远不会拖慢权威的 ordering。',
+      takeaway: '让 best-effort fanout 远离稀缺的 ordering 路径。',
     },
     {
       id: 'hot-doc',
       step: '05',
-      focus: 'One hot document',
+      focus: '一篇 hot document',
       scenarioId: 'hot-doc',
       question:
-        'One document is enormously popular. The room still orders edits — so what has to scale around it?',
+        '一篇文档极其火爆。room 仍然给编辑排序——那它周围有什么必须扩展？',
       reveal:
-        'The single ordering room stays authoritative, but reads, presence, and broadcast need fanout tiers, and the op log needs snapshots so new joiners recover fast instead of replaying the whole history.',
-      takeaway: 'The ordering point stays single; reads, presence, and recovery fan out around it.',
+        '那个单一的 ordering room 依旧权威，但读取、presence 和 broadcast 都需要 fanout 层，而且 op log 需要 snapshot，好让新加入者快速恢复，而不是重放整段历史。',
+      takeaway: 'ordering point 保持单一；读取、presence 和恢复都在它周围 fanout。',
     },
   ],
   analyze: analyzeGoogleDocsWorkload,
@@ -433,32 +433,29 @@ function analyzeGoogleDocsWorkload(workload: WorkloadValues): LabAnalysis {
       roomThroughput: {
         ratio: editOperationsPerSecond / roomOperationBudgetPerSecond,
         valueText: `${formatRate(editOperationsPerSecond)} ops/s`,
-        copy: `${formatCount(concurrentEditors)} active ${pluralize(
-          'editor',
-          concurrentEditors,
-        )} at ${operationsPerEditorSecond.toFixed(
+        copy: `${formatCount(concurrentEditors)} 位活跃编辑者，每人 ${operationsPerEditorSecond.toFixed(
           1,
-        )} operations per second each.`,
+        )} 次 operation/秒。`,
       },
       staleOperations: {
         ratio: staleOperationRisk,
-        valueText: offlineMinutes === 0 ? 'live only' : formatDuration(offlineSeconds),
-        copy: 'More editors and longer offline windows increase the chance that baseVersion is stale.',
+        valueText: offlineMinutes === 0 ? '仅实时' : formatDuration(offlineSeconds),
+        copy: '编辑者越多、offline 窗口越长，baseVersion 过期的概率就越大。',
       },
       operationLog: {
         ratio: operationLogMegabytesPerHour / fastRecoveryLogBudgetMegabytes,
         valueText: `${formatStorageGigabytes(operationLogMegabytesPerHour / 1024)}/hr`,
-        copy: 'Append-only operation history grows with edit rate even when the current document body is small.',
+        copy: '即便当前文档正文很小，append-only 的 operation 历史也会随编辑速率增长。',
       },
       presenceFanout: {
         ratio: presenceMessagesPerSecond / presenceFanoutBudgetPerSecond,
         valueText: `${formatRate(presenceMessagesPerSecond)} msg/s`,
-        copy: 'Cursor and selection updates multiply by editors and viewers, so they should stay best-effort.',
+        copy: '光标和选区更新会随编辑者和浏览者翻倍，所以它们应该保持 best-effort。',
       },
       recoveryCost: {
         ratio: recoveryMegabytes / fastRecoveryLogBudgetMegabytes,
         valueText: `${formatStorageGigabytes(recoveryMegabytes / 1024)}`,
-        copy: `${formatKilobytes(documentSizeKilobytes)} document plus operation replay since the last useful checkpoint.`,
+        copy: `${formatKilobytes(documentSizeKilobytes)} 的文档，加上自上一个有用 checkpoint 以来的 operation 重放。`,
       },
     },
     decisions: buildDecisions({
@@ -509,23 +506,23 @@ function buildReasons(analysis: {
       severity: analysis.concurrentEditors > 100 ? 'warning' : 'ok',
       text: `${formatCount(
         analysis.concurrentEditors,
-      )} editors create ${formatRate(
+      )} 位编辑者产生 ${formatRate(
         analysis.editOperationsPerSecond,
-      )} ops/s. All operations for one document need one authoritative order before broadcast.`,
+      )} ops/s。一篇文档的所有 operation 在 broadcast 前都需要一个权威顺序。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'With one editor and no realtime fanout, saving the latest body is still a defensible starting point.',
+      text: '只有一个编辑者、没有实时 fanout 时，保存最新正文仍是个说得过去的起点。',
     });
   }
 
   if (analysis.needsTransform) {
     reasons.push({
       severity: analysis.offlineMinutes >= 60 ? 'danger' : 'warning',
-      text: `Operations can arrive with stale base versions${
-        analysis.offlineMinutes > 0 ? ` after ${Math.round(analysis.offlineMinutes)} offline minutes` : ''
-      }. The system needs OT-style transform or CRDT-style merge rules.`,
+      text: `operation 可能带着过期的 base version 到达${
+        analysis.offlineMinutes > 0 ? `（offline 了 ${Math.round(analysis.offlineMinutes)} 分钟之后）` : ''
+      }。系统需要 OT 式的 transform 或 CRDT 式的 merge 规则。`,
     });
   }
 
@@ -533,26 +530,26 @@ function buildReasons(analysis: {
     reasons.push({
       severity: analysis.durableAck ? 'warning' : 'ok',
       text: analysis.durableAck
-        ? 'Ack-after-append protects confirmed edits from room crashes, at the cost of one durable write on the critical path.'
-        : 'An operation log becomes useful once history, retries, or offline reconciliation matter.',
+        ? 'append 后再 ack 能保护已确认的编辑不被 room 崩溃丢掉，代价是在关键路径上多一次 durable 写。'
+        : '一旦历史、重试或 offline 对账变得重要，operation log 就有用了。',
     });
   }
 
   if (analysis.needsSnapshot) {
     reasons.push({
       severity: 'warning',
-      text: `${formatStorageGigabytes(
+      text: `每小时 ${formatStorageGigabytes(
         analysis.operationLogMegabytesPerHour / 1024,
-      )} of operation history per hour makes replay-only recovery slow. Snapshots cap open and recovery time.`,
+      )} 的 operation 历史会让仅靠重放的恢复变慢。snapshot 能给打开和恢复时间封顶。`,
     });
   }
 
   if (analysis.needsPresenceFanout) {
     reasons.push({
       severity: analysis.presenceMessagesPerSecond > presenceFanoutBudgetPerSecond ? 'danger' : 'warning',
-      text: `Presence traffic is about ${formatRate(
+      text: `在教学模型里，presence 流量大约 ${formatRate(
         analysis.presenceMessagesPerSecond,
-      )} messages/s in the teaching model. Cursor updates should be best-effort and split away from durable document operations.`,
+      )} messages/s。光标更新应该是 best-effort，并从 durable 的文档 operation 中拆出去。`,
     });
   }
 
@@ -573,40 +570,40 @@ function buildDecisions(flags: {
     websocket: {
       state: flags.needsRealtimeGateway ? 'needed' : 'not-yet',
       copy: flags.needsRealtimeGateway
-        ? 'Use a WebSocket edge because clients and server both push edits and cursor updates continuously.'
-        : 'Plain save/load requests are enough until another collaborator needs low-latency updates.',
+        ? '用一个 WebSocket edge，因为客户端和 server 都在持续推送编辑和光标更新。'
+        : '在另一个协作者需要低延迟更新之前，普通的 save/load 请求就够了。',
     },
     documentRoom: {
       state: flags.needsDocumentRoom ? 'needed' : 'not-yet',
       copy: flags.needsDocumentRoom
-        ? 'Route one document to one room or actor so operations receive one authoritative version order.'
-        : 'Do not add an owner process yet; a single-writer save path is simpler for solo editing.',
+        ? '把一篇文档路由到一个 room 或 actor，让 operation 获得一个权威的 version 顺序。'
+        : '先别加 owner 进程；对单人编辑来说，single-writer 的 save 路径更简单。',
     },
     otOrCrdt: {
       state: flags.needsTransform ? 'needed' : 'not-yet',
       copy: flags.needsTransform
-        ? `Use OT or CRDT rules because operations may be based on older versions${
-            flags.offlineMinutes > 0 ? ' after offline edits' : ''
-          }.`
-        : 'No concurrent edits means there is no stale-position problem to solve yet.',
+        ? `用 OT 或 CRDT 规则，因为 operation 可能基于旧版本${
+            flags.offlineMinutes > 0 ? '（在 offline 编辑之后）' : ''
+          }。`
+        : '没有 concurrent edit，就还没有 stale-position 问题需要解决。',
     },
     durableLog: {
       state: flags.needsDurableLog ? 'needed' : 'not-yet',
       copy: flags.durableAck
-        ? 'Append before ack so confirmed edits can be replayed after a room crash.'
-        : 'A log is optional while losing an unconfirmed edit is acceptable and history is small.',
+        ? '先 append 再 ack，这样 room 崩溃后已确认的编辑能被重放。'
+        : '只要丢掉一次未确认的编辑还能接受、且历史很小，log 就是可选的。',
     },
     snapshot: {
       state: flags.needsSnapshot ? 'needed' : 'useful',
       copy: flags.needsSnapshot
-        ? 'Create periodic snapshots so open, replay, and recovery do not scan the whole operation history.'
-        : 'Snapshots are useful but can be infrequent while documents and histories are small.',
+        ? '定期做 snapshot，这样打开、重放和恢复就不必扫描整段 operation 历史。'
+        : '只要文档和历史还小，snapshot 虽有用但可以不那么频繁。',
     },
     presence: {
       state: flags.needsPresenceFanout ? 'tradeoff' : 'useful',
       copy: flags.needsPresenceFanout
-        ? 'Split presence into a best-effort fanout path so cursors do not compete with durable edits.'
-        : 'Presence can share the room while fanout is small, but it should still stay out of the durable log.',
+        ? '把 presence 拆到一条 best-effort 的 fanout 路径，这样光标不会和 durable 编辑抢资源。'
+        : '在 fanout 还小时 presence 可以共用 room，但它仍应留在 durable log 之外。',
     },
   };
 }
@@ -620,7 +617,7 @@ function chooseArchitectureTitle(flags: {
   needsPresenceFanout: boolean;
 }): string {
   if (!flags.needsRealtimeGateway) {
-    return 'Single document service + document store';
+    return '单个 document service + document store';
   }
   if (!flags.needsTransform && !flags.needsDurableLog) {
     return 'WebSocket gateway + document room';
@@ -629,9 +626,9 @@ function chooseArchitectureTitle(flags: {
     return 'Document room + OT + durable operation log';
   }
   if (!flags.needsPresenceFanout) {
-    return 'Document room + operation log + snapshots';
+    return 'Document room + operation log + snapshot';
   }
-  return 'Document room + durable edits + separate presence fanout';
+  return 'Document room + durable 编辑 + 独立的 presence fanout';
 }
 
 function chooseArchitectureSummary(flags: {
@@ -643,18 +640,18 @@ function chooseArchitectureSummary(flags: {
   needsPresenceFanout: boolean;
 }): string {
   if (!flags.needsRealtimeGateway) {
-    return 'The simplest system can load a document, accept one writer, and save the latest body. No realtime coordination is justified yet.';
+    return '最简单的系统可以加载一篇文档、接受一个 writer、保存最新正文。现在还不值得做实时协调。';
   }
   if (!flags.needsTransform && !flags.needsDurableLog) {
-    return 'Low-latency collaboration needs a persistent channel and one room to broadcast edits, but history and recovery are still light.';
+    return '低延迟协作需要一条持久通道和一个 room 来 broadcast 编辑，但历史和恢复仍然很轻。';
   }
   if (!flags.needsSnapshot && !flags.needsPresenceFanout) {
-    return 'The room serializes operations, transform logic repairs stale positions, and a log lets clients replay missed edits.';
+    return 'room 给 operation 排序，transform 逻辑修复过期位置，一条 log 让客户端能重放错过的编辑。';
   }
   if (!flags.needsPresenceFanout) {
-    return 'Operation history now needs snapshots so open and recovery time stay bounded as the document evolves.';
+    return '随着文档演进，operation 历史现在需要 snapshot，好让打开和恢复时间保持有界。';
   }
-  return 'The edit room remains the ordering authority, while snapshots, durable logs, and best-effort presence fanout scale different concerns separately.';
+  return 'edit room 仍是 ordering 权威，而 snapshot、durable log 和 best-effort 的 presence fanout 各自独立扩展不同的关注点。';
 }
 
 function chooseArchitecturePath(flags: {
@@ -690,8 +687,4 @@ function stateWhen(needed: boolean): NodeState {
 function numericValue(workload: WorkloadValues, key: string): number {
   const value = workload[key];
   return typeof value === 'number' ? value : 0;
-}
-
-function pluralize(unit: string, value: number): string {
-  return Math.round(value) === 1 ? unit : `${unit}s`;
 }

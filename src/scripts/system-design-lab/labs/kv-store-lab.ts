@@ -18,15 +18,15 @@ const bytesOverheadPerKey = 64;
 
 export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
   id: 'kv-store',
-  eyebrow: 'System Design Lab',
-  title: 'A distributed key-value store trades consistency, latency, and availability by tuning how many replicas must agree.',
+  eyebrow: '系统设计 Lab',
+  title: '分布式 key-value store 通过调节「多少个 replica 必须达成一致」，在 consistency、latency 和 availability 之间做权衡。',
   summary:
-    'Change throughput, key count, value size, replication factor N, read quorum R, write quorum W, and cluster size. The design moves from a single node to a consistent-hash ring, to replication, to quorum tuning (the CAP tradeoff made concrete), and finally to multi-region with anti-entropy. This mirrors Amazon Dynamo and Apache Cassandra.',
+    '调节吞吐、key 数量、value 大小、replication factor N、read quorum R、write quorum W，以及集群规模。设计会从单节点逐步演进到 consistent-hash ring、replication、quorum 调优（把 CAP 权衡变得具体），最后到带 anti-entropy 的多 region。这对应 Amazon Dynamo 和 Apache Cassandra。',
   controls: [
     {
       id: 'opsPerSecond',
-      label: 'Throughput',
-      help: 'Total get and put operations per second across the whole cluster.',
+      label: '吞吐',
+      help: '整个集群每秒的 get 和 put 操作总数。',
       min: 100,
       max: 5_000_000,
       defaultValue: 20_000,
@@ -35,19 +35,19 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'totalKeys',
-      label: 'Stored keys',
-      help: 'Total number of distinct keys held by the store.',
+      label: '已存 key 数',
+      help: 'store 里保存的不同 key 的总数。',
       min: 100_000,
       max: 100_000_000_000,
       defaultValue: 50_000_000,
       scale: 'log',
-      unit: 'keys',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'valueSizeBytes',
-      label: 'Average value size',
-      help: 'Mean serialized size of a stored value, in kilobytes.',
+      label: '平均 value 大小',
+      help: '一个 value 序列化后的平均大小，单位 kilobytes。',
       min: 0.1,
       max: 1_024,
       defaultValue: 4,
@@ -57,59 +57,59 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'replicationFactor',
       label: 'Replication factor (N)',
-      help: 'How many nodes hold a copy of each key. Higher N survives more failures but amplifies writes.',
+      help: '每个 key 由多少个 node 各持一份副本。N 越大能扛越多故障，但会放大写入。',
       min: 1,
       max: 7,
       defaultValue: 3,
       scale: 'linear',
-      unit: 'replicas',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'readQuorum',
       label: 'Read quorum (R)',
-      help: 'Replicas that must respond to a read. R+W>N gives strong-ish consistency; smaller R is faster.',
+      help: '一次读必须有多少个 replica 响应。R+W>N 给出接近强一致；R 越小越快。',
       min: 1,
       max: 7,
       defaultValue: 2,
       scale: 'linear',
-      unit: 'replicas',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'writeQuorum',
       label: 'Write quorum (W)',
-      help: 'Replicas that must acknowledge a write. R+W>N gives strong-ish consistency; smaller W is faster.',
+      help: '一次写必须有多少个 replica 确认。R+W>N 给出接近强一致；W 越小越快。',
       min: 1,
       max: 7,
       defaultValue: 2,
       scale: 'linear',
-      unit: 'replicas',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'clusterNodes',
-      label: 'Cluster nodes',
-      help: 'Physical nodes in the ring. More nodes spread load and storage but increase membership chatter.',
+      label: '集群节点数',
+      help: 'ring 上的物理 node。node 越多越能摊开负载和存储，但 membership 通信也越多。',
       min: 1,
       max: 1_000,
       defaultValue: 6,
       scale: 'log',
-      unit: 'nodes',
+      unit: '台',
       format: 'count',
     },
   ],
   toggles: [
     {
       id: 'strongConsistency',
-      label: 'Enforce strong consistency',
-      help: 'Require R+W>N so every read sees the latest acknowledged write, at the cost of latency and availability.',
+      label: '强制强一致',
+      help: '要求 R+W>N，让每次读都能看到最新已确认的写，代价是 latency 和 availability。',
       defaultValue: false,
     },
     {
       id: 'multiRegion',
-      label: 'Replicate across regions',
-      help: 'Place replicas in multiple regions for locality and disaster survival; adds cross-region latency and conflicts.',
+      label: '跨 region 复制',
+      help: '把 replica 放在多个 region，换取就近访问和灾难存活；会引入跨 region 的 latency 和冲突。',
       defaultValue: false,
     },
   ],
@@ -117,8 +117,8 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'single-node',
       step: '01',
-      title: 'Single node',
-      summary: 'One box holds every key with no replication.',
+      title: '单节点',
+      summary: '一台机器装下所有 key，没有 replication。',
       values: {
         opsPerSecond: 5_000,
         totalKeys: 1_000_000,
@@ -135,7 +135,7 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
       id: 'partitioned-ring',
       step: '02',
       title: 'Partitioned ring',
-      summary: 'Keys outgrow one node and spread across a hash ring.',
+      summary: 'key 数超出单节点，分散到一个 hash ring 上。',
       values: {
         opsPerSecond: 120_000,
         totalKeys: 500_000_000,
@@ -151,8 +151,8 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'replicated',
       step: '03',
-      title: 'Replicated for durability',
-      summary: 'Each key is copied to N nodes to survive failures.',
+      title: '为 durability 做 replication',
+      summary: '每个 key 复制到 N 个 node 上以扛过故障。',
       values: {
         opsPerSecond: 300_000,
         totalKeys: 2_000_000_000,
@@ -168,8 +168,8 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'quorum-tuned',
       step: '04',
-      title: 'Quorum-tuned consistency',
-      summary: 'R and W are raised so reads see the latest write.',
+      title: 'Quorum 调优的一致性',
+      summary: '调高 R 和 W，让读能看到最新的写。',
       values: {
         opsPerSecond: 800_000,
         totalKeys: 8_000_000_000,
@@ -186,7 +186,7 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
       id: 'multi-region',
       step: '05',
       title: 'Multi-region + anti-entropy',
-      summary: 'Replicas span regions; gossip and read repair heal them.',
+      summary: 'replica 跨越多个 region；gossip 和 read repair 来修复它们。',
       values: {
         opsPerSecond: 3_000_000,
         totalKeys: 40_000_000_000,
@@ -201,9 +201,9 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'Distributed key-value store architecture diagram',
+    title: '分布式 key-value store 架构图',
     description:
-      'Whiteboard-style architecture diagram for a Dynamo-style key-value store: clients, a coordinator that hashes the key onto a ring, partitions on a consistent-hash ring, the N replica nodes that hold each key, and an async anti-entropy layer of gossip membership and read repair.',
+      'Dynamo 风格 key-value store 的白板风格架构图：clients、把 key hash 到 ring 上的 coordinator、consistent-hash ring 上的 partition、各持一份 key 的 N 个 replica node，以及由 gossip membership 和 read repair 组成的异步 anti-entropy 层。',
     columns: [
       {
         id: 'clients',
@@ -215,7 +215,7 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
             title: 'Client',
             subtitle: 'get + put',
             kind: 'client',
-            summary: 'issues get and put operations keyed by an opaque key',
+            summary: '用一个不透明的 key 发起 get 和 put 操作',
           },
         ],
       },
@@ -227,16 +227,16 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'coordinator',
             title: 'Coordinator',
-            subtitle: 'hash + route',
+            subtitle: 'hash + 路由',
             kind: 'scheduler',
-            summary: 'hashes the key, finds its position on the ring, and fans the request out to replicas',
+            summary: '对 key 做 hash，找到它在 ring 上的位置，并把请求 fan-out 给各个 replica',
           },
           {
             id: 'quorum',
             title: 'Quorum logic',
-            subtitle: 'R + W gate',
+            subtitle: 'R + W 闸门',
             kind: 'service',
-            summary: 'waits for R reads or W write acks before answering the client',
+            summary: '等到 R 个读响应或 W 个写 ack 之后再回复 client',
           },
         ],
       },
@@ -248,9 +248,9 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'ring',
             title: 'Consistent ring',
-            subtitle: 'virtual nodes',
+            subtitle: 'virtual node',
             kind: 'scheduler',
-            summary: 'maps key hashes to partitions; virtual nodes keep load balanced as the cluster changes',
+            summary: '把 key 的 hash 映射到 partition；virtual node 让集群变化时负载保持均衡',
           },
         ],
       },
@@ -262,23 +262,23 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'primaryReplica',
             title: 'Primary replica',
-            subtitle: 'first owner',
+            subtitle: '第一个 owner',
             kind: 'nosql',
-            summary: 'the first of the N nodes responsible for a key on the ring',
+            summary: 'ring 上为某个 key 负责的 N 个 node 中的第一个',
           },
           {
             id: 'extraReplicas',
             title: 'Extra replicas',
-            subtitle: 'next N-1 nodes',
+            subtitle: '接下来 N-1 个 node',
             kind: 'nosql',
-            summary: 'the next nodes clockwise that each hold a copy for durability and availability',
+            summary: '顺时针往下的几个 node，各持一份副本以提供 durability 和 availability',
           },
           {
             id: 'hintedHandoff',
             title: 'Hinted handoff',
-            subtitle: 'failover writes',
+            subtitle: 'failover 写入',
             kind: 'nosql',
-            summary: 'a stand-in node temporarily stores writes for a down replica and replays them later',
+            summary: '一个替补 node 临时替挂掉的 replica 存下写入，之后再回放给它',
           },
         ],
       },
@@ -292,14 +292,14 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
             title: 'Gossip',
             subtitle: 'membership',
             kind: 'scheduler',
-            summary: 'nodes exchange membership and health so the ring converges without a master',
+            summary: 'node 之间交换 membership 和健康状态，让 ring 不靠 master 也能收敛',
           },
           {
             id: 'readRepair',
             title: 'Read repair',
-            subtitle: 'heal divergence',
+            subtitle: '修复 divergence',
             kind: 'compute',
-            summary: 'reconciles stale replicas found during reads and via background Merkle-tree syncs',
+            summary: '修复读取时发现的过期 replica，以及通过后台 Merkle-tree 同步来调和差异',
           },
         ],
       },
@@ -317,110 +317,110 @@ export const keyValueStoreLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'perNodeLoad', label: 'Per-node op load' },
-    { id: 'perNodeStorage', label: 'Storage per node' },
+    { id: 'perNodeLoad', label: '每节点操作负载' },
+    { id: 'perNodeStorage', label: '每节点存储' },
     { id: 'writeAmplification', label: 'Write amplification' },
-    { id: 'consistencyPressure', label: 'Quorum / consistency' },
-    { id: 'crossRegionCost', label: 'Cross-region + anti-entropy' },
+    { id: 'consistencyPressure', label: 'Quorum / 一致性' },
+    { id: 'crossRegionCost', label: '跨 region + anti-entropy' },
   ],
   decisions: [
     { id: 'partitioning', title: 'Partitioning' },
     { id: 'replication', title: 'Replication factor' },
-    { id: 'quorum', title: 'Quorum tuning' },
-    { id: 'conflicts', title: 'Conflict resolution' },
-    { id: 'failure', title: 'Failure handling' },
+    { id: 'quorum', title: 'Quorum 调优' },
+    { id: 'conflicts', title: '冲突解决' },
+    { id: 'failure', title: '故障处理' },
     { id: 'membership', title: 'Membership' },
   ],
   sourceBackedRules: [
     {
-      title: 'Consistent hashing partitions keys and limits reshuffling on membership change',
+      title: 'Consistent hashing 把 key 分区，并把 membership 变化时的搬迁量限制在很小范围',
       source: 'Amazon Dynamo (SOSP 2007)',
       url: 'https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf',
       summary:
-        'Dynamo places keys on a ring by hash and uses virtual nodes so that adding or removing a node only moves a fraction of the keys, keeping load balanced.',
+        'Dynamo 用 hash 把 key 放到 ring 上，并用 virtual node，使得加入或移除一个 node 只搬动一小部分 key，从而保持负载均衡。',
     },
     {
-      title: 'Quorum R+W>N gives read-your-writes; smaller quorums favor latency and availability',
+      title: 'Quorum R+W>N 给出 read-your-writes；更小的 quorum 偏向 latency 和 availability',
       source: 'Amazon Dynamo (SOSP 2007)',
       url: 'https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf',
       summary:
-        'Dynamo exposes N, R, and W as tunable knobs; R+W>N makes the read and write sets overlap so a read sees the latest write, trading off latency and availability.',
+        'Dynamo 把 N、R、W 暴露成可调旋钮；R+W>N 让读集合和写集合产生重叠，于是一次读能看到最新的写，代价是 latency 和 availability。',
     },
     {
-      title: 'Hinted handoff and read repair keep the store available and eventually consistent',
+      title: 'Hinted handoff 和 read repair 让 store 保持 available 和最终一致',
       source: 'Apache Cassandra Docs',
       url: 'https://cassandra.apache.org/doc/',
       summary:
-        'Cassandra stores hints for unreachable replicas and repairs divergence during reads and via background anti-entropy, so failures do not block writes.',
+        'Cassandra 为不可达的 replica 存下 hint，并在读取时以及通过后台 anti-entropy 修复差异，所以故障不会阻塞写入。',
     },
     {
-      title: 'DynamoDB is a managed key-value store with tunable, region-scoped replication',
+      title: 'DynamoDB 是一个托管的 key-value store，带可调、按 region 范围的 replication',
       source: 'AWS DynamoDB',
       url: 'https://aws.amazon.com/dynamodb/',
       summary:
-        'DynamoDB offers eventually and strongly consistent reads and global tables that replicate across regions, the same N/R/W tradeoffs as a managed service.',
+        'DynamoDB 提供最终一致和强一致的读，以及跨 region 复制的 global table，把同样的 N/R/W 权衡变成了托管服务。',
     },
   ],
   teachingAssumptions: [
-    'Per-node op and storage budgets are conservative teaching numbers; real nodes vary widely by hardware and value size.',
-    'Write amplification is modeled simply as the replication factor N — every put is applied to N replicas.',
-    'Consistency pressure compares R+W to N; it abstracts away clock skew, sloppy quorums, and hinted writes.',
+    '每节点的操作和存储预算是保守的教学数字；真实 node 会因硬件和 value 大小差异很大。',
+    'Write amplification 简单地按 replication factor N 建模——每个 put 都施加到 N 个 replica 上。',
+    '一致性压力用 R+W 和 N 做对比；它抽象掉了 clock skew、sloppy quorum 和 hinted write。',
   ],
   teachingWalkthrough: [
     {
       id: 'one-box',
       step: '01',
-      focus: 'One node, no replicas',
+      focus: '单节点，没有 replica',
       scenarioId: 'single-node',
       question:
-        'A million keys and 5k ops/s fit comfortably on one machine. Do you need a ring, replication, or quorums yet?',
+        '一百万个 key、5k ops/s，舒舒服服地装在一台机器上。现在需要 ring、replication 或 quorum 吗？',
       reveal:
-        'No. One node serves every read and write directly. There is nothing to partition and nothing to keep in sync, so a hash ring, replicas, and quorum logic would all be pure overhead.',
-      takeaway: 'Start with one node; distribution is a response to load and failure, not a default.',
+        '不需要。一个 node 直接服务所有读和写。没有东西要分区，也没有东西要保持同步，所以 hash ring、replica 和 quorum logic 都纯属额外开销。',
+      takeaway: '从单节点起步；分布式是对负载和故障的回应，不是默认选项。',
     },
     {
       id: 'partition',
       step: '02',
-      focus: 'Keys outgrow one node',
+      focus: 'key 数超出单节点',
       scenarioId: 'partitioned-ring',
       question:
-        'Now 500M keys and 120k ops/s no longer fit on one box. How do you spread them so adding capacity is cheap?',
+        '现在 500M 个 key、120k ops/s，单台机器装不下了。怎么摊开它们，才能让加容量很便宜？',
       reveal:
-        'Hash each key onto a consistent-hash ring and assign ranges to nodes, using virtual nodes for balance. Consistent hashing means adding a node only moves a fraction of the keys, instead of rehashing everything.',
-      takeaway: 'Consistent hashing partitions keys so the cluster grows by moving only a slice of the data.',
+        '把每个 key hash 到一个 consistent-hash ring 上，给各个 node 分配 range，用 virtual node 来平衡。Consistent hashing 意味着加一个 node 只搬动一小部分 key，而不是把所有东西重新 hash 一遍。',
+      takeaway: 'Consistent hashing 把 key 分区，让集群只搬动一小片数据就能扩容。',
     },
     {
       id: 'replicate',
       step: '03',
-      focus: 'Surviving node failure',
+      focus: '扛过节点故障',
       scenarioId: 'replicated',
       question:
-        'With one copy per key, losing a node loses its data. You set N=3. What does that cost on every write?',
+        '每个 key 只有一份副本时，丢一个 node 就丢了它的数据。你把 N 设成 3。这在每次写入上要付出什么代价？',
       reveal:
-        'Each put must now be applied to 3 replicas, so write traffic and storage are amplified roughly N times. In exchange any single node (and soon any two) can fail without losing the key, and reads have more places to go.',
-      takeaway: 'Replication buys durability and availability by paying an N-times write and storage cost.',
+        '现在每个 put 都必须施加到 3 个 replica 上，所以写入流量和存储被放大了大约 N 倍。换来的是任何单个 node（很快是任何两个）都能挂掉而不丢 key，而且读也有更多地方可去。',
+      takeaway: 'Replication 用 N 倍的写入和存储代价，换来 durability 和 availability。',
     },
     {
       id: 'quorum',
       step: '04',
-      focus: 'Consistency vs latency',
+      focus: '一致性 vs latency',
       scenarioId: 'quorum-tuned',
       question:
-        'With N=3, a fast write to W=1 can be missed by a read of R=1. You want reads to see the latest write — what R and W?',
+        'N=3 时，一次只写 W=1 的快写，可能被 R=1 的读漏掉。你想让读看到最新的写——R 和 W 该取多少？',
       reveal:
-        'Pick R and W so R+W>N — for example R=2, W=2 over N=3. The read and write quorums then overlap on at least one up-to-date replica, so a read sees the latest acknowledged write. The price is higher latency and lower availability, because more replicas must respond. That is the CAP tradeoff made concrete.',
-      takeaway: 'R+W>N overlaps the quorums for read-your-writes, trading latency and availability for consistency.',
+        '选 R 和 W 让 R+W>N——比如 N=3 下取 R=2、W=2。这样 read quorum 和 write quorum 就在至少一个最新 replica 上重叠，于是一次读能看到最新已确认的写。代价是更高的 latency 和更低的 availability，因为要更多 replica 响应。这就是把 CAP 权衡变得具体。',
+      takeaway: 'R+W>N 让两个 quorum 重叠以实现 read-your-writes，用 latency 和 availability 换 consistency。',
     },
     {
       id: 'global',
       step: '05',
-      focus: 'Multi-region + healing',
+      focus: 'Multi-region + 自愈',
       scenarioId: 'multi-region',
       question:
-        'Replicas now span regions and nodes fail constantly at 400-node scale. How do writes survive failures and how do replicas converge?',
+        '现在 replica 跨越多个 region，在 400 个 node 的规模下 node 不停地挂。写入怎么扛过故障，replica 又怎么收敛？',
       reveal:
-        'Use hinted handoff so a stand-in node accepts writes for a down replica, and read repair plus background Merkle-tree anti-entropy to reconcile divergence. Gossip tracks membership without a master. Conflicting versions are resolved by vector clocks or last-write-wins. Cross-region links make latency and conflicts the dominant cost.',
-      takeaway: 'At global scale, gossip, hinted handoff, and read repair keep an always-on store eventually consistent.',
+        '用 hinted handoff，让替补 node 替挂掉的 replica 接收写入，再用 read repair 加后台 Merkle-tree anti-entropy 来调和差异。Gossip 不靠 master 也能追踪 membership。冲突的版本用 vector clock 或 last-write-wins 解决。跨 region 链路让 latency 和冲突成为主导成本。',
+      takeaway: '全球规模下，gossip、hinted handoff 和 read repair 让一个常在线的 store 保持最终一致。',
     },
   ],
   analyze: analyzeKeyValueStoreWorkload,
@@ -505,20 +505,20 @@ function analyzeKeyValueStoreWorkload(workload: WorkloadValues): LabAnalysis {
         ratio: perNodeOps / comfortableOpsPerNode,
         valueText: `${formatRate(perNodeOps)} ops/s`,
         copy: needsPartitioning
-          ? `${formatRate(amplifiedOps)} ops/s of replica work spread over ${formatCount(clusterNodes)} ${pluralize('node', clusterNodes)}.`
-          : `All ${formatRate(amplifiedOps)} ops/s land on the single node.`,
+          ? `${formatRate(amplifiedOps)} ops/s 的 replica 工作量摊在 ${formatCount(clusterNodes)} 台 node 上。`
+          : `全部 ${formatRate(amplifiedOps)} ops/s 都落在这单个 node 上。`,
       },
       perNodeStorage: {
         ratio: perNodeStorageGigabytes / comfortableStorageGigabytesPerNode,
         valueText: formatStorageGigabytes(perNodeStorageGigabytes),
-        copy: `${formatCount(totalKeys)} keys x N=${Math.round(effectiveReplication)} over ${formatCount(clusterNodes)} ${pluralize('node', clusterNodes)}.`,
+        copy: `${formatCount(totalKeys)} 个 key × N=${Math.round(effectiveReplication)}，分布在 ${formatCount(clusterNodes)} 台 node 上。`,
       },
       writeAmplification: {
         ratio: effectiveReplication / 5,
         valueText: `${Math.round(effectiveReplication)}x`,
         copy: needsReplication
-          ? `Every put is applied to N=${Math.round(effectiveReplication)} replicas, so write and storage cost scale with N.`
-          : 'No replication yet, so each put is written exactly once.',
+          ? `每个 put 都施加到 N=${Math.round(effectiveReplication)} 个 replica 上，所以写入和存储成本随 N 增长。`
+          : '还没有 replication，所以每个 put 只写一次。',
       },
       consistencyPressure: {
         ratio: consistencyRatio,
@@ -527,21 +527,21 @@ function analyzeKeyValueStoreWorkload(workload: WorkloadValues): LabAnalysis {
             ? `R+W=${Math.round(readQuorum + writeQuorum)} vs N=${Math.round(effectiveReplication)}`
             : 'N=1',
         copy: consistencyMisconfigured
-          ? 'Strong consistency is requested but R+W is not greater than N, so reads can still miss the latest write.'
+          ? '请求了强一致，但 R+W 并没有大于 N，所以读仍然可能漏掉最新的写。'
           : quorumOverlaps
-            ? 'R+W>N: the read and write quorums overlap, so a read sees the latest acknowledged write.'
+            ? 'R+W>N：read quorum 和 write quorum 重叠，所以一次读能看到最新已确认的写。'
             : effectiveReplication > 1
-              ? 'R+W<=N: small quorums favor latency and availability over read-your-writes consistency.'
-              : 'A single replica is trivially consistent with itself.',
+              ? 'R+W<=N：小 quorum 偏向 latency 和 availability，而非 read-your-writes 一致性。'
+              : '单个 replica 对自己来说天然一致。',
       },
       crossRegionCost: {
         ratio: crossRegionPressure,
-        valueText: needsMultiRegion ? 'multi-region' : `${Math.round(effectiveReplication)} replicas`,
+        valueText: needsMultiRegion ? 'multi-region' : `${Math.round(effectiveReplication)} 个 replica`,
         copy: needsMultiRegion
-          ? 'Cross-region replication adds WAN latency and more conflicting versions to reconcile.'
+          ? '跨 region 复制会引入 WAN latency，以及更多需要调和的冲突版本。'
           : needsAntiEntropy
-            ? 'Gossip and read repair run continuously to keep the replicas converged.'
-            : 'A single copy needs no anti-entropy or cross-region traffic.',
+            ? 'Gossip 和 read repair 持续运行，让各个 replica 保持收敛。'
+            : '单份副本不需要 anti-entropy，也没有跨 region 流量。',
       },
     },
     decisions: buildDecisions({
@@ -595,26 +595,23 @@ function buildReasons(
   if (analysis.needsPartitioning) {
     reasons.push({
       severity: analysis.perNodeOps > comfortableOpsPerNode ? 'danger' : 'ok',
-      text: `${formatCount(analysis.totalKeys)} keys and ${formatRate(
+      text: `${formatCount(analysis.totalKeys)} 个 key 和 ${formatRate(
         analysis.opsPerSecond,
-      )} ops/s are spread across ${formatCount(analysis.clusterNodes)} ${pluralize(
-        'node',
-        analysis.clusterNodes,
-      )} by consistent hashing on a ring.`,
+      )} ops/s，通过 ring 上的 consistent hashing 摊到 ${formatCount(analysis.clusterNodes)} 台 node 上。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'The whole keyspace fits on one node, so there is nothing to partition yet.',
+      text: '整个 keyspace 装得进一个 node，所以现在还没有东西要分区。',
     });
   }
 
   if (analysis.perNodeStorageGigabytes > comfortableStorageGigabytesPerNode) {
     reasons.push({
       severity: 'danger',
-      text: `Each node holds ~${formatStorageGigabytes(
+      text: `每个 node 要装约 ${formatStorageGigabytes(
         analysis.perNodeStorageGigabytes,
-      )}, above a comfortable per-node budget; add nodes or lower N.`,
+      )}，超过了舒适的每节点预算；加 node 或调低 N。`,
     });
   }
 
@@ -623,53 +620,53 @@ function buildReasons(
       severity: 'warning',
       text: `N=${Math.round(
         analysis.effectiveReplication,
-      )} copies each key for durability, so every put is amplified ${Math.round(
+      )} 给每个 key 存这么多份以保 durability，所以每个 put 在写入和存储上都被放大了 ${Math.round(
         analysis.effectiveReplication,
-      )}x in writes and storage.`,
+      )} 倍。`,
     });
   }
 
   if (analysis.consistencyMisconfigured) {
     reasons.push({
       severity: 'danger',
-      text: `Strong consistency is on but R+W=${Math.round(
+      text: `强一致开着，但 R+W=${Math.round(
         analysis.readQuorum + analysis.writeQuorum,
-      )} is not greater than N=${Math.round(
+      )} 并没有大于 N=${Math.round(
         analysis.effectiveReplication,
-      )}; raise R or W so the quorums overlap.`,
+      )}；调高 R 或 W 让两个 quorum 重叠。`,
     });
   } else if (analysis.quorumOverlaps) {
     reasons.push({
       severity: 'ok',
       text: `R+W=${Math.round(analysis.readQuorum + analysis.writeQuorum)} > N=${Math.round(
         analysis.effectiveReplication,
-      )}: reads and writes overlap, so a read returns the latest acknowledged write.`,
+      )}：读和写重叠，所以一次读会返回最新已确认的写。`,
     });
   } else if (analysis.needsReplication) {
     reasons.push({
       severity: 'warning',
       text: `R+W=${Math.round(analysis.readQuorum + analysis.writeQuorum)} <= N=${Math.round(
         analysis.effectiveReplication,
-      )}: small quorums cut latency but reads may miss a recent write (eventual consistency).`,
+      )}：小 quorum 降低了 latency，但读可能漏掉一个近期的写（最终一致）。`,
     });
   }
 
   if (analysis.needsConflictResolution) {
     reasons.push({
       severity: 'warning',
-      text: 'Concurrent writes under loose quorums can diverge, so versions are reconciled with vector clocks or last-write-wins.',
+      text: '宽松 quorum 下的并发写可能产生分歧，所以版本用 vector clock 或 last-write-wins 来调和。',
     });
   }
 
   if (analysis.needsMultiRegion) {
     reasons.push({
       severity: 'warning',
-      text: 'Replicas spanning regions add WAN latency and more conflicts; hinted handoff and read repair keep the store available and converging.',
+      text: 'replica 跨 region 会引入 WAN latency 和更多冲突；hinted handoff 和 read repair 让 store 保持 available 和收敛。',
     });
   } else if (analysis.needsAntiEntropy) {
     reasons.push({
       severity: 'ok',
-      text: 'Gossip tracks membership and read repair plus background anti-entropy heal stale replicas without a master.',
+      text: 'Gossip 追踪 membership，read repair 加后台 anti-entropy 不靠 master 就能修复过期的 replica。',
     });
   }
 
@@ -688,16 +685,16 @@ function buildDecisions(
     partitioning: {
       state: flags.needsPartitioning ? 'needed' : 'not-yet',
       copy: flags.needsPartitioning
-        ? 'Hash keys onto a consistent-hash ring with virtual nodes so growth only reshuffles a fraction of the keys.'
-        : 'One node holds everything; no ring is needed until keys or load outgrow a single box.',
+        ? '把 key hash 到带 virtual node 的 consistent-hash ring 上，让扩容只重排一小部分 key。'
+        : '一个 node 装下所有东西；在 key 或负载超出单台机器之前，不需要 ring。',
     },
     replication: {
       state: flags.needsReplication ? 'needed' : 'not-yet',
       copy: flags.needsReplication
-        ? `Copy each key to N=${Math.round(
+        ? `把每个 key 复制到 N=${Math.round(
             flags.effectiveReplication,
-          )} nodes so the store survives node loss, at an N-times write and storage cost.`
-        : 'A single copy per key is enough until durability or availability demands more.',
+          )} 个 node，让 store 能扛过 node 丢失，代价是 N 倍的写入和存储。`
+        : '在 durability 或 availability 提出更高要求之前，每个 key 一份副本就够了。',
     },
     quorum: {
       state: flags.consistencyMisconfigured
@@ -708,68 +705,68 @@ function buildDecisions(
             ? 'useful'
             : 'not-yet',
       copy: flags.consistencyMisconfigured
-        ? 'Strong consistency is requested but R+W is not greater than N; raise R or W to make the quorums overlap.'
+        ? '请求了强一致，但 R+W 并没有大于 N；调高 R 或 W 让两个 quorum 重叠。'
         : flags.quorumOverlaps
-          ? `R=${Math.round(flags.readQuorum)}, W=${Math.round(
-              flags.writeQuorum,
-            )} over N=${Math.round(
+          ? `N=${Math.round(
               flags.effectiveReplication,
-            )} gives R+W>N for read-your-writes, trading latency for consistency.`
+            )} 下取 R=${Math.round(flags.readQuorum)}、W=${Math.round(
+              flags.writeQuorum,
+            )}，给出 R+W>N 以实现 read-your-writes，用 latency 换 consistency。`
           : flags.needsReplication
-            ? 'Small R and W favor low latency and high availability at the cost of possibly stale reads.'
-            : 'With one replica, there is no quorum to tune.',
+            ? '小的 R 和 W 偏向低 latency 和高 availability，代价是读可能拿到过期数据。'
+            : '只有一个 replica 时，没有 quorum 可调。',
     },
     conflicts: {
       state: flags.needsConflictResolution ? 'needed' : flags.needsReplication ? 'useful' : 'not-yet',
       copy: flags.needsReplication
-        ? 'Resolve divergent versions with vector clocks (causal merge) or last-write-wins (simpler, may drop updates).'
-        : 'A single copy never conflicts, so no reconciliation is needed.',
+        ? '用 vector clock（因果合并）或 last-write-wins（更简单，但可能丢更新）来解决分歧的版本。'
+        : '单份副本永远不会冲突，所以不需要调和。',
     },
     failure: {
       state: flags.needsReplication ? 'needed' : 'not-yet',
       copy: flags.needsReplication
-        ? 'Use hinted handoff so a stand-in node accepts writes for a down replica and replays them when it returns.'
-        : 'With one node there is no failover; its loss is total, so this stays off until replication is added.',
+        ? '用 hinted handoff，让替补 node 替挂掉的 replica 接收写入，等它回来再回放。'
+        : '只有一个 node 时没有 failover；它一丢就全丢，所以在加上 replication 之前这一项关闭。',
     },
     membership: {
       state: flags.needsPartitioning ? 'needed' : 'not-yet',
       copy: flags.needsPartitioning
-        ? 'Track node membership and health with gossip so the ring converges without a central master.'
-        : 'A single node needs no membership protocol.',
+        ? '用 gossip 追踪 node 的 membership 和健康，让 ring 不靠中心 master 也能收敛。'
+        : '单个 node 不需要 membership 协议。',
     },
   };
 }
 
 function chooseArchitectureTitle(flags: ArchitectureFlags): string {
   if (!flags.needsPartitioning && !flags.needsReplication) {
-    return 'Single node';
+    return '单节点';
   }
   if (flags.needsMultiRegion) {
-    return 'Multi-region replicated ring + anti-entropy';
+    return '多 region 复制的 ring + anti-entropy';
   }
   if (flags.needsReplication && flags.quorumOverlaps) {
-    return 'Replicated ring with quorum consistency';
+    return '带 quorum 一致性的复制 ring';
   }
   if (flags.needsReplication) {
-    return 'Replicated consistent-hash ring';
+    return '复制的 consistent-hash ring';
   }
-  return 'Partitioned consistent-hash ring';
+  return 'Partitioned 的 consistent-hash ring';
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (!flags.needsPartitioning && !flags.needsReplication) {
-    return 'One node holds every key and serves every get and put directly. No ring, replication, or quorum logic is justified yet.';
+    return '一个 node 装下所有 key，直接服务每个 get 和 put。ring、replication、quorum logic 现在都还没必要。';
   }
   if (flags.needsMultiRegion) {
-    return 'Keys are partitioned on a consistent-hash ring and replicated across regions; gossip, hinted handoff, and read repair keep an always-on store eventually consistent.';
+    return 'key 在 consistent-hash ring 上分区，并跨 region 复制；gossip、hinted handoff 和 read repair 让一个常在线的 store 保持最终一致。';
   }
   if (flags.needsReplication && flags.quorumOverlaps) {
-    return 'Each key is copied to N nodes on the ring, and R+W>N quorums make reads see the latest write, trading latency and availability for consistency.';
+    return '每个 key 复制到 ring 上的 N 个 node，R+W>N 的 quorum 让读看到最新的写，用 latency 和 availability 换 consistency。';
   }
   if (flags.needsReplication) {
-    return 'Each key is replicated to N nodes for durability, with loose quorums favoring low latency and high availability over read-your-writes consistency.';
+    return '每个 key 复制到 N 个 node 以保 durability，宽松的 quorum 偏向低 latency 和高 availability，而非 read-your-writes 一致性。';
   }
-  return 'Keys are hashed onto a consistent-hash ring so storage and throughput scale across nodes, but each key still has a single copy.';
+  return 'key 被 hash 到一个 consistent-hash ring 上，让存储和吞吐跨 node 扩展，但每个 key 仍然只有一份副本。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {
@@ -788,8 +785,4 @@ function chooseArchitecturePath(flags: ArchitectureFlags): string {
 function numericValue(workload: WorkloadValues, key: string): number {
   const value = workload[key];
   return typeof value === 'number' ? value : 0;
-}
-
-function pluralize(unit: string, value: number): string {
-  return Math.round(value) === 1 ? unit : `${unit}s`;
 }

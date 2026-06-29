@@ -9,67 +9,67 @@ const entry = findPhysicsLab('orbit')!;
 <BaseLayout title={`${entry.title} — Lab`} description={entry.tagline}>
   <PhysicsLabShell entry={entry}>
     <Fragment slot="readouts">
-      <div class="plab__readout"><span>Orbit</span><strong data-readout="classification">Bound ellipse</strong></div>
-      <div class="plab__readout"><span>Radius r</span><strong data-readout="radius">180 px</strong></div>
-      <div class="plab__readout"><span>Speed v</span><strong data-readout="speed">0.00</strong></div>
-      <div class="plab__readout"><span>Energy ε</span><strong data-readout="energy">+0.0</strong></div>
-      <div class="plab__readout"><span>Ang. mom. L</span><strong data-readout="angularMomentum">0</strong></div>
-      <div class="plab__readout"><span>Eccentricity e</span><strong data-readout="eccentricity">0.000</strong></div>
+      <div class="plab__readout"><span>轨道</span><strong data-readout="classification">Bound ellipse</strong></div>
+      <div class="plab__readout"><span>半径 r</span><strong data-readout="radius">180 px</strong></div>
+      <div class="plab__readout"><span>速度 v</span><strong data-readout="speed">0.00</strong></div>
+      <div class="plab__readout"><span>能量 ε</span><strong data-readout="energy">+0.0</strong></div>
+      <div class="plab__readout"><span>角动量 L</span><strong data-readout="angularMomentum">0</strong></div>
+      <div class="plab__readout"><span>偏心率 e</span><strong data-readout="eccentricity">0.000</strong></div>
     </Fragment>
 
-    <form class="plab__panel" slot="controls" aria-label="Orbit lab controls">
+    <form class="plab__panel" slot="controls" aria-label="轨道 Lab 控制">
       <div class="plab__panel-head">
-        <p>Controls</p>
+        <p>控制</p>
         <h2>Orbit Lab</h2>
       </div>
 
       <div class="plab__actions">
         <button class="plab__button is-primary" type="button" data-action="toggle">
-          <i class="ph ph-pause" aria-hidden="true"></i><span>Pause</span>
+          <i class="ph ph-pause" aria-hidden="true"></i><span>暂停</span>
         </button>
         <button class="plab__button" type="button" data-action="reset">
-          <i class="ph ph-crosshair" aria-hidden="true"></i><span>Launch</span>
+          <i class="ph ph-crosshair" aria-hidden="true"></i><span>发射</span>
         </button>
       </div>
 
       <div class="plab__presets">
-        <button class="plab__preset" type="button" data-preset="circle">Circle</button>
-        <button class="plab__preset" type="button" data-preset="ellipse">Ellipse</button>
-        <button class="plab__preset" type="button" data-preset="escape">Escape</button>
+        <button class="plab__preset" type="button" data-preset="circle">圆轨道</button>
+        <button class="plab__preset" type="button" data-preset="ellipse">椭圆轨道</button>
+        <button class="plab__preset" type="button" data-preset="escape">逃逸</button>
       </div>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showVectors" checked />
-        <span><strong>Velocity & gravity</strong><small>Teal is v, amber is the pull toward the star.</small></span>
+        <span><strong>速度与引力</strong><small>teal 是 v，amber 是指向恒星的引力。</small></span>
       </label>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showOrbit" checked />
-        <span><strong>Predicted orbit</strong><small>The conic the current state implies.</small></span>
+        <span><strong>预测轨道</strong><small>当前状态所对应的 conic section。</small></span>
       </label>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showTrail" checked />
-        <span><strong>Trace path</strong><small>Leave a trail behind the body.</small></span>
+        <span><strong>描摹轨迹</strong><small>在天体身后留下轨迹。</small></span>
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Central mass</span><output data-output="centralMass">1.00×</output></span>
+        <span class="plab__field-label"><span>中心质量</span><output data-output="centralMass">1.00×</output></span>
         <input type="range" min="0.4" max="2.4" step="0.05" value="1" data-control="centralMass" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Launch radius</span><output data-output="launchRadius">180 px</output></span>
+        <span class="plab__field-label"><span>发射半径</span><output data-output="launchRadius">180 px</output></span>
         <input type="range" min="120" max="255" step="1" value="180" data-control="launchRadius" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Launch speed</span><output data-output="launchSpeed">1.00×</output></span>
+        <span class="plab__field-label"><span>发射速度</span><output data-output="launchSpeed">1.00×</output></span>
         <input type="range" min="0.55" max="1.55" step="0.01" value="1" data-control="launchSpeed" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Launch angle</span><output data-output="launchAngle">90°</output></span>
+        <span class="plab__field-label"><span>发射角</span><output data-output="launchAngle">90°</output></span>
         <input type="range" min="45" max="135" step="1" value="90" data-control="launchAngle" />
       </label>
     </form>

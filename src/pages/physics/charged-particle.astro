@@ -9,75 +9,75 @@ const entry = findPhysicsLab('charged-particle')!;
 <BaseLayout title={`${entry.title} — Lab`} description={entry.tagline}>
   <PhysicsLabShell entry={entry}>
     <Fragment slot="readouts">
-      <div class="plab__readout"><span>Speed</span><strong data-readout="speed">0.00 m/s</strong></div>
-      <div class="plab__readout"><span>Cyclotron radius</span><strong data-readout="radius">∞</strong></div>
-      <div class="plab__readout"><span>Cyclotron freq</span><strong data-readout="frequency">0.00 rad/s</strong></div>
-      <div class="plab__readout"><span>Kinetic energy</span><strong data-readout="energy">0.00 J</strong></div>
+      <div class="plab__readout"><span>速度</span><strong data-readout="speed">0.00 m/s</strong></div>
+      <div class="plab__readout"><span>回旋半径</span><strong data-readout="radius">∞</strong></div>
+      <div class="plab__readout"><span>回旋频率</span><strong data-readout="frequency">0.00 rad/s</strong></div>
+      <div class="plab__readout"><span>动能</span><strong data-readout="energy">0.00 J</strong></div>
     </Fragment>
 
-    <form class="plab__panel" slot="controls" aria-label="Charged particle controls">
+    <form class="plab__panel" slot="controls" aria-label="带电粒子控制">
       <div class="plab__panel-head">
-        <p>Controls</p>
+        <p>控制</p>
         <h2>Charged Particle</h2>
       </div>
 
       <div class="plab__actions">
         <button class="plab__button is-primary" type="button" data-action="toggle">
-          <i class="ph ph-pause" aria-hidden="true"></i><span>Pause</span>
+          <i class="ph ph-pause" aria-hidden="true"></i><span>暂停</span>
         </button>
         <button class="plab__button" type="button" data-action="reset">
-          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>Reset</span>
+          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i><span>重置</span>
         </button>
       </div>
 
       <div class="plab__presets">
-        <button class="plab__preset" type="button" data-preset="cyclotron">Cyclotron</button>
-        <button class="plab__preset" type="button" data-preset="drift">E×B drift</button>
-        <button class="plab__preset" type="button" data-preset="accelerate">Accelerate</button>
+        <button class="plab__preset" type="button" data-preset="cyclotron">回旋</button>
+        <button class="plab__preset" type="button" data-preset="drift">E×B 漂移</button>
+        <button class="plab__preset" type="button" data-preset="accelerate">加速</button>
       </div>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showVectors" checked />
-        <span><strong>Show vectors</strong><small>Velocity (teal) and Lorentz force (amber).</small></span>
+        <span><strong>显示矢量</strong><small>速度（teal）与 Lorentz force（amber）。</small></span>
       </label>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showField" checked />
-        <span><strong>Show field grid</strong><small>B as ⊙/⊗ symbols, E as amber arrows.</small></span>
+        <span><strong>显示场网格</strong><small>B 用 ⊙/⊗ 符号，E 用 amber 箭头。</small></span>
       </label>
 
       <label class="plab__toggle">
         <input type="checkbox" data-control="showTrail" checked />
-        <span><strong>Trace the path</strong><small>Fading trail of the particle.</small></span>
+        <span><strong>描摹轨迹</strong><small>粒子的渐隐轨迹。</small></span>
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Charge q</span><output data-output="charge">+1.0 C</output></span>
+        <span class="plab__field-label"><span>电荷 q</span><output data-output="charge">+1.0 C</output></span>
         <input type="range" min="-3" max="3" step="0.1" value="1" data-control="charge" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Mass m</span><output data-output="mass">1.0 kg</output></span>
+        <span class="plab__field-label"><span>质量 m</span><output data-output="mass">1.0 kg</output></span>
         <input type="range" min="0.2" max="4" step="0.1" value="1" data-control="mass" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Magnetic field B<sub>z</sub></span><output data-output="magneticZ">+2.0 T</output></span>
+        <span class="plab__field-label"><span>磁场 B<sub>z</sub></span><output data-output="magneticZ">+2.0 T</output></span>
         <input type="range" min="-4" max="4" step="0.1" value="2" data-control="magneticZ" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Electric field E<sub>x</sub></span><output data-output="electricX">+0.0</output></span>
+        <span class="plab__field-label"><span>电场 E<sub>x</sub></span><output data-output="electricX">+0.0</output></span>
         <input type="range" min="-10" max="10" step="0.5" value="0" data-control="electricX" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Electric field E<sub>y</sub></span><output data-output="electricY">+0.0</output></span>
+        <span class="plab__field-label"><span>电场 E<sub>y</sub></span><output data-output="electricY">+0.0</output></span>
         <input type="range" min="-10" max="10" step="0.5" value="0" data-control="electricY" />
       </label>
 
       <label class="plab__field">
-        <span class="plab__field-label"><span>Initial speed</span><output data-output="speed">14 m/s</output></span>
+        <span class="plab__field-label"><span>初速度</span><output data-output="speed">14 m/s</output></span>
         <input type="range" min="2" max="30" step="1" value="14" data-control="speed" />
       </label>
     </form>

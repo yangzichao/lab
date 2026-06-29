@@ -18,38 +18,38 @@ const comfortableConcurrentSessions = 50; // sessions one runtime instance sched
 
 export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
   id: 'agent-orchestration',
-  eyebrow: 'System Design Lab',
+  eyebrow: '系统设计 Lab',
   title:
-    'An LLM agent is a reason-act loop whose cost, latency, and blast radius all grow with the number of steps per task.',
+    'LLM agent 本质上是一个 reason-act loop —— 它的成本、latency、影响半径，都随每个任务的 step 数一起涨。',
   summary:
-    'Tune concurrent sessions, tool calls and steps per task, LLM latency, context size, and how many tools are registered. The design grows from a single tool call into a reason-act loop, then adds memory and planning, parallel tool execution behind a sandbox, and finally multi-agent orchestration with full tracing at scale.',
+    '调节并发 session 数、每个任务的 tool call 与 step 数、LLM latency、context 大小，以及注册了多少 tool。设计会从单次 tool call 演进成 reason-act loop，再加上 memory 和 planning、sandbox 后面的并行 tool execution，最后变成带全链路 tracing 的 multi-agent orchestration。',
   controls: [
     {
       id: 'concurrentSessions',
       label: 'Concurrent agent sessions',
-      help: 'Tasks running their agent loop at the same time. Each holds context and may have tool calls in flight.',
+      help: '同时跑各自 agent loop 的任务数。每个都持有 context，还可能有 tool call 正在飞行中。',
       min: 1,
       max: 50_000,
       defaultValue: 10,
       scale: 'log',
-      unit: 'sessions',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'toolCallsPerTask',
       label: 'Tool calls per task',
-      help: 'Average number of tool invocations a task makes before it finishes.',
+      help: '一个任务在结束前平均发起多少次 tool 调用。',
       min: 0,
       max: 200,
       defaultValue: 4,
       scale: 'linear',
-      unit: 'calls',
+      unit: '次',
       format: 'count',
     },
     {
       id: 'maxStepsPerTask',
       label: 'Max steps per task',
-      help: 'Loop iterations (each is an LLM decision) allowed before the run is cut off.',
+      help: '一次 run 被截断前允许的 loop 迭代数（每次迭代是一个 LLM 决策）。',
       min: 1,
       max: 200,
       defaultValue: 8,
@@ -60,7 +60,7 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'llmLatencyMs',
       label: 'Avg LLM call latency',
-      help: 'Time for one model decision. Sequential loops pay this once per step.',
+      help: '一次模型决策的耗时。串行的 loop 每个 step 都要付一次这个时间。',
       min: 200,
       max: 20_000,
       defaultValue: 1_500,
@@ -70,7 +70,7 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'contextTokens',
       label: 'Context window tokens',
-      help: 'Working context per task: system prompt, history, tool results. Grows every step.',
+      help: '每个任务的工作 context：system prompt、历史、tool 结果。每个 step 都会变大。',
       min: 2_000,
       max: 1_000_000,
       defaultValue: 16_000,
@@ -81,18 +81,18 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'toolsRegistered',
       label: 'Tools registered',
-      help: 'Distinct tools the agent can choose from. Too many crowd the prompt and confuse selection.',
+      help: 'agent 可选的不同 tool 数量。太多会挤爆 prompt、扰乱选择。',
       min: 1,
       max: 2_000,
       defaultValue: 8,
       scale: 'log',
-      unit: 'tools',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'tokenThroughput',
       label: 'Aggregate token throughput',
-      help: 'Tokens per second pushed through the LLM gateway across all sessions.',
+      help: '所有 session 加起来、每秒推过 LLM gateway 的 token 数。',
       min: 100,
       max: 5_000_000,
       defaultValue: 5_000,
@@ -104,13 +104,13 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'longTermMemory',
       label: 'Long-term memory (vector)',
-      help: 'Persist and retrieve facts across tasks via a vector store, beyond the conversation window.',
+      help: '通过 vector store 把事实跨任务持久化并取回，超出对话窗口的范围。',
       defaultValue: false,
     },
     {
       id: 'sandboxedExecution',
       label: 'Sandboxed tool execution',
-      help: 'Run tools (code, shell, side effects) in an isolated sandbox so untrusted actions cannot harm the host.',
+      help: '把 tool（代码、shell、副作用）跑在隔离的 sandbox 里，让不可信操作伤不到 host。',
       defaultValue: true,
     },
   ],
@@ -119,7 +119,7 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
       id: 'single-tool',
       step: '01',
       title: 'Single tool call',
-      summary: 'One model call picks one tool and returns. No loop yet.',
+      summary: '一次模型调用挑一个 tool 然后返回。还没有 loop。',
       values: {
         concurrentSessions: 2,
         toolCallsPerTask: 1,
@@ -136,7 +136,7 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
       id: 'reason-act-loop',
       step: '02',
       title: 'Reason-act loop',
-      summary: 'The agent iterates: decide, call a tool, observe, repeat.',
+      summary: 'agent 开始迭代：决策、调一个 tool、观察、重复。',
       values: {
         concurrentSessions: 8,
         toolCallsPerTask: 5,
@@ -153,7 +153,7 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
       id: 'memory-and-planning',
       step: '03',
       title: 'Memory + planning',
-      summary: 'Long context and cross-task recall require memory management.',
+      summary: '长 context 和跨任务记忆需要 memory management。',
       values: {
         concurrentSessions: 60,
         toolCallsPerTask: 6,
@@ -170,7 +170,7 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
       id: 'parallel-tools',
       step: '04',
       title: 'Parallel tools + sandbox',
-      summary: 'Many tools per step run concurrently behind isolation.',
+      summary: '每个 step 的多个 tool 在隔离后面并发执行。',
       values: {
         concurrentSessions: 300,
         toolCallsPerTask: 40,
@@ -187,7 +187,7 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
       id: 'multi-agent-scale',
       step: '05',
       title: 'Multi-agent at scale',
-      summary: 'Thousands of sessions, deep runs, full tracing and guardrails.',
+      summary: '上千个 session、深 run、全链路 tracing 加 guardrail。',
       values: {
         concurrentSessions: 20_000,
         toolCallsPerTask: 120,
@@ -202,9 +202,9 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'LLM agent orchestration architecture diagram',
+    title: 'LLM agent orchestration 架构图',
     description:
-      'Whiteboard-style architecture diagram for an LLM agent system: clients, an agent runtime running the reason-act loop and planner, a tool registry with sandboxed execution, short-term and long-term vector memory plus the LLM gateway, and an async tracing and observability pipeline.',
+      '一个 LLM agent 系统的白板风格架构图：clients、跑着 reason-act loop 和 planner 的 agent runtime、带 sandboxed execution 的 tool registry、short-term 与 long-term vector memory 加上 LLM gateway，以及一条异步的 tracing 和 observability pipeline。',
     columns: [
       {
         id: 'clients',
@@ -214,9 +214,9 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'client',
             title: 'Client',
-            subtitle: 'task + stream',
+            subtitle: '任务 + 流式',
             kind: 'client',
-            summary: 'submits a task and streams the agent run back as it progresses',
+            summary: '提交一个任务，并随 agent run 推进把过程流式返回',
           },
         ],
       },
@@ -230,14 +230,14 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
             title: 'Agent loop',
             subtitle: 'reason + act',
             kind: 'scheduler',
-            summary: 'drives the decide-call-observe loop and enforces the step budget per task',
+            summary: '驱动 decide-call-observe 这个 loop，并对每个任务执行 step 预算',
           },
           {
             id: 'planner',
             title: 'Planner',
-            subtitle: 'decompose tasks',
+            subtitle: '拆解任务',
             kind: 'scheduler',
-            summary: 'breaks a goal into sub-steps and sequences or fans out the work',
+            summary: '把一个目标拆成子步骤，再把活儿串行排开或 fan out 出去',
           },
         ],
       },
@@ -251,14 +251,14 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
             title: 'Tool registry',
             subtitle: 'schemas + routing',
             kind: 'service',
-            summary: 'holds tool schemas and routes the model to the right tool from many',
+            summary: '存放 tool schema，并从一堆 tool 里把模型 route 到对的那个',
           },
           {
             id: 'sandbox',
             title: 'Sandbox',
-            subtitle: 'isolated exec',
+            subtitle: '隔离执行',
             kind: 'container',
-            summary: 'runs untrusted tool code and side effects in an isolated worker pool',
+            summary: '在隔离的 worker pool 里跑不可信的 tool 代码和副作用',
           },
         ],
       },
@@ -272,21 +272,21 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
             title: 'Conversation',
             subtitle: 'short-term',
             kind: 'cache',
-            summary: 'keeps the working context and applies summarization or truncation',
+            summary: '保存工作 context，并做 summarization 或截断',
           },
           {
             id: 'vectorMemory',
             title: 'Vector memory',
             subtitle: 'long-term',
             kind: 'search',
-            summary: 'embeds and retrieves facts across tasks beyond the context window',
+            summary: '把事实 embed 后跨任务取回，超出 context window 的范围',
           },
           {
             id: 'llmGateway',
             title: 'LLM gateway',
-            subtitle: 'model calls',
+            subtitle: '模型调用',
             kind: 'gpu',
-            summary: 'batches, rate-limits, and retries the many model calls every step makes',
+            summary: '对每个 step 发出的大量模型调用做 batch、rate-limit 和 retry',
           },
         ],
       },
@@ -300,14 +300,14 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
             title: 'Tracing',
             subtitle: 'async spans',
             kind: 'service',
-            summary: 'records each step, tool call, and token cost off the hot path',
+            summary: '在 hot path 之外记录每个 step、tool call 和 token 成本',
           },
           {
             id: 'guardrails',
             title: 'Guardrails',
-            subtitle: 'retries + limits',
+            subtitle: 'retry + 限额',
             kind: 'service',
-            summary: 'validates outputs, retries failures, and enforces cost and loop limits',
+            summary: '校验输出、对失败做 retry，并强制执行成本和 loop 上限',
           },
         ],
       },
@@ -326,110 +326,110 @@ export const agentOrchestrationLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'llmCallVolume', label: 'LLM call volume' },
-    { id: 'taskLatency', label: 'Sequential task latency' },
-    { id: 'sandboxLoad', label: 'Sandbox execution load' },
-    { id: 'contextPressure', label: 'Context window pressure' },
-    { id: 'toolSelection', label: 'Tool selection complexity' },
+    { id: 'llmCallVolume', label: 'LLM call 量' },
+    { id: 'taskLatency', label: '串行任务 latency' },
+    { id: 'sandboxLoad', label: 'Sandbox execution 负载' },
+    { id: 'contextPressure', label: 'Context window 压力' },
+    { id: 'toolSelection', label: 'Tool selection 复杂度' },
   ],
   decisions: [
     { id: 'agentLoop', title: 'Agent loop / planning' },
     { id: 'toolRouting', title: 'Tool registry + routing' },
     { id: 'sandbox', title: 'Sandboxed execution' },
-    { id: 'memory', title: 'Memory (short / long-term)' },
+    { id: 'memory', title: 'Memory（short / long-term）' },
     { id: 'contextManagement', title: 'Context management' },
     { id: 'observability', title: 'Observability + guardrails' },
   ],
   sourceBackedRules: [
     {
-      title: 'Reason-and-act interleaving makes agents iterate, not answer once',
+      title: 'reason 和 act 交错，让 agent 去迭代，而不是只答一次',
       source: 'ReAct (Yao et al.)',
       url: 'https://arxiv.org/abs/2210.03629',
       summary:
-        'ReAct interleaves reasoning traces with actions so the model decides, acts, observes, and repeats — the loop structure that all step-count cost and latency follow from.',
+        'ReAct 把 reasoning trace 和 action 交错起来，让模型决策、行动、观察、再重复 —— 所有按 step 数计的成本和 latency 都源自这个 loop 结构。',
     },
     {
-      title: 'Models can be taught to call tools/APIs as part of generation',
+      title: '模型可以被教会在 generation 过程中调用 tool/API',
       source: 'Toolformer (Schick et al.)',
       url: 'https://arxiv.org/abs/2302.04761',
       summary:
-        'Toolformer shows the model itself learning when and how to invoke external tools, motivating a tool registry the model selects from rather than hard-coded calls.',
+        'Toolformer 展示了模型自己学会何时、如何调用外部 tool，这正是为什么要有一个让模型去选的 tool registry，而不是写死的调用。',
     },
     {
-      title: 'Tool-use APIs define a registry of tool schemas the model picks among',
+      title: 'Tool-use API 定义了一个 registry，模型从这些 tool schema 里挑选',
       source: 'Anthropic tool use docs',
       url: 'https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview',
       summary:
-        'Production tool calling passes JSON tool schemas to the model; too many crowded into one prompt degrade selection, which is why routing matters as the registry grows.',
+        '生产环境的 tool calling 会把 JSON tool schema 传给模型；一个 prompt 里塞太多会让选择变差，这就是为什么 registry 一变大 routing 就重要起来。',
     },
     {
-      title: 'Multi-step agent runs need tracing across each LLM and tool span',
+      title: '多 step 的 agent run 需要在每个 LLM 和 tool span 上做 tracing',
       source: 'OpenAI Agents SDK docs',
       url: 'https://developers.openai.com/docs/guides/agents',
       summary:
-        'Orchestration guidance treats per-step tracing, retries, and guardrails as first-class, because a multi-step run is much harder to debug than a single request.',
+        'orchestration 的指南把 per-step tracing、retry 和 guardrail 当作一等公民，因为多 step 的 run 比单个请求难调试得多。',
     },
   ],
   teachingAssumptions: [
-    'Sequential task latency assumes steps run one after another; parallel tools shorten wall-clock but not total LLM calls.',
-    'Per-lane LLM and per-worker sandbox budgets are conservative teaching numbers, not provider limits.',
-    'Context pressure compares the working window against a comfortable single-task budget; long-term recall is modeled as a separate vector path.',
+    '串行任务 latency 假设各 step 一个接一个跑；并行 tool 缩短的是 wall-clock，不是 LLM call 总数。',
+    'per-lane 的 LLM 预算和 per-worker 的 sandbox 预算是保守的教学数字，不是 provider 的真实上限。',
+    'Context 压力是拿当前工作窗口对比一个舒适的单任务预算；long-term 记忆被建模成一条独立的 vector 路径。',
   ],
   teachingWalkthrough: [
     {
       id: 'one-call',
       step: '01',
-      focus: 'One tool, one call',
+      focus: '一个 tool，一次 call',
       scenarioId: 'single-tool',
       question:
-        'A task makes a single model call that picks one tool and returns the result. Do you need a loop, memory, or a sandbox yet?',
+        '一个任务做单次模型调用，挑一个 tool 然后返回结果。这时候你需要 loop、memory 或 sandbox 吗？',
       reveal:
-        'No. With one step there is nothing to iterate over, no growing context, and no untrusted accumulation to isolate. This is request-response with a function call attached — a planner, vector memory, and tracing would all be moving parts with no load to justify them.',
-      takeaway: 'A single tool call is not an agent yet; add machinery only when the loop appears.',
+        '不需要。只有一个 step 时没什么可迭代的，context 不会变大，也没有不可信内容累积需要隔离。这就是挂了个 function call 的 request-response —— planner、vector memory、tracing 在这里都是没有负载撑得起的多余零件。',
+      takeaway: '单次 tool call 还算不上 agent；等 loop 出现了再加机制。',
     },
     {
       id: 'the-loop',
       step: '02',
-      focus: 'The reason-act loop',
+      focus: 'reason-act loop',
       scenarioId: 'reason-act-loop',
       question:
-        'Now the task iterates ~8 steps, each an LLM call plus a tool execution. If one model call is 1.5 s, what dominates the user-visible latency?',
+        '现在任务迭代约 8 个 step，每个是一次 LLM call 加一次 tool execution。如果一次模型调用是 1.5 s，用户看到的 latency 主要被什么主导？',
       reveal:
-        'The chain of sequential LLM calls. Eight steps at ~1.5 s is ~12 s of model time alone before any tool work — latency scales linearly with steps. This is also where you first isolate execution: tools now run real side effects, so a sandbox keeps untrusted actions off the host.',
-      takeaway: 'Latency and cost scale with steps per task; the loop is the unit of work to optimize.',
+        '是那一串串行的 LLM call。8 个 step、每个约 1.5 s，光模型时间就约 12 s，还没算 tool 的活儿 —— latency 随 step 数线性增长。这也是你第一次需要隔离执行的地方：tool 现在会产生真实副作用，所以 sandbox 把不可信操作挡在 host 之外。',
+      takeaway: 'latency 和成本随每个任务的 step 数增长；loop 才是你要优化的工作单元。',
     },
     {
       id: 'memory',
       step: '03',
-      focus: 'Context outgrows the window',
+      focus: 'Context 撑爆窗口',
       scenarioId: 'memory-and-planning',
       question:
-        'Runs now reach 20 steps and ~120k tokens of accumulated history. What breaks if you just keep appending every tool result to the context?',
+        'run 现在到了 20 个 step、约 120k token 的累积历史。如果你只是一味把每个 tool 结果往 context 里追加，会坏在哪？',
       reveal:
-        'The context window fills and cost per step climbs because you re-send the whole transcript every call. You manage short-term memory with summarization/truncation, and push durable facts to a vector store so they survive across tasks instead of bloating every prompt. A planner keeps long runs from wandering.',
-      takeaway: 'Context is a budget per step; summarize the conversation and offload lasting facts to vector memory.',
+        'context window 会被填满，每个 step 的成本也会涨，因为你每次 call 都把整段 transcript 重发一遍。你要用 summarization/截断 来管理 short-term memory，并把持久的事实推到 vector store，让它们跨任务存活，而不是把每个 prompt 撑大。planner 则让长 run 不至于跑偏。',
+      takeaway: 'Context 是每个 step 的预算；把对话 summarize 掉，把要长期留存的事实卸载到 vector memory。',
     },
     {
       id: 'parallel',
       step: '04',
-      focus: 'Fan out the tools',
+      focus: '把 tool fan out',
       scenarioId: 'parallel-tools',
       question:
-        'A step issues 40 tool calls and you have hundreds of tools registered. How do you cut wall-clock time without changing the number of LLM decisions?',
+        '一个 step 发出 40 次 tool call，而你注册了几百个 tool。怎么在不改变 LLM 决策次数的前提下压缩 wall-clock 时间？',
       reveal:
-        'Execute independent tool calls in parallel behind the sandbox pool, so a step waits for the slowest tool, not the sum. With hundreds of tools, selection itself degrades, so the registry routes (retrieval / namespacing) to a relevant subset instead of stuffing every schema into the prompt.',
-      takeaway: 'Parallelize independent tools to compress latency; route a large registry so the model picks well.',
+        '把相互独立的 tool call 在 sandbox pool 后面并行执行，这样一个 step 只等最慢的那个 tool，而不是所有时间之和。在几百个 tool 时，选择本身会变差，所以 registry 要 route（retrieval / namespacing）到一个相关子集，而不是把每个 schema 都塞进 prompt。',
+      takeaway: '把独立的 tool 并行化来压缩 latency；给大 registry 做 route，让模型选得准。',
     },
     {
       id: 'scale',
       step: '05',
-      focus: 'Many agents, deep runs',
+      focus: '很多 agent、深 run',
       scenarioId: 'multi-agent-scale',
       question:
-        'Twenty thousand sessions run 120-step tasks pushing millions of tokens/s. Beyond more capacity, what is now non-negotiable?',
+        '两万个 session 跑 120 个 step 的任务，每秒推过几百万 token。除了加容量，现在什么是不可妥协的？',
       reveal:
-        'Observability and guardrails. At this depth a failed run is impossible to debug without per-step tracing, and runaway loops or cost spikes must be capped by hard step/budget limits and retry policies. The LLM gateway becomes a shared, rate-limited, batched bottleneck across all sessions.',
-      takeaway: 'At scale the orchestration concerns — tracing, guardrails, gateway limits — matter more than any single model call.',
+        'observability 和 guardrail。到这个深度，没有 per-step tracing 一个失败的 run 根本没法调；失控的 loop 或成本飙升必须靠硬性的 step/预算上限和 retry 策略来封顶。LLM gateway 则变成所有 session 共享的、被 rate-limit 和 batch 的瓶颈。',
+      takeaway: '到了规模化阶段，orchestration 层面的事 —— tracing、guardrail、gateway 上限 —— 比任何单次模型调用都更重要。',
     },
   ],
   analyze: analyzeAgentOrchestrationWorkload,
@@ -535,36 +535,36 @@ function analyzeAgentOrchestrationWorkload(workload: WorkloadValues): LabAnalysi
         ratio: llmRatio,
         valueText: `${formatRate(llmCallsPerSecond)} calls/s · ${formatRate(tokenThroughput)} tok/s`,
         copy: heavyLlm
-          ? `About ${formatRate(llmCallsPerSecond)} model calls/s and ${formatRate(tokenThroughput)} tokens/s across ${formatCount(concurrentSessions)} sessions saturate a gateway lane; batch and rate-limit.`
-          : `Roughly ${formatRate(llmCallsPerSecond)} model calls/s and ${formatRate(tokenThroughput)} tokens/s in flight across ${formatCount(concurrentSessions)} sessions.`,
+          ? `${formatCount(concurrentSessions)} 个 session 上约 ${formatRate(llmCallsPerSecond)} 次模型调用/s、${formatRate(tokenThroughput)} tokens/s，会打满一条 gateway lane；做 batch 和 rate-limit。`
+          : `${formatCount(concurrentSessions)} 个 session 上大约 ${formatRate(llmCallsPerSecond)} 次模型调用/s、${formatRate(tokenThroughput)} tokens/s 正在飞行中。`,
       },
       taskLatency: {
         ratio: latencyRatio,
         valueText: formatSeconds(sequentialTaskLatencySeconds),
         copy: needsParallelTools
-          ? `${Math.round(maxStepsPerTask)} sequential steps at ${formatCount(llmLatencyMs)} ms each; parallel tools cut tool wait but not the LLM chain.`
-          : `${Math.round(maxStepsPerTask)} steps run back-to-back, each paying one ${formatCount(llmLatencyMs)} ms model call.`,
+          ? `${Math.round(maxStepsPerTask)} 个串行 step，每个 ${formatCount(llmLatencyMs)} ms；并行 tool 砍掉的是 tool 等待，不是 LLM 这条链。`
+          : `${Math.round(maxStepsPerTask)} 个 step 一个接一个跑，每个都付一次 ${formatCount(llmLatencyMs)} ms 的模型调用。`,
       },
       sandboxLoad: {
         ratio: sandboxRatio,
         valueText: needsSandbox ? `${formatRate(sandboxExecPerSecond)} exec/s` : 'off',
         copy: needsSandbox
-          ? `Tool executions run isolated at about ${formatRate(sandboxExecPerSecond)}/s; the worker pool scales with this.`
-          : 'Tools run in-process — fine for trusted tools, unsafe once they touch untrusted code.',
+          ? `Tool execution 隔离运行，约 ${formatRate(sandboxExecPerSecond)}/s；worker pool 随之扩容。`
+          : 'tool 在进程内运行 —— 对可信 tool 没问题，一旦碰到不可信代码就不安全了。',
       },
       contextPressure: {
         ratio: contextRatio,
         valueText: `${formatCount(contextTokens)} tokens`,
         copy: needsContextManagement
-          ? `${formatCount(contextTokens)} tokens per task exceeds the comfortable window; summarize or truncate each step.`
-          : `${formatCount(contextTokens)} tokens fits a single window without active management.`,
+          ? `每个任务 ${formatCount(contextTokens)} tokens 超过了舒适窗口；每个 step 都要 summarize 或截断。`
+          : `${formatCount(contextTokens)} tokens 装得进单个窗口，不用主动管理。`,
       },
       toolSelection: {
         ratio: toolSelectionRatio,
         valueText: `${formatCount(toolsRegistered)} tools`,
         copy: needsRouting
-          ? `${formatCount(toolsRegistered)} tools crowd the prompt; route to a relevant subset instead of sending every schema.`
-          : `${formatCount(toolsRegistered)} tools fit in the prompt, so the model can pick directly.`,
+          ? `${formatCount(toolsRegistered)} 个 tool 挤爆了 prompt；route 到一个相关子集，而不是把每个 schema 都发过去。`
+          : `${formatCount(toolsRegistered)} 个 tool 装得进 prompt，模型可以直接挑。`,
       },
     },
     decisions: buildDecisions({
@@ -623,43 +623,43 @@ function buildReasons(
   if (analysis.heavyLlm) {
     critical.push({
       severity: 'danger',
-      text: `~${formatRate(
-        analysis.llmCallsPerSecond,
-      )} model calls/s across ${formatCount(
+      text: `${formatCount(
         analysis.concurrentSessions,
-      )} sessions saturate the gateway; batch, rate-limit, and retry centrally.`,
+      )} 个 session 上约 ${formatRate(
+        analysis.llmCallsPerSecond,
+      )} 次模型调用/s 打满了 gateway；集中做 batch、rate-limit 和 retry。`,
     });
   }
 
   if (analysis.needsObservability) {
     critical.push({
       severity: 'warning',
-      text: 'Deep runs at scale need per-step tracing and hard step/budget guardrails to stay debuggable and bounded.',
+      text: '规模化的深 run 需要 per-step tracing 和硬性的 step/预算 guardrail，才能保持可调试、有边界。',
     });
   }
 
   if (analysis.sandboxRatio > 1) {
     critical.push({
       severity: 'danger',
-      text: 'Sandboxed tool executions exceed one worker pool; scale the pool to isolate untrusted side effects safely.',
+      text: 'sandbox 里的 tool execution 超过了一个 worker pool 的承载；扩容 pool 才能安全隔离不可信副作用。',
     });
   }
 
   if (analysis.needsContextManagement) {
     critical.push({
       severity: 'warning',
-      text: `${formatCount(
+      text: `每个任务 ${formatCount(
         analysis.contextTokens,
-      )} tokens per task forces summarization or truncation each step to keep cost and window in check.`,
+      )} tokens，逼着每个 step 都做 summarization 或截断，才能压住成本和窗口。`,
     });
   }
 
   if (analysis.needsParallelTools) {
     critical.push({
       severity: 'warning',
-      text: `${Math.round(
+      text: `每个任务 ${Math.round(
         analysis.toolCallsPerTask,
-      )} tool calls per task should run in parallel so a step waits for the slowest tool, not the sum.`,
+      )} 次 tool call 应该并行跑，这样一个 step 只等最慢的 tool，而不是所有时间之和。`,
     });
   }
 
@@ -668,14 +668,14 @@ function buildReasons(
       severity: 'warning',
       text: `${formatCount(
         analysis.toolsRegistered,
-      )} registered tools crowd the prompt; route the model to a relevant subset.`,
+      )} 个已注册 tool 挤爆了 prompt；把模型 route 到一个相关子集。`,
     });
   }
 
   if (analysis.needsLongTermMemory) {
     critical.push({
       severity: 'ok',
-      text: 'Long-term vector memory retrieves durable facts across tasks instead of bloating every prompt.',
+      text: 'long-term vector memory 跨任务取回持久的事实，而不是把每个 prompt 撑大。',
     });
   }
 
@@ -686,37 +686,37 @@ function buildReasons(
   if (!analysis.isLoop) {
     baseline.push({
       severity: 'ok',
-      text: 'A single step makes this request-response with a tool attached — no loop, memory, or planner is justified yet.',
+      text: '只有一个 step，这就是挂了个 tool 的 request-response —— loop、memory、planner 现在都没必要。',
     });
   } else {
     baseline.push({
       severity: analysis.sequentialTaskLatencySeconds > 10 ? 'warning' : 'ok',
-      text: `${Math.round(analysis.maxStepsPerTask)} sequential steps take ~${formatSeconds(
+      text: `${Math.round(analysis.maxStepsPerTask)} 个串行 step 光模型时间就约 ${formatSeconds(
         analysis.sequentialTaskLatencySeconds,
-      )} of model time alone; latency scales linearly with steps.`,
+      )}；latency 随 step 数线性增长。`,
     });
   }
 
   if (!analysis.heavyLlm) {
     baseline.push({
       severity: 'ok',
-      text: `~${formatRate(
-        analysis.llmCallsPerSecond,
-      )} model calls/s across ${formatCount(
+      text: `${formatCount(
         analysis.concurrentSessions,
-      )} sessions stay within one gateway lane; no batching pressure yet.`,
+      )} 个 session 上约 ${formatRate(
+        analysis.llmCallsPerSecond,
+      )} 次模型调用/s，还在一条 gateway lane 之内；暂时没有 batching 压力。`,
     });
   }
 
   if (analysis.needsSandbox && analysis.sandboxRatio <= 1) {
     baseline.push({
       severity: 'ok',
-      text: 'Tools run in an isolated sandbox so untrusted code and side effects cannot reach the host.',
+      text: 'tool 跑在隔离的 sandbox 里，不可信代码和副作用都碰不到 host。',
     });
   } else if (!analysis.needsSandbox) {
     baseline.push({
       severity: 'warning',
-      text: 'Tools run in-process — acceptable only while every tool is trusted; untrusted code needs sandboxing.',
+      text: 'tool 在进程内运行 —— 只有在所有 tool 都可信时才能接受；不可信代码需要 sandboxing。',
     });
   }
 
@@ -726,9 +726,9 @@ function buildReasons(
   if (!analysis.needsContextManagement) {
     fillers.push({
       severity: 'ok',
-      text: `${formatCount(
+      text: `每个任务 ${formatCount(
         analysis.contextTokens,
-      )} tokens per task still fits one window, so appending tool results needs no active management.`,
+      )} tokens 还装得进一个窗口，所以追加 tool 结果不用主动管理。`,
     });
   }
 
@@ -737,7 +737,7 @@ function buildReasons(
       severity: 'ok',
       text: `${formatCount(
         analysis.toolsRegistered,
-      )} tool schemas fit in the prompt, so the model can pick directly without routing.`,
+      )} 个 tool schema 装得进 prompt，所以模型不用 routing 就能直接挑。`,
     });
   }
 
@@ -766,88 +766,88 @@ function buildDecisions(
       state: flags.isLoop ? (flags.needsPlanner ? 'needed' : 'useful') : 'not-yet',
       copy: flags.isLoop
         ? flags.needsPlanner
-          ? `Long, multi-tool tasks need a planner to decompose the goal and keep ${Math.round(
+          ? `又长又多 tool 的任务需要 planner 来拆解目标，并让 ${Math.round(
               flags.maxStepsPerTask,
-            )}-step runs from wandering.`
-          : 'A reason-act loop drives decide-call-observe; a planner is optional while runs stay short.'
-        : 'One step means no loop yet — this is a single model call with a tool attached.',
+            )} 个 step 的 run 不跑偏。`
+          : 'reason-act loop 驱动 decide-call-observe；run 还短的时候 planner 是可选的。'
+        : '只有一个 step，还没有 loop —— 这是挂了个 tool 的单次模型调用。',
     },
     toolRouting: {
       state: flags.toolCallsPerTask > 0 ? (flags.needsRouting ? 'needed' : 'useful') : 'not-yet',
       copy:
         flags.toolCallsPerTask > 0
           ? flags.needsRouting
-            ? `Route among ${formatCount(
+            ? `在 ${formatCount(
                 flags.toolsRegistered,
-              )} tools (retrieval / namespacing); too many schemas in one prompt hurt selection.`
-            : `${formatCount(flags.toolsRegistered)} tool schemas fit directly in the prompt for the model to choose.`
-          : 'No tools called yet, so the registry is unused.',
+              )} 个 tool 里做 route（retrieval / namespacing）；一个 prompt 里 schema 太多会伤害选择。`
+            : `${formatCount(flags.toolsRegistered)} 个 tool schema 直接装进 prompt 让模型挑。`
+          : '还没有调用任何 tool，所以 registry 没用上。',
     },
     sandbox: {
       state: flags.needsSandbox ? 'needed' : 'tradeoff',
       copy: flags.needsSandbox
-        ? 'Run tool code and side effects in an isolated sandbox so untrusted actions cannot harm the host.'
-        : 'In-process execution is faster but unsafe for untrusted tools — a deliberate trust tradeoff.',
+        ? '把 tool 代码和副作用跑在隔离的 sandbox 里，让不可信操作伤不到 host。'
+        : '进程内执行更快，但对不可信 tool 不安全 —— 这是一个有意为之的信任权衡。',
     },
     memory: {
       state: flags.needsLongTermMemory ? 'needed' : flags.isLoop ? 'useful' : 'not-yet',
       copy: flags.needsLongTermMemory
-        ? 'Short-term conversation memory plus a vector store for durable cross-task recall.'
+        ? 'short-term 对话 memory，加上一个 vector store 做持久的跨任务记忆。'
         : flags.isLoop
-          ? 'Short-term conversation memory holds the loop; long-term recall is not needed yet.'
-          : 'A single step needs no memory beyond the request itself.',
+          ? 'short-term 对话 memory 撑住这个 loop；long-term 记忆暂时还不需要。'
+          : '单个 step 除了请求本身不需要任何 memory。',
     },
     contextManagement: {
       state: flags.needsContextManagement ? 'needed' : flags.isLoop ? 'useful' : 'not-yet',
       copy: flags.needsContextManagement
-        ? `${formatCount(
+        ? `每个任务 ${formatCount(
             flags.contextTokens,
-          )} tokens per task requires summarization or truncation every step to control cost and window.`
+          )} tokens，要求每个 step 都做 summarization 或截断，来控住成本和窗口。`
         : flags.isLoop
-          ? 'Context still fits the window; appending tool results is fine for now.'
-          : 'Single-step context needs no management.',
+          ? 'Context 还装得进窗口；眼下追加 tool 结果没问题。'
+          : '单 step 的 context 不用管理。',
     },
     observability: {
       state: flags.needsObservability ? 'needed' : flags.isLoop ? 'useful' : 'not-yet',
       copy: flags.needsObservability
-        ? 'Trace every step and tool span and enforce retry, step, and cost guardrails on each run.'
+        ? '给每个 step 和 tool span 做 tracing，并对每个 run 强制执行 retry、step 和成本 guardrail。'
         : flags.isLoop
-          ? 'Basic logging suffices while runs are shallow and the fleet is small.'
-          : 'A single call is trivial to observe without dedicated tracing.',
+          ? 'run 还浅、fleet 还小的时候，基础 logging 就够了。'
+          : '单次 call 很容易观测，不需要专门的 tracing。',
     },
   };
 }
 
 function chooseArchitectureTitle(flags: ArchitectureFlags, multiAgentScale: boolean): string {
   if (!flags.isLoop) {
-    return 'Single model call + tool';
+    return '单次模型调用 + tool';
   }
   if (multiAgentScale && flags.needsObservability) {
-    return 'Multi-agent orchestration + full tracing';
+    return 'Multi-agent orchestration + 全链路 tracing';
   }
   if (flags.needsParallelTools && flags.needsSandbox) {
-    return 'Reason-act loop + parallel sandboxed tools';
+    return 'Reason-act loop + 并行 sandboxed tool';
   }
   if (flags.needsContextManagement || flags.needsLongTermMemory) {
-    return 'Reason-act loop + managed memory';
+    return 'Reason-act loop + 受管 memory';
   }
   return 'Reason-act loop + tool registry';
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags, multiAgentScale: boolean): string {
   if (!flags.isLoop) {
-    return 'A single model call selects one tool and returns. No loop, memory, planner, or tracing is justified yet.';
+    return '单次模型调用挑一个 tool 然后返回。loop、memory、planner、tracing 现在都没必要。';
   }
   if (multiAgentScale && flags.needsObservability) {
-    return 'Many agent sessions run deep tasks with a planner, routed tool registry, sandboxed parallel execution, short- and long-term memory, and per-step tracing with hard guardrails over a rate-limited LLM gateway.';
+    return '很多 agent session 跑深任务，带 planner、做过 route 的 tool registry、sandboxed 并行执行、short-term 与 long-term memory，以及在一条被 rate-limit 的 LLM gateway 上的 per-step tracing 加硬性 guardrail。';
   }
   if (flags.needsParallelTools && flags.needsSandbox) {
-    return 'The reason-act loop fans independent tool calls out in parallel behind a sandbox pool while managing the growing conversation context each step.';
+    return 'reason-act loop 把相互独立的 tool call 在 sandbox pool 后面并行 fan out，同时管理每个 step 不断变大的对话 context。';
   }
   if (flags.needsContextManagement || flags.needsLongTermMemory) {
-    return 'A reason-act loop with a planner summarizes the conversation each step and offloads durable facts to a vector store so the context window stays bounded.';
+    return '一个带 planner 的 reason-act loop 每个 step 都把对话 summarize 掉，并把持久的事实卸载到 vector store，让 context window 保持有界。';
   }
-  return 'A reason-act loop iterates decide-call-observe over a small tool registry, isolating execution in a sandbox when tools touch real side effects.';
+  return 'reason-act loop 在一个小 tool registry 上迭代 decide-call-observe，当 tool 碰到真实副作用时把执行隔离进 sandbox。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {

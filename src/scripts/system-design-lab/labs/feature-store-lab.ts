@@ -22,16 +22,16 @@ const warehouseScanBudgetGigabytes = 2_000; // offline scan a single warehouse h
 
 export const featureStoreLabDefinition: SystemDesignLabDefinition = {
   id: 'feature-store',
-  eyebrow: 'System Design Lab',
+  eyebrow: '系统设计 Lab',
   title:
-    'A feature store is two stores wearing one schema: the hard part is computing the same feature identically for training and serving.',
+    'feature store 本质是两个 store 共用一套 schema：难点在于让 training 和 serving 用完全一致的方式算出同一个 feature。',
   summary:
-    'Change serving lookups, feature and entity counts, the online latency target, training rows, and streaming freshness, and toggle streaming features and point-in-time correctness. The design evolves from features computed inline, to an offline batch store, to an online/offline split with parity, to point-in-time training joins, and finally to streaming materialization at scale.',
+    '调节 serving lookup、feature 数和 entity 数、online latency 目标、training 行数、streaming 新鲜度，再开关 streaming features 和 point-in-time correctness。架构会从 feature 在请求路径里现算，演进到 offline batch store，再到带 parity 的 online/offline split，再到 point-in-time training join，最终到大规模的 streaming materialization。',
   controls: [
     {
       id: 'servingLookupsPerSecond',
-      label: 'Serving lookups',
-      help: 'Online feature reads per second at inference: each prediction fetches a row of features by entity key.',
+      label: 'Serving lookup',
+      help: '推理时每秒的 online feature 读取量：每次预测都按 entity key 取一行 feature。',
       min: 1,
       max: 2_000_000,
       defaultValue: 500,
@@ -40,30 +40,30 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'featureCount',
-      label: 'Features',
-      help: 'Distinct feature columns served and materialized. More features means wider rows and more transforms to keep in parity.',
+      label: 'Feature 数',
+      help: '对外服务并 materialize 的 feature 列数。feature 越多，行越宽，要保持 parity 的 transform 也越多。',
       min: 5,
       max: 50_000,
       defaultValue: 200,
       scale: 'log',
-      unit: 'features',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'entityCount',
-      label: 'Entities',
-      help: 'Distinct keys (users, items, sessions) with feature values. Sets the online store size and key cardinality.',
+      label: 'Entity 数',
+      help: '带 feature 值的 distinct key 数（用户、物品、会话）。决定 online store 的体量和 key 的基数。',
       min: 1_000,
       max: 5_000_000_000,
       defaultValue: 5_000_000,
       scale: 'log',
-      unit: 'keys',
+      unit: '个',
       format: 'count',
     },
     {
       id: 'onlineLatencyTargetMs',
-      label: 'Online latency target',
-      help: 'p99 budget to return a feature vector at serving. Tight budgets force a dedicated low-latency online store.',
+      label: 'Online latency 目标',
+      help: 'serving 时返回一个 feature vector 的 p99 预算。预算越紧，越需要一个专门的低延迟 online store。',
       min: 1,
       max: 500,
       defaultValue: 25,
@@ -72,19 +72,19 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
     },
     {
       id: 'trainingRows',
-      label: 'Training rows',
-      help: 'Labeled rows joined to historical features to build a training set. Drives the offline join and scan cost.',
+      label: 'Training 行数',
+      help: '带 label 的行，join 上历史 feature 来构建 training set。决定 offline join 和扫描的开销。',
       min: 10_000,
       max: 50_000_000_000,
       defaultValue: 5_000_000,
       scale: 'log',
-      unit: 'rows',
+      unit: '行',
       format: 'count',
     },
     {
       id: 'streamFreshnessSeconds',
-      label: 'Freshness lag',
-      help: 'How stale an online feature is allowed to be. Seconds-level freshness rules out periodic batch materialization.',
+      label: '新鲜度延迟',
+      help: '一个 online feature 最多能有多旧。秒级新鲜度就排除了周期性的 batch materialization。',
       min: 1,
       max: 86_400,
       defaultValue: 3_600,
@@ -96,13 +96,13 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'streamingFeatures',
       label: 'Streaming features',
-      help: 'Update features from an event stream in near-real-time instead of only periodic batch jobs.',
+      help: '从 event stream 近实时更新 feature，而不是只靠周期性的 batch job。',
       defaultValue: false,
     },
     {
       id: 'pointInTimeCorrectness',
       label: 'Point-in-time correctness',
-      help: 'Join each label to feature values as they were at the label timestamp, preventing future data from leaking into training.',
+      help: '把每个 label join 到它在 label 时间点上当时的 feature 值，防止未来数据泄漏进 training。',
       defaultValue: true,
     },
   ],
@@ -110,8 +110,8 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'inline',
       step: '01',
-      title: 'Features computed inline',
-      summary: 'A model recomputes features in the request path over a small key set.',
+      title: 'Feature 在请求路径里现算',
+      summary: '一个模型在请求路径里、对一小撮 key 现场重算 feature。',
       values: {
         servingLookupsPerSecond: 20,
         featureCount: 15,
@@ -126,8 +126,8 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'offline-batch',
       step: '02',
-      title: 'Offline batch features',
-      summary: 'Nightly jobs precompute features into a warehouse for training.',
+      title: 'Offline batch feature',
+      summary: '每晚的 job 把 feature 预算好写进 warehouse 供 training 用。',
       values: {
         servingLookupsPerSecond: 200,
         featureCount: 80,
@@ -143,7 +143,7 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
       id: 'online-offline-split',
       step: '03',
       title: 'Online/offline split',
-      summary: 'Low-latency serving needs a dedicated online store kept in parity with offline.',
+      summary: '低延迟 serving 需要一个专门的 online store，并和 offline 保持 parity。',
       values: {
         servingLookupsPerSecond: 30_000,
         featureCount: 400,
@@ -158,8 +158,8 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'point-in-time',
       step: '04',
-      title: 'Point-in-time training joins',
-      summary: 'Large training sets must join features as-of each label to avoid leakage.',
+      title: 'Point-in-time training join',
+      summary: '大的 training set 必须按每个 label 的 as-of 时点 join feature，才能避免泄漏。',
       values: {
         servingLookupsPerSecond: 120_000,
         featureCount: 2_000,
@@ -174,8 +174,8 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
     {
       id: 'streaming-scale',
       step: '05',
-      title: 'Streaming features at scale',
-      summary: 'Seconds-fresh features over billions of keys at high serving QPS.',
+      title: '大规模 streaming features',
+      summary: '在数十亿 key、高 serving QPS 下做到秒级新鲜的 feature。',
       values: {
         servingLookupsPerSecond: 1_000_000,
         featureCount: 12_000,
@@ -189,9 +189,9 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
     },
   ],
   diagram: buildColumnDiagram({
-    title: 'Feature store architecture diagram',
+    title: 'Feature store 架构图',
     description:
-      'Whiteboard-style architecture diagram for an ML feature store: models and training clients, a serving API and feature registry, a low-latency online store, batch and stream materialization, an offline warehouse, and a point-in-time training-join job.',
+      'ML feature store 的白板式架构图：模型与 training 客户端、serving API 和 feature registry、低延迟 online store、batch 和 stream materialization、offline warehouse，以及一个 point-in-time training-join job。',
     columns: [
       {
         id: 'clients',
@@ -202,14 +202,14 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
             id: 'servingModel',
             title: 'Serving model',
             subtitle: 'online inference',
-            summary: 'asks for a feature vector by entity key on every prediction',
+            summary: '每次预测都按 entity key 要一个 feature vector',
             kind: 'client',
           },
           {
             id: 'trainingJob',
             title: 'Training job',
-            subtitle: 'builds datasets',
-            summary: 'requests historical features joined to labels to train models',
+            subtitle: '构建数据集',
+            summary: '请求 join 到 label 的历史 feature 来训练模型',
             kind: 'client',
           },
         ],
@@ -223,14 +223,14 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
             id: 'servingApi',
             title: 'Serving API',
             subtitle: 'feature lookup',
-            summary: 'fetches feature vectors at low latency for online inference',
+            summary: '为 online inference 低延迟地取出 feature vector',
             kind: 'api',
           },
           {
             id: 'registry',
             title: 'Feature registry',
-            subtitle: 'definitions',
-            summary: 'single source of truth for feature definitions and transform logic',
+            subtitle: '定义',
+            summary: 'feature 定义和 transform 逻辑的 single source of truth',
             kind: 'service',
           },
         ],
@@ -244,7 +244,7 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
             id: 'onlineStore',
             title: 'Online store',
             subtitle: 'low-latency KV',
-            summary: 'serves the latest feature values keyed by entity in single-digit ms',
+            summary: '按 entity 做 key，在个位数 ms 内返回最新的 feature 值',
             kind: 'nosql',
           },
         ],
@@ -257,15 +257,15 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
           {
             id: 'batchJob',
             title: 'Batch job',
-            subtitle: 'periodic compute',
-            summary: 'recomputes features on a schedule and writes them to both stores',
+            subtitle: '周期性计算',
+            summary: '按计划重算 feature，并写进两个 store',
             kind: 'compute',
           },
           {
             id: 'streamJob',
             title: 'Stream job',
-            subtitle: 'near-real-time',
-            summary: 'updates features from an event stream for seconds-level freshness',
+            subtitle: '近实时',
+            summary: '从 event stream 更新 feature，做到秒级新鲜度',
             kind: 'compute',
           },
         ],
@@ -279,14 +279,14 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
             id: 'offlineStore',
             title: 'Offline store',
             subtitle: 'warehouse',
-            summary: 'durable historical feature values for training and backfills',
+            summary: '持久保存历史 feature 值，供 training 和 backfill 用',
             kind: 'db',
           },
           {
             id: 'pitJoin',
             title: 'Point-in-time join',
             subtitle: 'as-of training',
-            summary: 'joins each label to feature values as of its timestamp to stop leakage',
+            summary: '把每个 label join 到它时间点上的 feature 值，杜绝泄漏',
             kind: 'compute',
           },
         ],
@@ -305,77 +305,77 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
     ],
   }),
   meters: [
-    { id: 'onlineRead', label: 'Online lookup load' },
-    { id: 'onlineLatency', label: 'Online latency pressure' },
-    { id: 'onlineStorage', label: 'Online store size' },
-    { id: 'freshness', label: 'Freshness vs lag budget' },
-    { id: 'trainingJoin', label: 'Training join cost' },
+    { id: 'onlineRead', label: 'Online lookup 负载' },
+    { id: 'onlineLatency', label: 'Online latency 压力' },
+    { id: 'onlineStorage', label: 'Online store 体量' },
+    { id: 'freshness', label: '新鲜度 vs 延迟预算' },
+    { id: 'trainingJoin', label: 'Training join 开销' },
   ],
   decisions: [
     { id: 'storeSplit', title: 'Online/offline split' },
-    { id: 'materialization', title: 'Materialization mode' },
-    { id: 'pointInTime', title: 'Point-in-time joins' },
-    { id: 'onlineStoreChoice', title: 'Online store choice' },
+    { id: 'materialization', title: 'Materialization 模式' },
+    { id: 'pointInTime', title: 'Point-in-time join' },
+    { id: 'onlineStoreChoice', title: 'Online store 选型' },
     { id: 'registry', title: 'Feature registry' },
-    { id: 'freshness', title: 'Freshness strategy' },
+    { id: 'freshness', title: '新鲜度策略' },
   ],
   sourceBackedRules: [
     {
-      title: 'A feature store splits a low-latency online store from a scalable offline store',
+      title: 'feature store 把低延迟的 online store 和可扩展的 offline store 拆开',
       source: 'Feast Docs',
       url: 'https://docs.feast.dev/',
       summary:
-        'Feast materializes features into an online store for serving and keeps an offline store for historical retrieval, so the same feature definitions back both paths.',
+        'Feast 把 feature materialize 进 online store 供 serving，又保留一个 offline store 做历史检索，于是同一套 feature 定义同时支撑两条路径。',
     },
     {
-      title: 'Online/offline parity is the core problem a feature store solves',
+      title: 'Online/offline parity 才是 feature store 真正要解决的核心问题',
       source: 'Uber Michelangelo',
       url: 'https://www.uber.com/blog/michelangelo-machine-learning-platform/',
       summary:
-        'Michelangelo computes features once and shares them across training and serving so the model sees the same values in both, avoiding training/serving skew.',
+        'Michelangelo 把 feature 只算一次，并在 training 和 serving 间共享，让模型在两边看到相同的值，避免 training/serving skew。',
     },
     {
-      title: 'Training joins must be point-in-time correct to avoid label leakage',
+      title: 'Training join 必须 point-in-time correct，才能避免 label 泄漏',
       source: 'Feast Point-in-Time Joins',
       url: 'https://docs.feast.dev/getting-started/concepts/point-in-time-joins',
       summary:
-        'Features must be joined to labels as of the prediction timestamp; using values from after the label leaks future information and inflates offline metrics.',
+        'feature 必须按预测时间点 join 到 label；用 label 之后的值会泄漏未来信息，把 offline 指标虚高。',
     },
     {
-      title: 'In-memory key-value stores serve online features at sub-millisecond latency',
+      title: 'in-memory key-value store 能在亚毫秒延迟下服务 online feature',
       source: 'Redis Docs',
       url: 'https://redis.io/docs/latest/develop/',
       summary:
-        'Point lookups by entity key from an in-memory store meet tight serving budgets that a warehouse scan cannot.',
+        '从 in-memory store 按 entity key 做 point lookup，能满足 warehouse 扫描达不到的紧 serving 预算。',
     },
   ],
   teachingAssumptions: [
-    'Online lookups are modeled as point reads of one feature row per entity key; each fetch returns the full feature vector.',
-    'Single-node read, latency, storage, and join budgets are conservative teaching numbers, not vendor limits.',
-    'Online store size approximates entities x features x ~32 bytes; real systems add TTLs, indexes, and replication overhead.',
+    'online lookup 被建模为按 entity key 读一行 feature 的 point read；每次取回完整的 feature vector。',
+    '单节点的读取、延迟、存储、join 预算都是保守的教学数字，不是厂商上限。',
+    'online store 体量约等于 entity 数 x feature 数 x ~32 字节；真实系统还要加上 TTL、索引和 replication 开销。',
   ],
   teachingWalkthrough: [
     {
       id: 'inline',
       step: '01',
-      focus: 'Features computed inline',
+      focus: 'Feature 在请求路径里现算',
       scenarioId: 'inline',
       question:
-        'A single model computes 15 features in the request path over 50k keys at 20 lookups/s. Do you need a feature store at all yet?',
+        '单个模型在请求路径里、对 50k 个 key、以 20 lookup/s 算 15 个 feature。这时候你真的需要 feature store 吗？',
       reveal:
-        'No. At this volume the model can compute features inline from the source data. A feature store earns its keep only when features must be shared across models and reused identically in training — none of that pressure exists yet.',
-      takeaway: 'A feature store is reuse and parity infrastructure; without sharing, inline computation is simpler.',
+        '不需要。在这个量级下，模型可以直接从源数据里 inline 算出 feature。只有当 feature 必须跨模型共享、并在 training 里被以完全一致的方式复用时，feature store 才值回票价——而这些压力现在都还不存在。',
+      takeaway: 'feature store 是复用和 parity 的基础设施；没有共享需求时，inline 计算更简单。',
     },
     {
       id: 'offline-batch',
       step: '02',
-      focus: 'Offline batch features',
+      focus: 'Offline batch feature',
       scenarioId: 'offline-batch',
       question:
-        'You now train on 20M rows and want repeatable features. What is the first piece to add, and why offline first?',
+        '现在你在 20M 行上做 training，想要可复现的 feature。第一块该加什么，为什么先从 offline 开始？',
       reveal:
-        'Precompute features with a batch job into an offline warehouse. Training reads them back for reproducibility, and the same transform code becomes the definition others reuse. Serving is still slow-tolerant, so no online store is needed yet.',
-      takeaway: 'Offline batch materialization comes first: it makes features reproducible and reusable before serving gets strict.',
+        '用一个 batch job 把 feature 预算好写进 offline warehouse。training 读回这些值以保证可复现，同一份 transform 代码也就成了别人复用的定义。serving 这时仍然容忍慢，所以还不需要 online store。',
+      takeaway: 'offline batch materialization 先来：它让 feature 在 serving 变严格之前就先做到可复现、可复用。',
     },
     {
       id: 'online-offline-split',
@@ -383,32 +383,32 @@ export const featureStoreLabDefinition: SystemDesignLabDefinition = {
       focus: 'Online/offline split',
       scenarioId: 'online-offline-split',
       question:
-        'Serving now needs 30k lookups/s under 25 ms. Can the warehouse that backs training also answer online reads?',
+        'serving 现在要 30k lookup/s、控制在 25 ms 以内。撑 training 的那个 warehouse 还能顺带回答 online 读取吗？',
       reveal:
-        'No — a warehouse scan cannot meet a 25 ms point-read budget at that QPS. You split out a low-latency online KV store and materialize the same features into it. The hard requirement is parity: both stores must reflect the same computation, or the model sees training/serving skew.',
-      takeaway: 'Tight serving latency forces a separate online store; the whole job is keeping it in parity with offline.',
+        '不行——在那个 QPS 下，warehouse 扫描满足不了 25 ms 的 point-read 预算。你要拆出一个低延迟的 online KV store，并把同样的 feature materialize 进去。硬性要求是 parity：两个 store 必须反映同一份计算，否则模型会看到 training/serving skew。',
+      takeaway: '紧的 serving latency 逼出一个独立的 online store；整件事的活儿就是让它和 offline 保持 parity。',
     },
     {
       id: 'point-in-time',
-      focus: 'Point-in-time joins',
+      focus: 'Point-in-time join',
       step: '04',
       scenarioId: 'point-in-time',
       question:
-        'Training on 5B rows, you naively join the latest feature value to each label. What silently breaks?',
+        '在 5B 行上 training，你图省事把最新的 feature 值 join 到每个 label 上。什么东西会悄无声息地坏掉？',
       reveal:
-        'Label leakage. The latest value reflects data from after the label, so the model trains on the future and offline metrics look great but collapse in production. You need an as-of (point-in-time) join that picks the feature value as it was at each label timestamp, which is far more expensive than a plain join.',
-      takeaway: 'Joining the latest value leaks the future; point-in-time joins are the price of correct training data.',
+        'label 泄漏。最新值反映的是 label 之后的数据，于是模型在用未来训练，offline 指标看着很漂亮，到生产里却崩盘。你需要一个 as-of（point-in-time）join，挑出每个 label 时间点上当时的 feature 值，而这比普通 join 贵得多。',
+      takeaway: 'join 最新值会泄漏未来；point-in-time join 是换来正确 training 数据的代价。',
     },
     {
       id: 'streaming-scale',
       step: '05',
-      focus: 'Streaming features at scale',
+      focus: '大规模 streaming features',
       scenarioId: 'streaming-scale',
       question:
-        'Features must now be 5 seconds fresh over billions of keys. Can a faster batch schedule deliver that?',
+        '现在 feature 要在数十亿 key 上做到 5 秒新鲜。把 batch 跑得更频繁能做到吗？',
       reveal:
-        'No — even frequent batch jobs leave a freshness gap measured in minutes. Seconds-level freshness requires a streaming pipeline that updates the online store from an event stream, and that same computation must still be replayable offline so training and serving stay in parity.',
-      takeaway: 'Seconds-fresh features need streaming, and streaming must stay replayable offline to preserve parity.',
+        '不行——就算 batch job 跑得再勤，新鲜度缺口也是分钟级的。秒级新鲜需要一条 streaming pipeline，从 event stream 更新 online store；而同一份计算还必须能在 offline 重放，才能让 training 和 serving 保持 parity。',
+      takeaway: '秒级新鲜的 feature 需要 streaming，而 streaming 必须能 offline 重放，才能维持 parity。',
     },
   ],
   analyze: analyzeFeatureStoreWorkload,
@@ -522,36 +522,36 @@ function analyzeFeatureStoreWorkload(workload: WorkloadValues): LabAnalysis {
         ratio: onlineReadRatio,
         valueText: `${formatRate(servingLookupsPerSecond)} ops/s`,
         copy: needsOnlineStore
-          ? `The online store answers ${formatRate(servingLookupsPerSecond)} point lookups/s by entity key.`
-          : 'Serving traffic is low enough to recompute or read features inline.',
+          ? `online store 按 entity key 每秒回答 ${formatRate(servingLookupsPerSecond)} 次 point lookup。`
+          : 'serving 流量足够低，feature 可以现算或 inline 读取。',
       },
       onlineLatency: {
         ratio: latencyRatio,
-        valueText: `${Math.round(onlineLatencyTargetMs)} ms target`,
+        valueText: `${Math.round(onlineLatencyTargetMs)} ms 目标`,
         copy:
           onlineLatencyTargetMs < comfortableOnlineLatencyMs * 3
-            ? `A ${Math.round(onlineLatencyTargetMs)} ms p99 budget rules out warehouse reads; an in-memory online store is required.`
-            : `A ${Math.round(onlineLatencyTargetMs)} ms budget is relaxed enough that a general-purpose database read could meet it; a warehouse still cannot.`,
+            ? `${Math.round(onlineLatencyTargetMs)} ms 的 p99 预算排除了 warehouse 读取；必须上一个 in-memory online store。`
+            : `${Math.round(onlineLatencyTargetMs)} ms 的预算够宽松，通用数据库的一次读取就能满足；但 warehouse 仍然不行。`,
       },
       onlineStorage: {
         ratio: onlineStorageRatio,
         valueText: formatStorageGigabytes(onlineStorageGigabytes),
-        copy: `${formatCount(entityCount)} entities x ${formatCount(featureCount)} features at ~${bytesPerFeatureValue} bytes each.`,
+        copy: `${formatCount(entityCount)} 个 entity x ${formatCount(featureCount)} 个 feature，每个约 ${bytesPerFeatureValue} 字节。`,
       },
       freshness: {
         ratio: freshnessRatio,
         valueText: formatFreshness(streamFreshnessSeconds),
         copy:
           streamFreshnessSeconds < comfortableStreamFreshnessSeconds
-            ? `A ${formatFreshness(streamFreshnessSeconds)} freshness budget is below what periodic batch can deliver; stream the updates.`
-            : `A ${formatFreshness(streamFreshnessSeconds)} freshness budget is comfortable for scheduled batch materialization.`,
+            ? `${formatFreshness(streamFreshnessSeconds)} 的新鲜度预算低于周期性 batch 能给的水平；改成 stream 更新。`
+            : `${formatFreshness(streamFreshnessSeconds)} 的新鲜度预算对定时 batch materialization 来说很从容。`,
       },
       trainingJoin: {
         ratio: trainingJoinRatio,
-        valueText: `${formatCount(trainingRows)} rows`,
+        valueText: `${formatCount(trainingRows)} 行`,
         copy: needsPointInTime
-          ? `Point-in-time joins over ${formatCount(trainingRows)} rows scan ~${formatStorageGigabytes(trainingScanGigabytes)} of history with as-of lookups.`
-          : `A plain join over ${formatCount(trainingRows)} rows reads ~${formatStorageGigabytes(trainingScanGigabytes)} of features.`,
+          ? `在 ${formatCount(trainingRows)} 行上做 point-in-time join，要用 as-of 查找扫描约 ${formatStorageGigabytes(trainingScanGigabytes)} 的历史。`
+          : `在 ${formatCount(trainingRows)} 行上做普通 join，读取约 ${formatStorageGigabytes(trainingScanGigabytes)} 的 feature。`,
       },
     },
     decisions: buildDecisions({
@@ -604,67 +604,67 @@ function buildReasons(
   if (analysis.needsOffline) {
     reasons.push({
       severity: 'ok',
-      text: `Features are precomputed into an offline store so ${formatCount(
+      text: `feature 被预算进 offline store，于是 ${formatCount(
         analysis.trainingRows,
-      )} training rows read reproducible values and the same transform code becomes the shared definition.`,
+      )} 行 training 数据读到的是可复现的值，同一份 transform 代码也成了共享的定义。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'With one model and a tiny training set, features can be computed inline from source data — no offline store earns its keep yet.',
+      text: '只有一个模型、training set 又很小，feature 可以从源数据 inline 算出来——还没到 offline store 值回票价的时候。',
     });
   }
 
   if (analysis.needsOnlineStore) {
     reasons.push({
       severity: analysis.needsOnlineScaleOut ? 'danger' : 'warning',
-      text: `${formatRate(
-        analysis.servingLookupsPerSecond,
-      )} lookups/s under a ${Math.round(
+      text: `在 ${Math.round(
         analysis.onlineLatencyTargetMs,
-      )} ms budget need a dedicated low-latency online store, separate from the warehouse.`,
+      )} ms 预算下做 ${formatRate(
+        analysis.servingLookupsPerSecond,
+      )} lookup/s，需要一个专门的低延迟 online store，和 warehouse 分开。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Serving load and latency are relaxed enough that features can be computed or read inline without an online store.',
+      text: 'serving 的负载和延迟都够宽松，feature 可以现算或 inline 读取，不需要 online store。',
     });
   }
 
   if (analysis.needsOnlineStore) {
     reasons.push({
       severity: 'warning',
-      text: 'The online and offline stores must reflect the same computation, or the model sees training/serving skew — parity is the central constraint.',
+      text: 'online 和 offline 两个 store 必须反映同一份计算，否则模型会遇到 training/serving skew——parity 是核心约束。',
     });
   }
 
   if (analysis.needsPointInTime) {
     reasons.push({
       severity: analysis.trainingJoinRatio > 1 ? 'danger' : 'warning',
-      text: `Training over ${formatCount(
+      text: `在 ${formatCount(
         analysis.trainingRows,
-      )} rows must use point-in-time (as-of) joins; the latest value would leak future data into training.`,
+      )} 行上做 training 必须用 point-in-time（as-of）join；用最新值会把未来数据泄漏进 training。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
-      text: 'Training sets are small and a plain feature join is acceptable, but watch for leakage as soon as labels span time.',
+      text: 'training set 很小，普通的 feature join 还能接受，但一旦 label 横跨时间就要当心泄漏。',
     });
   }
 
   if (analysis.needsStreaming) {
     reasons.push({
       severity: 'warning',
-      text: `A ${formatFreshness(
+      text: `${formatFreshness(
         analysis.streamFreshnessSeconds,
-      )} freshness target exceeds batch; stream updates into the online store and keep them replayable offline.`,
+      )} 的新鲜度目标超出了 batch 的能力；把更新 stream 进 online store，并保持它在 offline 可重放。`,
     });
   } else if (analysis.needsOffline) {
     reasons.push({
       severity: 'ok',
-      text: `A ${formatFreshness(
+      text: `${formatFreshness(
         analysis.streamFreshnessSeconds,
-      )} freshness budget is comfortable for scheduled batch materialization, so no streaming pipeline is needed yet.`,
+      )} 的新鲜度预算对定时 batch materialization 来说很从容，所以暂时不需要 streaming pipeline。`,
     });
   }
 
@@ -673,9 +673,9 @@ function buildReasons(
       severity: 'danger',
       text: `${formatStorageGigabytes(
         analysis.onlineStorageGigabytes,
-      )} of online values (${formatCount(analysis.entityCount)} entities x ${formatCount(
+      )} 的 online 值（${formatCount(analysis.entityCount)} 个 entity x ${formatCount(
         analysis.featureCount,
-      )} features) and the read rate exceed one node; shard the online store.`,
+      )} 个 feature）加上读取速率，已经超出单节点；把 online store 做 shard。`,
     });
   }
 
@@ -684,14 +684,14 @@ function buildReasons(
       severity: 'ok',
       text: `${formatCount(
         analysis.featureCount,
-      )} shared features need a registry so definitions and transform logic are reused, not re-implemented per model.`,
+      )} 个共享 feature 需要一个 registry，让定义和 transform 逻辑被复用，而不是每个模型各写一遍。`,
     });
   } else {
     reasons.push({
       severity: 'ok',
       text: `${formatCount(
         analysis.featureCount,
-      )} features and a single consumer mean a feature registry is overhead for now; revisit it once features are shared across models.`,
+      )} 个 feature、又只有一个消费方，feature registry 目前是额外负担；等 feature 跨模型共享了再回头看。`,
     });
   }
 
@@ -711,65 +711,65 @@ function buildDecisions(
     storeSplit: {
       state: flags.needsOnlineStore ? 'needed' : 'not-yet',
       copy: flags.needsOnlineStore
-        ? 'Split a low-latency online store from the offline warehouse; both materialize from the same feature definitions.'
-        : 'One store is fine — serving tolerates the same path that training reads from.',
+        ? '把低延迟 online store 从 offline warehouse 里拆出来；两者都从同一套 feature 定义 materialize。'
+        : '一个 store 就够——serving 容忍走 training 读取的同一条路径。',
     },
     materialization: {
       state: flags.needsStreaming ? 'tradeoff' : flags.needsOffline ? 'useful' : 'not-yet',
       copy: flags.needsStreaming
-        ? `Run batch for backfills plus a stream job for the ${formatFreshness(
+        ? `跑 batch 做 backfill，再加一个 stream job 来满足 ${formatFreshness(
             flags.streamFreshnessSeconds,
-          )} freshness target; the stream must stay replayable offline.`
+          )} 的新鲜度目标；这条 stream 必须能在 offline 重放。`
         : flags.needsOffline
-          ? 'Periodic batch jobs precompute features into the stores; freshness is comfortable.'
-          : 'No materialization yet — features are computed inline at request time.',
+          ? '周期性的 batch job 把 feature 预算进各个 store；新鲜度很从容。'
+          : '还不需要 materialization——feature 在请求时 inline 算出来。',
     },
     pointInTime: {
       state: flags.needsPointInTime ? 'needed' : 'not-yet',
       copy: flags.needsPointInTime
-        ? `Join features as-of each label timestamp over ${formatCount(
+        ? `在 ${formatCount(
             flags.trainingRows,
-          )} rows so the model never trains on the future.`
-        : 'A plain join is acceptable while training sets are small and labels do not span time.',
+          )} 行上，按每个 label 时间点 as-of join feature，让模型永远不会用未来训练。`
+        : 'training set 还小、label 也不横跨时间时，普通 join 可以接受。',
     },
     onlineStoreChoice: {
       state: flags.needsOnlineScaleOut ? 'tradeoff' : flags.needsOnlineStore ? 'needed' : 'not-yet',
       copy: flags.needsOnlineScaleOut
-        ? 'Use a sharded in-memory KV store (Redis-class) sized for the read rate and value footprint.'
+        ? '用一个做了 shard 的 in-memory KV store（Redis 一类），按读取速率和值的体量来定规模。'
         : flags.needsOnlineStore
-          ? `An in-memory KV store serves ${formatRate(
+          ? `一个 in-memory KV store 能在 ${Math.round(flags.onlineLatencyTargetMs)} ms 预算内服务 ${formatRate(
               flags.servingLookupsPerSecond,
-            )} lookups/s within a ${Math.round(flags.onlineLatencyTargetMs)} ms budget.`
-          : 'No online store yet, so no online engine decision to make.',
+            )} lookup/s。`
+          : '还没有 online store，所以也没有 online 引擎可选。',
     },
     registry: {
       state: flags.needsRegistry ? 'useful' : 'not-yet',
       copy: flags.needsRegistry
-        ? `Govern ${formatCount(
+        ? `用一个 registry 来治理 ${formatCount(
             flags.featureCount,
-          )} feature definitions in a registry so training and serving share one source of truth.`
-        : 'Few features and one model — a registry is overhead for now.',
+          )} 个 feature 定义，让 training 和 serving 共享同一个 source of truth。`
+        : 'feature 少、又只有一个模型——registry 目前是额外负担。',
     },
     freshness: {
       state: flags.needsStreaming ? 'needed' : flags.needsOffline ? 'useful' : 'not-yet',
       copy: flags.needsStreaming
-        ? `Stream features near-real-time to hit ${formatFreshness(flags.streamFreshnessSeconds)} of staleness.`
+        ? `近实时 stream feature，把过期程度压到 ${formatFreshness(flags.streamFreshnessSeconds)}。`
         : flags.needsOffline
-          ? 'Scheduled batch keeps features fresh enough for the current budget.'
-          : 'Freshness is irrelevant while features are computed inline.',
+          ? '定时 batch 让 feature 的新鲜度对当前预算来说足够。'
+          : 'feature 还在 inline 计算时，新鲜度无关紧要。',
     },
   };
 }
 
 function chooseArchitectureTitle(flags: ArchitectureFlags): string {
   if (!flags.needsOnlineStore && !flags.needsOffline) {
-    return 'Inline feature computation';
+    return 'Inline feature 计算';
   }
   if (flags.needsStreaming && flags.needsOnlineScaleOut) {
-    return 'Streaming materialization + sharded online store';
+    return 'Streaming materialization + 分片 online store';
   }
   if (flags.needsOnlineStore && flags.needsPointInTime) {
-    return 'Online/offline split + point-in-time training joins';
+    return 'Online/offline split + point-in-time training join';
   }
   if (flags.needsOnlineStore) {
     return 'Online/offline store split';
@@ -779,32 +779,32 @@ function chooseArchitectureTitle(flags: ArchitectureFlags): string {
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
   if (!flags.needsOnlineStore && !flags.needsOffline) {
-    return 'A single model computes features inline from source data. There is nothing to share, so a feature store is not justified yet.';
+    return '单个模型从源数据 inline 算 feature。没什么可共享的，所以现在还撑不起一个 feature store。';
   }
   if (flags.needsStreaming && flags.needsOnlineScaleOut) {
-    return 'A streaming pipeline keeps a sharded online store seconds-fresh while the same computation is replayed offline, and point-in-time joins build correct training sets.';
+    return '一条 streaming pipeline 把分片的 online store 保持在秒级新鲜，同时同一份计算在 offline 重放，再用 point-in-time join 构建正确的 training set。';
   }
   if (flags.needsOnlineStore && flags.needsPointInTime) {
-    return 'A low-latency online store serves features in parity with the offline warehouse, and training sets are built with point-in-time joins to avoid leakage.';
+    return '一个低延迟 online store 与 offline warehouse 保持 parity 地服务 feature，training set 用 point-in-time join 构建以避免泄漏。';
   }
   if (flags.needsOnlineStore) {
-    return 'A dedicated online store serves features at low latency while the offline warehouse holds history; both materialize from the same definitions for parity.';
+    return '一个专门的 online store 低延迟地服务 feature，offline warehouse 保存历史；两者从同一套定义 materialize 以保证 parity。';
   }
-  return 'Batch jobs precompute features into an offline warehouse so training is reproducible and the transforms are reused.';
+  return 'batch job 把 feature 预算进 offline warehouse，让 training 可复现、transform 可复用。';
 }
 
 function chooseArchitecturePath(flags: ArchitectureFlags): string {
   if (!flags.needsOnlineStore && !flags.needsOffline) {
-    return 'Model -> compute features inline';
+    return 'Model -> inline 算 feature';
   }
   if (flags.needsStreaming && flags.needsOnlineScaleOut) {
-    return 'Model -> serving API -> sharded online store; stream + batch -> offline -> point-in-time join';
+    return 'Model -> serving API -> 分片 online store；stream + batch -> offline -> point-in-time join';
   }
   if (flags.needsOnlineStore && flags.needsPointInTime) {
-    return 'Serving -> online store; training -> point-in-time join -> offline store';
+    return 'Serving -> online store；training -> point-in-time join -> offline store';
   }
   if (flags.needsOnlineStore) {
-    return 'Serving -> online store; batch -> online + offline store';
+    return 'Serving -> online store；batch -> online + offline store';
   }
   return 'Training -> batch job -> offline store';
 }
@@ -816,13 +816,13 @@ function numericValue(workload: WorkloadValues, key: string): number {
 
 function formatFreshness(seconds: number): string {
   if (seconds >= 86_400) {
-    return `${Math.round(seconds / 86_400)} day${Math.round(seconds / 86_400) === 1 ? '' : 's'}`;
+    return `${Math.round(seconds / 86_400)} 天`;
   }
   if (seconds >= 3600) {
-    return `${Math.round(seconds / 3600)} hr`;
+    return `${Math.round(seconds / 3600)} 小时`;
   }
   if (seconds >= 60) {
-    return `${Math.round(seconds / 60)} min`;
+    return `${Math.round(seconds / 60)} 分`;
   }
-  return `${Math.round(seconds)} sec`;
+  return `${Math.round(seconds)} 秒`;
 }
