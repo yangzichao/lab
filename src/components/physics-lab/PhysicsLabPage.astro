@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { findPhysicsLab } from '../../scripts/physics-lab/physics-lab-catalog';
+import { getPhysicsLabHtmlLang, normalizePhysicsLabLocale, type PhysicsLabLocale } from '../../scripts/physics-lab/physics-lab-i18n';
+import { getPhysicsLabPage } from '../../scripts/physics-lab/physics-lab-pages';
+import PhysicsLabShell from './PhysicsLabShell.astro';
+
+interface Props {
+  slug: string;
+  locale?: PhysicsLabLocale;
+}
+
+const locale = normalizePhysicsLabLocale(Astro.props.locale);
+const entry = findPhysicsLab(Astro.props.slug, locale);
+const page = getPhysicsLabPage(Astro.props.slug, locale);
+
+if (!entry || !page) {
+  throw new Error(`Unknown physics lab slug: ${Astro.props.slug}`);
+}
+---
+
+<BaseLayout title={`${entry.title} — Lab`} description={entry.tagline} lang={getPhysicsLabHtmlLang(locale)}>
+  <PhysicsLabShell entry={entry} locale={locale}>
+    <Fragment slot="readouts">
+      {
+        page.readouts.map((readout) => (
+          <div class="plab__readout">
+            <span>{readout.label}</span>
+            <strong data-readout={readout.id}>{readout.initialValue}</strong>
+          </div>
+        ))
+      }
+    </Fragment>
+
+    <form class="plab__panel" slot="controls" aria-label={page.controls.ariaLabel}>
+      <div class="plab__panel-head">
+        <p>{page.controls.eyebrow}</p>
+        <h2>{page.controls.title}</h2>
+      </div>
+
+      <div class="plab__actions">
+        {
+          page.controls.actions.map((action) => (
+            <button
+              class={`plab__button ${action.primary ? 'is-primary' : ''}`}
+              type="button"
+              data-action={action.id}
+              data-running-label={action.runningLabel}
+              data-paused-label={action.pausedLabel}
+            >
+              <i class={`ph ${action.icon}`} aria-hidden="true"></i>
+              <span>{action.label}</span>
+            </button>
+          ))
+        }
+      </div>
+
+      {
+        page.controls.presets && (
+          <div class="plab__presets">
+            {
+              page.controls.presets.map((preset) => (
+                <button class="plab__preset" type="button" data-preset={preset.id}>
+                  {preset.label}
+                </button>
+              ))
+            }
+          </div>
+        )
+      }
+
+      {
+        page.controls.toggles?.map((toggle) => (
+          <label class="plab__toggle">
+            <input type="checkbox" data-control={toggle.id} checked={toggle.checked} />
+            <span>
+              <strong>{toggle.label}</strong>
+              <small>{toggle.description}</small>
+            </span>
+          </label>
+        ))
+      }
+
+      {
+        page.controls.fields?.map((field) => (
+          <label class="plab__field">
+            <span class="plab__field-label">
+              {field.labelHtml ? <span set:html={field.labelHtml} /> : <span>{field.label}</span>}
+              <output data-output={field.id}>{field.outputValue}</output>
+            </span>
+            <input
+              type="range"
+              min={field.min}
+              max={field.max}
+              step={field.step}
+              value={field.value}
+              data-control={field.id}
+            />
+          </label>
+        ))
+      }
+
+      {
+        page.controls.notices?.map((notice) => (
+          <p class="plab__notice">
+            <i class={`ph ${notice.icon}`} aria-hidden="true"></i>
+            <span>{notice.text}</span>
+          </p>
+        ))
+      }
+    </form>
+  </PhysicsLabShell>
+
+  <script>
+    import { initPhysicsLab } from '../../scripts/physics-lab/init-physics-lab';
+    initPhysicsLab();
+  </script>
+</BaseLayout>

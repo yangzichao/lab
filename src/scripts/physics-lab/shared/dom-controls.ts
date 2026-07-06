@@ -79,6 +79,8 @@ export function updatePlayPauseButton(root: HTMLElement, running: boolean): void
     icon.className = running ? 'ph ph-pause' : 'ph ph-play';
   }
   if (label) {
-    label.textContent = running ? 'Pause' : 'Play';
+    const runningLabel = button.dataset.runningLabel ?? 'Pause';
+    const pausedLabel = button.dataset.pausedLabel ?? 'Play';
+    label.textContent = running ? runningLabel : pausedLabel;
   }
 }

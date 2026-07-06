@@ -18,11 +18,18 @@
   margin-bottom: 26px;
 }
 
+.plab__topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
 .plab__back {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 18px;
   color: var(--plab-muted);
   font-size: 0.9rem;
   font-weight: 600;
@@ -32,6 +39,44 @@
 
 .plab__back:hover {
   color: var(--plab-ink);
+}
+
+.plab__language-toggle {
+  position: sticky;
+  top: 14px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--plab-ink);
+  border-radius: 999px;
+  background: var(--plab-ink);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 10px 24px rgba(22, 32, 28, 0.14);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
+}
+
+.plab__language-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(22, 32, 28, 0.18);
+}
+
+.plab__language-toggle-active {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.plab__language-toggle-divider {
+  opacity: 0.58;
 }
 
 .plab__eyebrow {
@@ -323,5 +368,17 @@
 
   .plab__title {
     font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .plab__topbar {
+    grid-template-columns: 1fr;
+  }
+
+  .plab__language-toggle {
+    position: static;
+    justify-self: start;
+    order: -1;
   }
 }

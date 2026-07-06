@@ -1,0 +1,14 @@
+---
+import PhysicsLabPage from '../../components/physics-lab/PhysicsLabPage.astro';
+import { getPhysicsLabSlugs } from '../../scripts/physics-lab/physics-lab-catalog';
+
+export function getStaticPaths() {
+  return getPhysicsLabSlugs().map((slug) => ({
+    params: { slug },
+  }));
+}
+
+const slug = Astro.params.slug!;
+---
+
+<PhysicsLabPage slug={slug} locale="zh" />

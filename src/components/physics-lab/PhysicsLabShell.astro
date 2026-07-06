@@ -1,28 +1,58 @@
 ---
 import '../../styles/physics-lab/physics-lab.css';
-import { physicsLabCatalog, type PhysicsLabEntry } from '../../scripts/physics-lab/physics-lab-catalog';
+import { getPhysicsLabCatalog, type PhysicsLabEntry } from '../../scripts/physics-lab/physics-lab-catalog';
+import {
+  getAlternatePhysicsLabLocale,
+  getLocalizedPhysicsLabPath,
+  normalizePhysicsLabLocale,
+  type PhysicsLabLocale,
+} from '../../scripts/physics-lab/physics-lab-i18n';
 
 interface Props {
   entry: PhysicsLabEntry;
+  locale?: PhysicsLabLocale;
 }
 
 const { entry } = Astro.props;
+const locale = normalizePhysicsLabLocale(Astro.props.locale ?? entry.locale);
+const labs = getPhysicsLabCatalog(locale);
+const alternateLocale = getAlternatePhysicsLabLocale(locale);
+const currentLanguageLabel = locale === 'en' ? 'EN' : '中文';
+const alternateLanguageLabel = alternateLocale === 'en' ? 'EN' : '中文';
+const backLabel = locale === 'en' ? 'All labs' : '所有 lab';
+const navAriaLabel = locale === 'en' ? 'Physics labs' : '物理 lab';
+const languageToggleLabel =
+  locale === 'en' ? 'Switch language to Chinese' : '切换语言到 English';
+const canvasAriaLabel =
+  locale === 'en' ? `${entry.title} simulation canvas` : `${entry.title} 仿真画布`;
 ---
 
 <section class="plab" data-lab={entry.slug}>
   <header class="plab__head">
-    <a class="plab__back" href="/">
-      <i class="ph ph-arrow-left" aria-hidden="true"></i>
-      <span>所有 lab</span>
-    </a>
+    <div class="plab__topbar">
+      <a class="plab__back" href="/">
+        <i class="ph ph-arrow-left" aria-hidden="true"></i>
+        <span>{backLabel}</span>
+      </a>
+
+      <a
+        class="plab__language-toggle"
+        href={getLocalizedPhysicsLabPath(entry.slug, alternateLocale)}
+        aria-label={languageToggleLabel}
+      >
+        <span class="plab__language-toggle-active">{currentLanguageLabel}</span>
+        <span class="plab__language-toggle-divider" aria-hidden="true">/</span>
+        <span>{alternateLanguageLabel}</span>
+      </a>
+    </div>
 
     <p class="plab__eyebrow">{entry.eyebrow}</p>
     <h1 class="plab__title">{entry.title}</h1>
     <p class="plab__lede">{entry.description}</p>
 
-    <nav class="plab__switcher" aria-label="物理 lab">
+    <nav class="plab__switcher" aria-label={navAriaLabel}>
       {
-        physicsLabCatalog.map((lab) => (
+        labs.map((lab) => (
           <a
             class={`plab__switcher-link ${lab.slug === entry.slug ? 'is-current' : ''}`}
             href={lab.href}
@@ -44,7 +74,7 @@ const { entry } = Astro.props;
           width="900"
           height="560"
           data-stage-canvas
-          aria-label={`${entry.title} 仿真画布`}></canvas>
+          aria-label={canvasAriaLabel}></canvas>
       </div>
       <div class="plab__readouts">
         <slot name="readouts" />
