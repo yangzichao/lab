@@ -88,18 +88,18 @@ const physicsLabDefinitions: PhysicsLabDefinition[] = [
         eyebrow: '波 · 叠加',
         tagline: '两个相干波源，以及它们相遇处的条纹。',
         description:
-          '两个点波源同步发射。在光程差为整数个波长的地方它们相互增强；差半个波长时则相互抵消。右侧的长条就是你在屏上会测到的强度。',
+          '两个点波源同步发射，曲面的高度就是瞬时场值。在光程差为整数个波长的地方它们相互增强；差半个波长时则相互抵消。右侧竖屏画出时间平均后的强度。',
         notice:
-          '在画布上拖动可以移动探针。亮条纹落在光程差为 0、λ、2λ… 的地方；拉大波源间距会把条纹挤到一起，跟 double-slit 实验里一模一样。',
+          '移动指针可以放置探针，拖动空白处则旋转视角。亮条纹落在光程差为 0、λ、2λ… 的地方；拉大波源间距会把条纹挤到一起，跟 double-slit 实验里一模一样。',
       },
       en: {
         title: 'Wave Interference',
         eyebrow: 'Waves · superposition',
         tagline: 'Two coherent sources and the fringes where their waves meet.',
         description:
-          'Two point sources emit in sync. They reinforce where path difference is an integer number of wavelengths and cancel where it is half a wavelength off. The right-hand band is the screen intensity.',
+          'Two point sources emit in sync, with surface height showing the instantaneous field. They reinforce at integer-wavelength path differences and cancel at half wavelengths. The upright screen shows time-averaged intensity.',
         notice:
-          'Drag on the canvas to move the probe. Bright fringes land where path difference is 0, lambda, 2 lambda, and so on; increasing source separation squeezes the fringes just like a double-slit experiment.',
+          'Move the pointer to place the probe, or drag empty space to orbit. Bright fringes land at path differences of 0, lambda, 2 lambda, and so on; increasing source separation squeezes them just like a double-slit experiment.',
       },
     },
   },
@@ -112,7 +112,7 @@ const physicsLabDefinitions: PhysicsLabDefinition[] = [
         eyebrow: '场 · 静电学',
         tagline: '放下点电荷，看场在它们周围成形。',
         description:
-          '在平面上丢下正负电荷。streamline 描出场的走向——从正电荷出发、进入负电荷——背景的明暗是电势，等势线就画在电势齐平的地方。',
+          '在平面上放下正负电荷。曲面高度和颜色共同表示电势，streamline 描出场从正电荷流向负电荷的方向，等势线则沿相同高度环绕。',
         notice:
           '电场线永不相交，而且总是与等势线垂直相交。场是电势的 gradient，所以颜色变化越陡，场就越强。拖动一个电荷，看每条线瞬间重新连接。',
       },
@@ -121,7 +121,7 @@ const physicsLabDefinitions: PhysicsLabDefinition[] = [
         eyebrow: 'Fields · electrostatics',
         tagline: 'Place point charges and watch the field form around them.',
         description:
-          'Drop positive and negative charges on the plane. Streamlines trace the field from positive charges into negative ones, the background shows electric potential, and equipotentials sit where that potential is level.',
+          'Place positive and negative charges on the plane. Surface height and color encode electric potential, streamlines run from positive to negative, and equipotentials wrap around equal heights.',
         notice:
           'Electric field lines never cross, and they meet equipotential lines at right angles. The field is the gradient of potential, so steeper color changes mean stronger field. Drag a charge to see every line reconnect.',
       },
@@ -158,20 +158,20 @@ const physicsLabDefinitions: PhysicsLabDefinition[] = [
       zh: {
         title: 'Kinetic Theory',
         eyebrow: '热力学 · 分子运动论',
-        tagline: '几百个相撞的圆盘，以及从混沌里浮现的秩序。',
+        tagline: '几百个相撞的硬球，以及从混沌里浮现的秩序。',
         description:
-          '一盒硬圆盘彼此之间、与盒壁之间都做弹性碰撞。每次碰撞实际上都是随机的，可它们的速率分布最终会落到 Maxwell–Boltzmann 曲线上——直方图实时跟着它走。',
+          '一盒三维硬球彼此之间、与六面盒壁之间都做弹性碰撞。单次碰撞看似随机，可它们的速率分布最终会落到三维 Maxwell–Boltzmann 曲线上——旁边的直方图实时跟着它走。',
         notice:
-          '温度不过是平均动能。给气体加热，整条速率分布就会整体右移并展宽；压强读数是粒子撞击盒壁的稳定鼓点，PV = NkT 正是从这里来的。',
+          '三维气体满足 ⟨KE⟩ = 3kT/2。给气体加热，整条速率分布会右移并展宽；压强读数是粒子撞击六面盒壁的稳定鼓点，PV = NkT 正是从这里来的。',
       },
       en: {
         title: 'Kinetic Theory',
         eyebrow: 'Thermodynamics · molecular motion',
-        tagline: 'Hundreds of colliding disks, with order emerging from chaos.',
+        tagline: 'Hundreds of colliding spheres, with order emerging from chaos.',
         description:
-          'Hard disks bounce elastically off each other and the box walls. Every collision looks random, but the speed distribution settles toward a Maxwell-Boltzmann curve tracked by the live histogram.',
+          'Hard spheres bounce elastically off one another and all six box walls. Individual collisions look random, but their speeds settle toward the 3D Maxwell-Boltzmann distribution tracked by the live histogram.',
         notice:
-          'Temperature is average kinetic energy. Heat the gas and the whole speed distribution shifts right and broadens; the pressure readout is the steady drumbeat of particles hitting the walls, where PV = NkT comes from.',
+          'A 3D gas obeys <KE> = 3kT/2. Heat it and the speed distribution shifts right and broadens; the pressure readout is the steady drumbeat of particles hitting all six walls, where PV = NkT comes from.',
       },
     },
   },

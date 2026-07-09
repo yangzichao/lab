@@ -8,7 +8,7 @@ import {
   updatePlayPauseButton,
 } from '../shared/dom-controls';
 import { formatCompact, formatFixed, formatSigned } from '../shared/format';
-import { clearStage, setupStageCanvas, STAGE_HEIGHT, STAGE_WIDTH, type Point } from '../shared/stage';
+import { STAGE_HEIGHT, STAGE_WIDTH, type Point } from '../shared/stage';
 import {
   clonePreset,
   fieldAt,
@@ -18,7 +18,7 @@ import {
   potentialAt,
   type Charge,
 } from './electric-field-physics';
-import { renderDynamicLayer, renderStaticFieldLayer } from './electric-field-render';
+import { ElectricFieldThreeDimensionalRenderer } from './electric-field-three-dimensional-renderer';
 
 const maximumTrailPoints = 260;
 const testChargeSpeed = 90; // pixels/second the test charge travels along E
@@ -35,29 +35,13 @@ export function initElectricFieldLab(): void {
   if (!canvas) {
     return;
   }
-  const context = setupStageCanvas(canvas);
-  if (!context) {
-    return;
-  }
-
-  // Offscreen cache for the static field layer (heatmap + equipotentials +
-  // streamlines). It only depends on the resting charge layout and the toggle
-  // state, so it is rebuilt on a dirty flag rather than every frame.
-  const fieldCacheCanvas = document.createElement('canvas');
-  const fieldCacheContext = setupStageCanvas(fieldCacheCanvas);
-  if (!fieldCacheContext) {
-    return;
-  }
-  let fieldCacheDirty = true;
+  const renderer = new ElectricFieldThreeDimensionalRenderer(canvas);
+  window.addEventListener('pagehide', () => renderer.dispose(), { once: true });
 
   let charges: Charge[] = clonePreset(initialPreset);
   let testCharge: Point = releasePoint();
   let trail: Point[] = [];
   let draggingIndex = -1;
-
-  const markFieldDirty = (): void => {
-    fieldCacheDirty = true;
-  };
 
   const updateReadouts = (): void => {
     const potential = potentialAt(testCharge, charges);
@@ -68,22 +52,14 @@ export function initElectricFieldLab(): void {
     setReadout(root, 'netCharge', formatCompact(netCharge(charges), 0));
   };
 
-  const rebuildFieldCache = (): void => {
-    renderStaticFieldLayer(fieldCacheContext, {
+  const render = (): void => {
+    renderer.draw({
       charges,
+      testCharge,
+      trail,
       showEquipotentials: isChecked(root, 'showEquipotentials', true),
       showFieldLines: isChecked(root, 'showFieldLines', true),
     });
-    fieldCacheDirty = false;
-  };
-
-  const render = (): void => {
-    if (fieldCacheDirty) {
-      rebuildFieldCache();
-    }
-    clearStage(context);
-    context.drawImage(fieldCacheCanvas, 0, 0, STAGE_WIDTH, STAGE_HEIGHT);
-    renderDynamicLayer(context, testCharge, trail, charges);
     updateReadouts();
   };
 
@@ -95,16 +71,7 @@ export function initElectricFieldLab(): void {
   const reset = (): void => {
     charges = clonePreset(initialPreset);
     resetTestCharge();
-    markFieldDirty();
     render();
-  };
-
-  const pointerToStage = (event: PointerEvent): Point => {
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: ((event.clientX - rect.left) / rect.width) * STAGE_WIDTH,
-      y: ((event.clientY - rect.top) / rect.height) * STAGE_HEIGHT,
-    };
   };
 
   const advanceTestCharge = (deltaSeconds: number): void => {
@@ -140,10 +107,14 @@ export function initElectricFieldLab(): void {
   });
 
   const onPointerDown = (event: PointerEvent): void => {
-    const point = pointerToStage(event);
+    const point = renderer.stagePointFromPointer(event);
+    if (!point) {
+      return;
+    }
     const nearest = nearestChargeIndex(point, charges);
     if (nearest.index >= 0 && nearest.distance < 28) {
       draggingIndex = nearest.index;
+      renderer.setChargeDragging(true);
       canvas.setPointerCapture(event.pointerId);
       event.preventDefault();
     }
@@ -153,14 +124,16 @@ export function initElectricFieldLab(): void {
     if (draggingIndex < 0) {
       return;
     }
-    const point = pointerToStage(event);
+    const point = renderer.stagePointFromPointer(event);
+    if (!point) {
+      return;
+    }
     charges[draggingIndex] = {
       ...charges[draggingIndex],
       x: Math.max(12, Math.min(STAGE_WIDTH - 12, point.x)),
       y: Math.max(12, Math.min(STAGE_HEIGHT - 12, point.y)),
     };
     resetTestCharge();
-    markFieldDirty();
     render();
   };
 
@@ -168,6 +141,7 @@ export function initElectricFieldLab(): void {
     if (draggingIndex >= 0) {
       canvas.releasePointerCapture(event.pointerId);
       draggingIndex = -1;
+      renderer.setChargeDragging(false);
     }
   };
 
@@ -184,13 +158,10 @@ export function initElectricFieldLab(): void {
   bindPresets(root, (presetId) => {
     charges = clonePreset(presetId);
     resetTestCharge();
-    markFieldDirty();
     render();
   });
 
   onControlInput(root, () => {
-    // Toggles change which static layers are drawn, so the cache must rebuild.
-    markFieldDirty();
     render();
   });
 

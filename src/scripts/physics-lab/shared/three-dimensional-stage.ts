@@ -4,11 +4,15 @@ import {
   CanvasTexture,
   Color,
   Fog,
+  Plane,
   PerspectiveCamera,
   Points,
   PointsMaterial,
+  Raycaster,
   Scene,
   SRGBColorSpace,
+  Vector2,
+  Vector3,
   WebGLRenderer,
   BufferGeometry,
   Float32BufferAttribute,
@@ -100,6 +104,25 @@ export class ThreeDimensionalStage {
   render(): void {
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+  }
+
+  setOrbitInteractionEnabled(enabled: boolean): void {
+    this.controls.enabled = enabled;
+    this.canvas.style.cursor = enabled ? 'grab' : 'grabbing';
+  }
+
+  projectPointerToHorizontalPlane(event: PointerEvent, height = 0): Vector3 | null {
+    const bounds = this.canvas.getBoundingClientRect();
+    const normalizedPointer = new Vector2(
+      ((event.clientX - bounds.left) / bounds.width) * 2 - 1,
+      -((event.clientY - bounds.top) / bounds.height) * 2 + 1,
+    );
+    const raycaster = new Raycaster();
+    raycaster.setFromCamera(normalizedPointer, this.camera);
+    return raycaster.ray.intersectPlane(
+      new Plane(new Vector3(0, 1, 0), -height),
+      new Vector3(),
+    );
   }
 
   dispose(): void {

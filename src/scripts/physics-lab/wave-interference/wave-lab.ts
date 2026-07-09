@@ -9,12 +9,13 @@ import {
   updatePlayPauseButton,
 } from '../shared/dom-controls';
 import { degreesToRadians, formatCompact, formatFixed, formatSigned } from '../shared/format';
-import { setupStageCanvas, STAGE_HEIGHT, STAGE_WIDTH, type Point } from '../shared/stage';
+import { STAGE_HEIGHT, STAGE_WIDTH, type Point } from '../shared/stage';
 import { fieldAt, pathDifference, sourcePositions, type WaveParameters } from './wave-physics';
-import { drawWaveInterference, WAVE_CENTER } from './wave-render';
+import { WaveThreeDimensionalRenderer } from './wave-three-dimensional-renderer';
 
 const phaseSpeed = 4.2;
-const screenDistance = STAGE_WIDTH - 132 - WAVE_CENTER.x;
+const waveCenter: Point = { x: STAGE_WIDTH * 0.42, y: STAGE_HEIGHT / 2 };
+const screenDistance = STAGE_WIDTH - 132 - waveCenter.x;
 
 export function initWaveInterferenceLab(): void {
   const root = document.querySelector<HTMLElement>('[data-lab="wave-interference"]');
@@ -25,10 +26,8 @@ export function initWaveInterferenceLab(): void {
   if (!canvas) {
     return;
   }
-  const context = setupStageCanvas(canvas);
-  if (!context) {
-    return;
-  }
+  const renderer = new WaveThreeDimensionalRenderer(canvas);
+  window.addEventListener('pagehide', () => renderer.dispose(), { once: true });
 
   let phaseTime = 0;
   let sample: Point = { x: STAGE_WIDTH * 0.7, y: STAGE_HEIGHT * 0.32 };
@@ -52,8 +51,8 @@ export function initWaveInterferenceLab(): void {
 
   const render = (): void => {
     const params = parameters();
-    const sources = sourcePositions(WAVE_CENTER, params.sourceSeparation);
-    drawWaveInterference(context, {
+    const sources = sourcePositions(waveCenter, params.sourceSeparation);
+    renderer.draw({
       parameters: params,
       sources,
       phaseTime,
@@ -72,13 +71,16 @@ export function initWaveInterferenceLab(): void {
   };
 
   const moveSampleFromPointer = (event: PointerEvent): void => {
-    const rect = canvas.getBoundingClientRect();
-    sample = {
-      x: ((event.clientX - rect.left) / rect.width) * STAGE_WIDTH,
-      y: ((event.clientY - rect.top) / rect.height) * STAGE_HEIGHT,
-    };
+    if (event.type === 'pointermove' && event.buttons !== 0) {
+      return;
+    }
+    const nextSample = renderer.stagePointFromPointer(event);
+    if (!nextSample) {
+      return;
+    }
+    sample = nextSample;
     render();
-  }
+  };
 
   const loop = createAnimationLoop((deltaSeconds) => {
     phaseTime += deltaSeconds * phaseSpeed;

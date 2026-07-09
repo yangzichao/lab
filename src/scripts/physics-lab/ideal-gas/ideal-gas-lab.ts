@@ -11,7 +11,6 @@ import {
   updatePlayPauseButton,
 } from '../shared/dom-controls';
 import { clamp, formatFixed } from '../shared/format';
-import { setupStageCanvas } from '../shared/stage';
 import {
   advance,
   createGasState,
@@ -19,13 +18,14 @@ import {
   meanSpeed,
   mostProbableSpeed,
   setTemperature,
+  speedAxisForMostProbableSpeed,
   temperature,
   type GasState,
 } from './ideal-gas-physics';
-import { drawIdealGas, speedAxisFor } from './ideal-gas-render';
+import { IdealGasThreeDimensionalRenderer } from './ideal-gas-three-dimensional-renderer';
 
-// The temperature slider reads as a target mean kinetic energy. These bounds keep
-// the gas lively without letting particles tunnel through walls between steps.
+// These temperature bounds keep the gas lively without letting particles
+// tunnel through one another or the walls between fixed physics steps.
 const MINIMUM_TEMPERATURE = 0.1;
 const MAXIMUM_TEMPERATURE = 4;
 
@@ -52,10 +52,8 @@ export function initIdealGasLab(): void {
   if (!canvas) {
     return;
   }
-  const context = setupStageCanvas(canvas);
-  if (!context) {
-    return;
-  }
+  const renderer = new IdealGasThreeDimensionalRenderer(canvas);
+  window.addEventListener('pagehide', () => renderer.dispose(), { once: true });
 
   const readParticleCount = (): number => Math.round(getRangeValue(root, 'count', DEFAULT_PARTICLE_COUNT));
   const readTargetTemperature = (): number =>
@@ -63,7 +61,7 @@ export function initIdealGasLab(): void {
 
   let state: GasState = createGasState(readParticleCount(), readTargetTemperature());
   let smoothedPressure = 0;
-  let smoothedSpeedAxis = speedAxisFor(mostProbableSpeed(state));
+  let smoothedSpeedAxis = speedAxisForMostProbableSpeed(mostProbableSpeed(state));
 
   const updateReadouts = (): void => {
     setReadout(root, 'count', String(state.particles.length));
@@ -74,7 +72,7 @@ export function initIdealGasLab(): void {
 
   const render = (): void => {
     const gasTemperature = temperature(state);
-    drawIdealGas(context, {
+    renderer.draw({
       state,
       temperature: gasTemperature,
       mostProbableSpeed: mostProbableSpeed(state),
@@ -93,7 +91,7 @@ export function initIdealGasLab(): void {
   const rebuild = (): void => {
     state = createGasState(readParticleCount(), readTargetTemperature());
     smoothedPressure = 0;
-    smoothedSpeedAxis = speedAxisFor(mostProbableSpeed(state));
+    smoothedSpeedAxis = speedAxisForMostProbableSpeed(mostProbableSpeed(state));
     updateOutputs();
     render();
   };
@@ -102,7 +100,7 @@ export function initIdealGasLab(): void {
     advance(state, deltaSeconds);
     const rawPressure = instantaneousPressure(state);
     smoothedPressure += (rawPressure - smoothedPressure) * PRESSURE_SMOOTHING;
-    const targetAxis = speedAxisFor(mostProbableSpeed(state));
+    const targetAxis = speedAxisForMostProbableSpeed(mostProbableSpeed(state));
     smoothedSpeedAxis += (targetAxis - smoothedSpeedAxis) * SPEED_AXIS_SMOOTHING;
     render();
   });
