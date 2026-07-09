@@ -8,10 +8,9 @@ import {
   setRangeValue,
   setReadout,
 } from '../shared/dom-controls';
-import { clamp, formatFixed } from '../shared/format';
-import { setupStageCanvas, STAGE_HEIGHT, STAGE_WIDTH } from '../shared/stage';
+import { formatFixed } from '../shared/format';
 import { solveLensImage, type LensParameters } from './lens-optics-physics';
-import { AXIS_Y, drawLensScene, LENS_X } from './lens-optics-render';
+import { LensOpticsThreeDimensionalRenderer } from './lens-optics-three-dimensional-renderer';
 
 const defaults = { focalLength: 150, objectDistance: 360, objectHeight: 110 };
 
@@ -25,11 +24,6 @@ const presets: Record<string, { focalLength: number; objectDistance: number; obj
   diverging: { focalLength: -160, objectDistance: 320, objectHeight: 120 },
 };
 
-// Drag bounds keep the object on the left side of the lens and inside the stage.
-const minObjectDistance = 30;
-const maxObjectDistance = LENS_X - 30;
-const maxObjectHeight = (STAGE_HEIGHT / 2) - 30;
-
 export function initLensOpticsLab(): void {
   const root = document.querySelector<HTMLElement>('[data-lab="lens-optics"]');
   if (!root) {
@@ -39,10 +33,7 @@ export function initLensOpticsLab(): void {
   if (!canvas) {
     return;
   }
-  const context = setupStageCanvas(canvas);
-  if (!context) {
-    return;
-  }
+  const renderer = new LensOpticsThreeDimensionalRenderer(canvas);
 
   const parameters = (): LensParameters => ({
     focalLength: getRangeValue(root, 'focalLength', defaults.focalLength),
@@ -67,7 +58,7 @@ export function initLensOpticsLab(): void {
 
   const render = (): void => {
     const params = parameters();
-    drawLensScene(context, {
+    renderer.draw({
       parameters: params,
       image: solveLensImage(params),
       showRays: isChecked(root, 'showRays', true),
@@ -82,21 +73,24 @@ export function initLensOpticsLab(): void {
     setOutput(root, 'objectHeight', `${Math.round(getRangeValue(root, 'objectHeight', defaults.objectHeight))} px`);
   };
 
-  // Pointer drag on the canvas moves the object: x sets do, y sets ho.
+  // Dragging the object arrow moves it in the optical plane; dragging empty
+  // space remains available to orbit the camera.
   const moveObjectFromPointer = (event: PointerEvent): void => {
-    const rect = canvas.getBoundingClientRect();
-    const stageX = ((event.clientX - rect.left) / rect.width) * STAGE_WIDTH;
-    const stageY = ((event.clientY - rect.top) / rect.height) * STAGE_HEIGHT;
-    const objectDistance = clamp(LENS_X - stageX, minObjectDistance, maxObjectDistance);
-    const objectHeight = clamp(AXIS_Y - stageY, 10, maxObjectHeight);
-    setRangeValue(root, 'objectDistance', Math.round(objectDistance));
-    setRangeValue(root, 'objectHeight', Math.round(objectHeight));
+    const nextParameters = renderer.objectParametersFromPointer(event);
+    if (!nextParameters) {
+      return;
+    }
+    setRangeValue(root, 'objectDistance', Math.round(nextParameters.objectDistance));
+    setRangeValue(root, 'objectHeight', Math.round(nextParameters.objectHeight));
     updateOutputs();
     render();
   };
 
   let dragging = false;
   const onPointerDown = (event: PointerEvent): void => {
+    if (!renderer.beginObjectDrag(event, parameters())) {
+      return;
+    }
     dragging = true;
     canvas.setPointerCapture(event.pointerId);
     moveObjectFromPointer(event);
@@ -107,7 +101,11 @@ export function initLensOpticsLab(): void {
     }
   };
   const onPointerUp = (event: PointerEvent): void => {
+    if (!dragging) {
+      return;
+    }
     dragging = false;
+    renderer.endObjectDrag();
     if (canvas.hasPointerCapture(event.pointerId)) {
       canvas.releasePointerCapture(event.pointerId);
     }
@@ -138,6 +136,7 @@ export function initLensOpticsLab(): void {
   canvas.addEventListener('pointerdown', onPointerDown);
   canvas.addEventListener('pointermove', onPointerMove);
   canvas.addEventListener('pointerup', onPointerUp);
+  canvas.addEventListener('pointercancel', onPointerUp);
 
   onControlInput(root, () => {
     updateOutputs();

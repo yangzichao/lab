@@ -11,7 +11,6 @@ import {
   updatePlayPauseButton,
 } from '../shared/dom-controls';
 import { formatFixed } from '../shared/format';
-import { setupStageCanvas } from '../shared/stage';
 import {
   activeModes,
   beadDisplacements,
@@ -22,7 +21,7 @@ import {
   totalEnergy,
   type ChainConfiguration,
 } from './coupled-oscillators-physics';
-import { drawCoupledOscillators } from './coupled-oscillators-render';
+import { CoupledOscillatorsThreeDimensionalRenderer } from './coupled-oscillators-three-dimensional-renderer';
 
 // Each preset describes which modes to excite and with what amplitude, plus an
 // optional bead count it forces first. The amplitudes are chosen so the chain
@@ -55,10 +54,7 @@ export function initCoupledOscillatorsLab(): void {
   if (!canvas) {
     return;
   }
-  const context = setupStageCanvas(canvas);
-  if (!context) {
-    return;
-  }
+  const renderer = new CoupledOscillatorsThreeDimensionalRenderer(canvas);
 
   let beadCount = defaultBeadCount;
   let selectedPreset = defaultPreset;
@@ -89,7 +85,7 @@ export function initCoupledOscillatorsLab(): void {
 
   const render = (): void => {
     const modeNumbers = activeModes(configuration);
-    drawCoupledOscillators(context, {
+    renderer.draw({
       beadCount,
       displacements: beadDisplacements(configuration, elapsedSeconds),
       velocities: beadVelocities(configuration, elapsedSeconds),

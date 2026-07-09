@@ -11,7 +11,6 @@ import {
   updatePlayPauseButton,
 } from '../shared/dom-controls';
 import { clamp, formatFixed } from '../shared/format';
-import { setupStageCanvas } from '../shared/stage';
 import {
   effectiveSlitCount,
   firstOrderAngleDegrees,
@@ -20,7 +19,7 @@ import {
   type ApertureMode,
   type DiffractionParameters,
 } from './diffraction-physics';
-import { drawDiffraction } from './diffraction-render';
+import { DiffractionThreeDimensionalRenderer } from './diffraction-three-dimensional-renderer';
 
 // Wavelength slider is in nanometres (visible band); the diffraction maths needs
 // it in the same aperture units as a and d, so we scale nm → aperture units.
@@ -51,10 +50,7 @@ export function initDiffractionLab(): void {
   if (!canvas) {
     return;
   }
-  const context = setupStageCanvas(canvas);
-  if (!context) {
-    return;
-  }
+  const renderer = new DiffractionThreeDimensionalRenderer(canvas);
 
   // The mode is driven by presets rather than a slider, so the controller keeps
   // it as its own piece of state.
@@ -100,7 +96,7 @@ export function initDiffractionLab(): void {
 
   const render = (): void => {
     const parameters = readParameters();
-    drawDiffraction(context, {
+    renderer.draw({
       parameters,
       wavelengthNanometres: wavelengthNanometres(),
       showEnvelope: isChecked(root, 'showEnvelope', true),

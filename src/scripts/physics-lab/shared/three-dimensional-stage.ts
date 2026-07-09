@@ -78,6 +78,13 @@ export class ThreeDimensionalStage {
     this.controls.maxPolarAngle = Math.PI * 0.47;
     this.controls.minPolarAngle = Math.PI * 0.08;
     this.controls.update();
+    const renderAfterCameraChange = (): void => {
+      this.renderer.render(this.scene, this.camera);
+    };
+    this.controls.addEventListener('change', renderAfterCameraChange);
+    this.cleanupCallbacks.push(() =>
+      this.controls.removeEventListener('change', renderAfterCameraChange),
+    );
 
     canvas.dataset.rendering = 'three-dimensional';
     canvas.style.cursor = 'grab';
@@ -121,6 +128,20 @@ export class ThreeDimensionalStage {
     raycaster.setFromCamera(normalizedPointer, this.camera);
     return raycaster.ray.intersectPlane(
       new Plane(new Vector3(0, 1, 0), -height),
+      new Vector3(),
+    );
+  }
+
+  projectPointerToVerticalPlane(event: PointerEvent, depth = 0): Vector3 | null {
+    const bounds = this.canvas.getBoundingClientRect();
+    const normalizedPointer = new Vector2(
+      ((event.clientX - bounds.left) / bounds.width) * 2 - 1,
+      -((event.clientY - bounds.top) / bounds.height) * 2 + 1,
+    );
+    const raycaster = new Raycaster();
+    raycaster.setFromCamera(normalizedPointer, this.camera);
+    return raycaster.ray.intersectPlane(
+      new Plane(new Vector3(0, 0, 1), -depth),
       new Vector3(),
     );
   }

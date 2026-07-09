@@ -1,8 +1,7 @@
 type PhysicsLabInitializer = () => Promise<void>;
 
-// Keep every lab behind its own dynamic import. The Three.js renderer is large,
-// and only three labs need it; a visitor opening a 2D optics or wave lab should
-// not pay the WebGL download and parse cost.
+// Keep every lab behind its own dynamic import. The Three.js renderers are
+// intentionally route-scoped so a visitor downloads only the active scene.
 const physicsLabInitializers: Record<string, PhysicsLabInitializer> = {
   'charged-particle': async () => {
     const { initChargedParticleLab } = await import(

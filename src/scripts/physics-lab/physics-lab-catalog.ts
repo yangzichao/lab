@@ -184,18 +184,18 @@ const physicsLabDefinitions: PhysicsLabDefinition[] = [
         eyebrow: '力学 · 简正模',
         tagline: '一排连在弹簧上的小球，以及藏在里面的纯净 mode。',
         description:
-          '一串用弹簧连起来的小球。再杂乱的运动，也都是一组 normal mode 之和——在每个 mode 里，所有小球以同一个共享频率振动。激发单个 mode，它就保持纯净；混入两个，就能看到拍频出现。',
+          '一串真正卷成螺旋的三维弹簧连接着小球，速度箭头标出每颗球下一刻的方向，悬浮的正弦曲线则显出藏在运动里的 normal mode。激发单个 mode，它会保持纯净；混入两个，就能看到拍频出现。',
         notice:
-          'N 个小球的系统恰好有 N 个 normal mode。最低的那个里所有小球一起动；最高的那个里相邻小球互相对着干。这是振动弦的离散版表亲，也是通往 phonon 和能带结构的门户。',
+          '旋转视角可以看清弹簧怎样随横向位移拉伸。N 个小球恰好有 N 个 normal mode：最低模里所有小球一起动，最高模里相邻小球互相对着干。',
       },
       en: {
         title: 'Coupled Oscillators',
         eyebrow: 'Mechanics · normal modes',
         tagline: 'A row of spring-linked masses and the clean modes hidden inside.',
         description:
-          'A chain of masses connected by springs. Even messy motion is a sum of normal modes, where every mass vibrates at one shared frequency. Excite one mode and it stays pure; mix two and beats appear.',
+          'True 3D spring coils connect the masses, velocity arrows show where each bead is heading, and floating sine curves expose the normal modes hidden in the motion. Excite one mode and it stays pure; mix two and beats appear.',
         notice:
-          'A system with N masses has exactly N normal modes. In the lowest mode every mass moves together; in the highest, neighbors oppose each other. It is a discrete cousin of a vibrating string and a doorway to phonons and band structure.',
+          'Orbit the view to see each spring stretch with transverse displacement. A system with N masses has exactly N normal modes: all masses move together in the lowest, while neighbors oppose each other in the highest.',
       },
     },
   },
@@ -208,18 +208,18 @@ const physicsLabDefinitions: PhysicsLabDefinition[] = [
         eyebrow: '波 · 衍射',
         tagline: '让一束波穿过狭缝，读出它画出的图样。',
         description:
-          '光穿过单缝、双缝，或一道光栅。屏上的强度是缝口上每一点的干涉叠加（Huygens），曲线会随着你拉宽缝、增加缝数、改变波长而实时更新。',
+          '在三维光学台上，入射波穿过单缝、双缝或光栅，再展开到发光屏幕。屏上的彩色条纹和浮起的强度曲线会随缝宽、缝数与波长实时重排。',
         notice:
-          '把缝收窄，图样反而铺开——衍射其实是 uncertainty principle 的化身。缝越多，亮条纹就越被锐化成细线，这正是 diffraction grating 能把光分解成精密 spectrum 的原因。',
+          '彩色光线标出可见的衍射级次，虚线曲线给出单缝包络。把缝收窄，图样反而铺开；增加缝数，亮纹就被锐化成光栅式的细线。',
       },
       en: {
         title: 'Diffraction',
         eyebrow: 'Waves · diffraction',
         tagline: 'Send a wave through slits and read the pattern it paints.',
         description:
-          'Light passes through a single slit, a double slit, or a grating. Screen intensity is the interference sum from every point in the aperture, and the curve updates as you widen slits, add more slits, or change wavelength.',
+          'On a 3D optical bench, an incident wave passes through one slit, two slits, or a grating and spreads onto a luminous screen. Colored fringes and a raised intensity profile rearrange as slit width, count, and wavelength change.',
         notice:
-          'Narrow the slit and the pattern spreads out; diffraction is uncertainty made visible. Add more slits and bright fringes sharpen into fine lines, which is why a diffraction grating can split light into a precise spectrum.',
+          'Colored paths mark visible diffraction orders while the dashed curve gives the single-slit envelope. Narrowing a slit spreads the pattern; adding slits sharpens bright fringes into grating-like lines.',
       },
     },
   },
@@ -280,18 +280,18 @@ const physicsLabDefinitions: PhysicsLabDefinition[] = [
         eyebrow: '光学 · 光线追踪',
         tagline: '让光线穿过透镜弯折，看像如何成形。',
         description:
-          '从物体发出的光线在薄透镜处折射，会聚成像。拖动物体或改变焦距，光线就会实时重描——展现实像与虚像、放大率，以及从会聚到发散的切换。',
+          '透明的三维透镜会随焦距符号在凸面与凹面间切换，三束主光线在空间中折射并定位像。拖动物体箭头或改变焦距，实像、虚像与放大率都会实时更新。',
         notice:
-          '三条特殊光线定下像的位置：一条过镜心不偏折，一条先平行入射再过远焦点，一条先过近焦点再平行射出。当物体越过焦点，像就从倒立实像翻转为正立虚像。',
+          '拖动空白处旋转视角，拖动绿色物体箭头改变物距与物高。物体越过焦点时，三束光的反向虚线延长线会汇成正立虚像。',
       },
       en: {
         title: 'Lenses & Refraction',
         eyebrow: 'Optics · ray tracing',
         tagline: 'Bend rays through a lens and watch an image take shape.',
         description:
-          'Rays from an object refract through a thin lens and converge into an image. Drag the object or change focal length to redraw the rays in real time, revealing real and virtual images, magnification, and the switch from converging to diverging behavior.',
+          'A transparent 3D lens changes from convex to concave with the focal-length sign, while three spatial principal rays refract to locate the image. Drag the object arrow or change focal length to update real and virtual images in place.',
         notice:
-          'Three special rays locate the image: one through the lens center, one entering parallel then passing through the far focus, and one entering through the near focus then leaving parallel. When the object crosses the focal point, the image flips from inverted real to upright virtual.',
+          'Drag empty space to orbit, or drag the green object arrow to change its distance and height. When the object crosses the focus, dashed backward extensions meet at the upright virtual image.',
       },
     },
   },

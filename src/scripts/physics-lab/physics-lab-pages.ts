@@ -374,8 +374,8 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
             label: locale === 'en' ? 'Show mode envelopes' : '显示模式包络',
             description:
               locale === 'en'
-                ? 'Dashed sine shapes for the excited normal modes, sin(pπx/(N+1)).'
-                : '各激发 normal mode 的虚线正弦形 sin(pπx/(N+1))。',
+                ? 'Floating dashed sine shapes for the excited modes, sin(pπx/(N+1)).'
+                : '悬浮的虚线正弦形显示各激发 mode：sin(pπx/(N+1))。',
             checked: true,
           },
           {
@@ -419,13 +419,13 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
           {
             id: 'showEnvelope',
             label: locale === 'en' ? 'Single-slit envelope' : '单缝包络',
-            description: locale === 'en' ? 'The dashed sinc² envelope over the fine fringes.' : '覆盖在细条纹上的虚线 sinc² 包络。',
+            description: locale === 'en' ? 'A raised dashed sinc² envelope over the screen profile.' : '悬在屏幕强度曲线上的虚线 sinc² 包络。',
             checked: true,
           },
           {
             id: 'showScreenBand',
             label: locale === 'en' ? 'Screen color band' : '屏幕色带',
-            description: locale === 'en' ? 'Draw intensity as the color your eye would see.' : '把强度画成你肉眼会看到的颜色。',
+            description: locale === 'en' ? 'Light the 3D screen with the color your eye would see.' : '用肉眼可见的颜色点亮三维屏幕。',
             checked: true,
           },
         ],
@@ -543,7 +543,7 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
           {
             id: 'showRays',
             label: locale === 'en' ? 'Principal rays' : '主光线',
-            description: locale === 'en' ? 'The three rays that locate the image.' : '确定像的三条光线。',
+            description: locale === 'en' ? 'Three spatial rays that locate the image.' : '在空间中确定像位置的三条光线。',
             checked: true,
           },
           {
