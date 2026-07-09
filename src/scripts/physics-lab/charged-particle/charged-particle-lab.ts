@@ -11,7 +11,7 @@ import {
   updatePlayPauseButton,
 } from '../shared/dom-controls';
 import { degreesToRadians, formatFixed, formatSigned } from '../shared/format';
-import { setupStageCanvas, type Point } from '../shared/stage';
+import type { Point } from '../shared/stage';
 import {
   createParticleState,
   cyclotronFrequency,
@@ -23,7 +23,7 @@ import {
   type FieldParameters,
   type ParticleState,
 } from './charged-particle-physics';
-import { drawChargedParticle, particleScreenPosition } from './charged-particle-render';
+import { ChargedParticleThreeDimensionalRenderer } from './charged-particle-three-dimensional-renderer';
 
 const maximumTrailPoints = 720;
 
@@ -58,10 +58,8 @@ export function initChargedParticleLab(): void {
   if (!canvas) {
     return;
   }
-  const context = setupStageCanvas(canvas);
-  if (!context) {
-    return;
-  }
+  const renderer = new ChargedParticleThreeDimensionalRenderer(canvas);
+  window.addEventListener('pagehide', () => renderer.dispose(), { once: true });
 
   const readFields = (): FieldParameters => ({
     charge: getRangeValue(root, 'charge', 1),
@@ -88,7 +86,7 @@ export function initChargedParticleLab(): void {
   };
 
   const render = (): void => {
-    drawChargedParticle(context, {
+    renderer.draw({
       state,
       fields: readFields(),
       trail,
@@ -117,7 +115,7 @@ export function initChargedParticleLab(): void {
 
   const loop = createAnimationLoop((deltaSeconds) => {
     state = integrate(state, readFields(), deltaSeconds);
-    trail.push(particleScreenPosition(state));
+    trail.push({ x: state.x, y: state.y });
     if (trail.length > maximumTrailPoints) {
       trail.splice(0, trail.length - maximumTrailPoints);
     }

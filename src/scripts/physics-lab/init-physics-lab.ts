@@ -1,35 +1,67 @@
-import { initChargedParticleLab } from './charged-particle/charged-particle-lab';
-import { initCoupledOscillatorsLab } from './coupled-oscillators/coupled-oscillators-lab';
-import { initDiffractionLab } from './diffraction/diffraction-lab';
-import { initDoublePendulumLab } from './double-pendulum/double-pendulum-lab';
-import { initElectricFieldLab } from './electric-field/electric-field-lab';
-import { initFourierEpicyclesLab } from './fourier-epicycles/fourier-epicycles-lab';
-import { initIdealGasLab } from './ideal-gas/ideal-gas-lab';
-import { initLensOpticsLab } from './lens-optics/lens-optics-lab';
-import { initOrbitLab } from './orbit/orbit-lab';
-import { initThreeBodyLab } from './three-body/three-body-lab';
-import { initWaveInterferenceLab } from './wave-interference/wave-lab';
+type PhysicsLabInitializer = () => Promise<void>;
 
-const physicsLabInitializers: Record<string, () => void> = {
-  'charged-particle': initChargedParticleLab,
-  'coupled-oscillators': initCoupledOscillatorsLab,
-  diffraction: initDiffractionLab,
-  'double-pendulum': initDoublePendulumLab,
-  'electric-field': initElectricFieldLab,
-  'fourier-epicycles': initFourierEpicyclesLab,
-  'ideal-gas': initIdealGasLab,
-  'lens-optics': initLensOpticsLab,
-  orbit: initOrbitLab,
-  'three-body': initThreeBodyLab,
-  'wave-interference': initWaveInterferenceLab,
+// Keep every lab behind its own dynamic import. The Three.js renderer is large,
+// and only three labs need it; a visitor opening a 2D optics or wave lab should
+// not pay the WebGL download and parse cost.
+const physicsLabInitializers: Record<string, PhysicsLabInitializer> = {
+  'charged-particle': async () => {
+    const { initChargedParticleLab } = await import(
+      './charged-particle/charged-particle-lab'
+    );
+    initChargedParticleLab();
+  },
+  'coupled-oscillators': async () => {
+    const { initCoupledOscillatorsLab } = await import(
+      './coupled-oscillators/coupled-oscillators-lab'
+    );
+    initCoupledOscillatorsLab();
+  },
+  diffraction: async () => {
+    const { initDiffractionLab } = await import('./diffraction/diffraction-lab');
+    initDiffractionLab();
+  },
+  'double-pendulum': async () => {
+    const { initDoublePendulumLab } = await import('./double-pendulum/double-pendulum-lab');
+    initDoublePendulumLab();
+  },
+  'electric-field': async () => {
+    const { initElectricFieldLab } = await import('./electric-field/electric-field-lab');
+    initElectricFieldLab();
+  },
+  'fourier-epicycles': async () => {
+    const { initFourierEpicyclesLab } = await import(
+      './fourier-epicycles/fourier-epicycles-lab'
+    );
+    initFourierEpicyclesLab();
+  },
+  'ideal-gas': async () => {
+    const { initIdealGasLab } = await import('./ideal-gas/ideal-gas-lab');
+    initIdealGasLab();
+  },
+  'lens-optics': async () => {
+    const { initLensOpticsLab } = await import('./lens-optics/lens-optics-lab');
+    initLensOpticsLab();
+  },
+  orbit: async () => {
+    const { initOrbitLab } = await import('./orbit/orbit-lab');
+    initOrbitLab();
+  },
+  'three-body': async () => {
+    const { initThreeBodyLab } = await import('./three-body/three-body-lab');
+    initThreeBodyLab();
+  },
+  'wave-interference': async () => {
+    const { initWaveInterferenceLab } = await import('./wave-interference/wave-lab');
+    initWaveInterferenceLab();
+  },
 };
 
-export function initPhysicsLab(): void {
+export async function initPhysicsLab(): Promise<void> {
   const root = document.querySelector<HTMLElement>('[data-lab]');
   const slug = root?.dataset.lab;
   if (!slug) {
     return;
   }
 
-  physicsLabInitializers[slug]?.();
+  await physicsLabInitializers[slug]?.();
 }

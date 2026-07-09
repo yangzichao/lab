@@ -12,7 +12,6 @@ import {
 } from '../shared/dom-controls';
 import { formatCompact, formatFixed, formatSigned } from '../shared/format';
 import type { Point } from '../shared/stage';
-import { setupStageCanvas } from '../shared/stage';
 import {
   BASE_MU,
   createOrbitState,
@@ -20,7 +19,7 @@ import {
   orbitMetrics,
   type OrbitState,
 } from './orbit-physics';
-import { drawOrbit, planetScreenPosition } from './orbit-render';
+import { OrbitThreeDimensionalRenderer } from './orbit-three-dimensional-renderer';
 
 const maximumTrailPoints = 900;
 const minimumRadius = 18;
@@ -44,10 +43,8 @@ export function initOrbitLab(): void {
   if (!canvas) {
     return;
   }
-  const context = setupStageCanvas(canvas);
-  if (!context) {
-    return;
-  }
+  const renderer = new OrbitThreeDimensionalRenderer(canvas);
+  window.addEventListener('pagehide', () => renderer.dispose(), { once: true });
 
   const mu = (): number => BASE_MU * getRangeValue(root, 'centralMass', 1);
 
@@ -64,7 +61,7 @@ export function initOrbitLab(): void {
 
   const render = (): void => {
     const metrics = orbitMetrics(state, mu());
-    drawOrbit(context, {
+    renderer.draw({
       state,
       mu: mu(),
       trail,
@@ -103,7 +100,7 @@ export function initOrbitLab(): void {
       state = buildState();
       trail = [];
     } else {
-      trail.push(planetScreenPosition(state));
+      trail.push({ x: state.x, y: state.y });
       if (trail.length > maximumTrailPoints) {
         trail.splice(0, trail.length - maximumTrailPoints);
       }

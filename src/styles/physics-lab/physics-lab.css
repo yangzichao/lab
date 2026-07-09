@@ -159,6 +159,7 @@
 }
 
 .plab__stage {
+  position: relative;
   overflow: hidden;
   border: 1px solid var(--plab-border);
   border-radius: var(--radius);
@@ -171,6 +172,58 @@
   height: auto;
   aspect-ratio: 900 / 560;
   touch-action: none;
+}
+
+.plab__canvas[data-rendering='three-dimensional'] {
+  background: #07111d;
+}
+
+.plab__three-dimensional-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 14px;
+  pointer-events: none;
+}
+
+.plab__three-dimensional-hint,
+.plab__three-dimensional-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border: 1px solid rgba(196, 220, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(5, 13, 24, 0.68);
+  color: rgba(235, 244, 255, 0.84);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  line-height: 1;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(10px);
+}
+
+.plab__three-dimensional-legend {
+  flex-wrap: wrap;
+  border-radius: 10px;
+}
+
+.plab__three-dimensional-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.plab__three-dimensional-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--plab-three-dimensional-color);
+  box-shadow: 0 0 8px var(--plab-three-dimensional-color);
 }
 
 .plab__readouts {

@@ -11,7 +11,6 @@ import {
 } from '../shared/dom-controls';
 import { formatFixed, formatSigned } from '../shared/format';
 import type { Point } from '../shared/stage';
-import { setupStageCanvas } from '../shared/stage';
 import {
   createThreeBodyState,
   integrateThreeBody,
@@ -20,7 +19,7 @@ import {
   type ThreeBodyPresetId,
   type ThreeBodyState,
 } from './three-body-physics';
-import { bodyScreenPosition, drawThreeBody } from './three-body-render';
+import { ThreeBodyThreeDimensionalRenderer } from './three-body-three-dimensional-renderer';
 
 const maximumTrailPoints = 1400;
 
@@ -39,10 +38,8 @@ export function initThreeBodyLab(): void {
   if (!canvas) {
     return;
   }
-  const context = setupStageCanvas(canvas);
-  if (!context) {
-    return;
-  }
+  const renderer = new ThreeBodyThreeDimensionalRenderer(canvas);
+  window.addEventListener('pagehide', () => renderer.dispose(), { once: true });
 
   let activePreset: ThreeBodyPresetId = 'figure8';
   let state: ThreeBodyState = createThreeBodyState(activePreset, 0);
@@ -54,7 +51,7 @@ export function initThreeBodyLab(): void {
 
   const render = (precomputedMetrics?: ThreeBodyMetrics): void => {
     const metrics = precomputedMetrics ?? threeBodyMetrics(state);
-    drawThreeBody(context, {
+    renderer.draw({
       state,
       trails,
       metrics,
@@ -77,7 +74,7 @@ export function initThreeBodyLab(): void {
 
   const pushTrails = (): void => {
     for (let index = 0; index < 3; index += 1) {
-      trails[index].push(bodyScreenPosition(state.bodies[index]));
+      trails[index].push({ x: state.bodies[index].x, y: state.bodies[index].y });
       if (trails[index].length > maximumTrailPoints) {
         trails[index].splice(0, trails[index].length - maximumTrailPoints);
       }
