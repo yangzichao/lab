@@ -55,6 +55,7 @@ export class DiffractionThreeDimensionalRenderer {
   private readonly wavefronts = new Group();
   private readonly screenTextureCanvas = document.createElement('canvas');
   private readonly screenTexture: CanvasTexture;
+  private readonly screenPixels: ImageData | null;
   private readonly screenGlow: Mesh<PlaneGeometry, MeshBasicMaterial>;
   private readonly intensityCurve: Line<BufferGeometry, LineBasicMaterial>;
   private readonly envelopeCurve: Line<BufferGeometry, LineDashedMaterial>;
@@ -86,6 +87,10 @@ export class DiffractionThreeDimensionalRenderer {
 
     this.screenTextureCanvas.width = textureWidth;
     this.screenTextureCanvas.height = textureHeight;
+    this.screenPixels =
+      this.screenTextureCanvas
+        .getContext('2d')
+        ?.createImageData(textureWidth, textureHeight) ?? null;
     this.screenTexture = new CanvasTexture(this.screenTextureCanvas);
     this.screenTexture.colorSpace = SRGBColorSpace;
 
@@ -303,15 +308,12 @@ export class DiffractionThreeDimensionalRenderer {
 
   private updateScreen(scene: DiffractionThreeDimensionalScene): void {
     const context = this.screenTextureCanvas.getContext('2d');
-    if (!context) {
+    if (!context || !this.screenPixels) {
       return;
     }
     const [red, green, blue] = wavelengthNanometresToRgb(
       scene.wavelengthNanometres,
     );
-    context.fillStyle = '#02060a';
-    context.fillRect(0, 0, textureWidth, textureHeight);
-
     for (let pixelX = 0; pixelX < textureWidth; pixelX += 1) {
       const fraction = pixelX / (textureWidth - 1) - 0.5;
       const sinTheta = fraction * diffractionSinMaximum * 2;
@@ -319,16 +321,20 @@ export class DiffractionThreeDimensionalRenderer {
         relativeIntensity(sinTheta, scene.parameters),
         1,
       );
-      const verticalGradient = context.createLinearGradient(0, 0, 0, textureHeight);
-      verticalGradient.addColorStop(0, `rgba(${red}, ${green}, ${blue}, 0.05)`);
-      verticalGradient.addColorStop(
-        0.5,
-        `rgba(${Math.round(red * intensity)}, ${Math.round(green * intensity)}, ${Math.round(blue * intensity)}, ${0.3 + intensity * 0.7})`,
-      );
-      verticalGradient.addColorStop(1, `rgba(${red}, ${green}, ${blue}, 0.05)`);
-      context.fillStyle = verticalGradient;
-      context.fillRect(pixelX, 0, 1, textureHeight);
+      const perceptualIntensity = Math.pow(intensity, 0.62);
+      for (let pixelY = 0; pixelY < textureHeight; pixelY += 1) {
+        const verticalPosition = pixelY / (textureHeight - 1);
+        const verticalFalloff =
+          0.05 + Math.pow(Math.sin(verticalPosition * Math.PI), 1.35) * 0.95;
+        const brightness = perceptualIntensity * verticalFalloff;
+        const pixelIndex = (pixelY * textureWidth + pixelX) * 4;
+        this.screenPixels.data[pixelIndex] = Math.round(red * brightness);
+        this.screenPixels.data[pixelIndex + 1] = Math.round(green * brightness);
+        this.screenPixels.data[pixelIndex + 2] = Math.round(blue * brightness);
+        this.screenPixels.data[pixelIndex + 3] = 255;
+      }
     }
+    context.putImageData(this.screenPixels, 0, 0);
     this.screenTexture.needsUpdate = true;
     this.screenGlow.visible = scene.showScreenBand;
 

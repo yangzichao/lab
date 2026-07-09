@@ -410,7 +410,7 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
           { id: 'grating', label: locale === 'en' ? 'Grating' : '光栅' },
         ],
         fields: [
-          { id: 'slitWidth', label: locale === 'en' ? 'Slit width a' : '缝宽 a', outputValue: '4.0 µ', min: 1, max: 14, step: 0.5, value: 4 },
+          { id: 'slitWidth', label: locale === 'en' ? 'Slit width a' : '缝宽 a', outputValue: '10.0 µ', min: 1, max: 14, step: 0.5, value: 10 },
           { id: 'slitSpacing', label: locale === 'en' ? 'Slit spacing d' : '缝间距 d', outputValue: '18.0 µ', min: 6, max: 40, step: 0.5, value: 18 },
           { id: 'slitCount', label: locale === 'en' ? 'Slit count N' : '缝数 N', outputValue: '6', min: 2, max: 12, step: 1, value: 6 },
           { id: 'wavelength', label: locale === 'en' ? 'Wavelength λ' : '波长 λ', outputValue: '540 nm', min: 380, max: 720, step: 1, value: 540 },

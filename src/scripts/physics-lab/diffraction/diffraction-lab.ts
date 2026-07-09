@@ -36,7 +36,7 @@ type DiffractionPreset = {
 };
 
 const presets: Record<string, DiffractionPreset> = {
-  single: { mode: 'single', slitWidth: 6, slitSpacing: 18, slitCount: 1 },
+  single: { mode: 'single', slitWidth: 10, slitSpacing: 18, slitCount: 1 },
   double: { mode: 'double', slitWidth: 4, slitSpacing: 18, slitCount: 2 },
   grating: { mode: 'grating', slitWidth: 3, slitSpacing: 16, slitCount: 6 },
 };
@@ -62,7 +62,7 @@ export function initDiffractionLab(): void {
 
   const readParameters = (): DiffractionParameters => ({
     mode,
-    slitWidth: getRangeValue(root, 'slitWidth', 4),
+    slitWidth: getRangeValue(root, 'slitWidth', 10),
     slitSpacing: getRangeValue(root, 'slitSpacing', 18),
     slitCount: getRangeValue(root, 'slitCount', 6),
     wavelength: wavelengthNanometres() * NANOMETRES_TO_APERTURE_UNITS,
@@ -106,7 +106,7 @@ export function initDiffractionLab(): void {
   };
 
   const updateOutputs = (): void => {
-    setOutput(root, 'slitWidth', `${formatFixed(getRangeValue(root, 'slitWidth', 4), 1)} µ`);
+    setOutput(root, 'slitWidth', `${formatFixed(getRangeValue(root, 'slitWidth', 10), 1)} µ`);
     setOutput(root, 'slitSpacing', `${formatFixed(getRangeValue(root, 'slitSpacing', 18), 1)} µ`);
     setOutput(root, 'slitCount', `${Math.round(getRangeValue(root, 'slitCount', 6))}`);
     setOutput(root, 'wavelength', `${Math.round(wavelengthNanometres())} nm`);
