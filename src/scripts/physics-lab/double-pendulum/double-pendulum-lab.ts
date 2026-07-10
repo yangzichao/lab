@@ -11,8 +11,11 @@ import {
   updatePlayPauseButton,
 } from '../shared/dom-controls';
 import { degreesToRadians, formatCompact, formatFixed } from '../shared/format';
-import type { Point } from '../shared/stage';
-import { setupStageCanvas } from '../shared/stage';
+import {
+  pendulumBobPosition,
+  pendulumBobVelocity,
+  type PendulumCartesianPoint,
+} from './double-pendulum-kinematics';
 import {
   BASE_GRAVITY,
   createPendulumState,
@@ -20,7 +23,7 @@ import {
   totalEnergy,
   type PendulumState,
 } from './double-pendulum-physics';
-import { bobScreenPosition, bobVelocity, drawDoublePendulum } from './double-pendulum-render';
+import { DoublePendulumThreeDimensionalRenderer } from './double-pendulum-three-dimensional-renderer';
 
 const maximumTrailPoints = 620;
 const twinPerturbationRadians = degreesToRadians(0.001);
@@ -40,10 +43,7 @@ export function initDoublePendulumLab(): void {
   if (!canvas) {
     return;
   }
-  const context = setupStageCanvas(canvas);
-  if (!context) {
-    return;
-  }
+  const renderer = new DoublePendulumThreeDimensionalRenderer(canvas);
 
   const buildState = (): PendulumState =>
     createPendulumState(
@@ -61,11 +61,11 @@ export function initDoublePendulumLab(): void {
 
   let state = buildState();
   let twin = perturb(state);
-  let trail: Point[] = [];
+  let trail: PendulumCartesianPoint[] = [];
   let elapsedSeconds = 0;
 
   const updateReadouts = (): void => {
-    const velocity = bobVelocity(state);
+    const velocity = pendulumBobVelocity(state);
     const speed = Math.hypot(velocity.x, velocity.y);
     const separation = Math.hypot(
       (state.theta1 - twin.theta1) * (180 / Math.PI),
@@ -78,7 +78,7 @@ export function initDoublePendulumLab(): void {
   };
 
   const render = (): void => {
-    drawDoublePendulum(context, {
+    renderer.draw({
       state,
       twin: isChecked(root, 'showTwin', true) ? twin : null,
       trail,
@@ -110,7 +110,7 @@ export function initDoublePendulumLab(): void {
     twin = integrate(twin, g, b, deltaSeconds);
     elapsedSeconds += deltaSeconds;
 
-    trail.push(bobScreenPosition(state));
+    trail.push(pendulumBobPosition(state));
     if (trail.length > maximumTrailPoints) {
       trail.splice(0, trail.length - maximumTrailPoints);
     }

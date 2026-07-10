@@ -40,18 +40,18 @@ const physicsLabDefinitions: PhysicsLabDefinition[] = [
         eyebrow: '混沌 · 非线性动力学',
         tagline: '两根耦合的摆杆，运动出了名地无法预测。',
         description:
-          '用 RK4 积分的 double pendulum。一个浅色的孪生摆从相差千分之一度的地方出发——看它能跟原摆同步多久，再看混沌如何把两者撕开。',
+          '一套三维金属双摆由 RK4 实时积分，速度箭头和发光轨迹把末端运动留在空间中。紫色孪生摆从相差千分之一度的平行层出发——看它能跟原摆同步多久。',
         notice:
-          '把阻尼调到零，总能量就稳稳不动——那个不变的数字正是积分器在证明它守恒能量。轻轻拨动一个初始角度，孪生摆就会暴露出对初始条件的敏感依赖。',
+          '拖动空白处旋转机构，就能看清两根摆杆始终在同一运动平面内。把阻尼调到零，总能量近似不变；孪生摆逐渐分离则暴露出对初始条件的敏感依赖。',
       },
       en: {
         title: 'Double Pendulum',
         eyebrow: 'Chaos · nonlinear dynamics',
         tagline: 'Two coupled rods turn tiny initial changes into unpredictable motion.',
         description:
-          'An RK4-integrated double pendulum. A pale twin starts one-thousandth of a degree away; watch how long it shadows the original before chaos pulls them apart.',
+          'An RK4-integrated 3D metal mechanism, with a velocity arrow and luminous tip trail preserving the motion in space. A violet twin starts one-thousandth of a degree away on a parallel layer; watch how long it shadows the original.',
         notice:
-          'Set damping to zero and total energy stays nearly fixed, which is the integrator proving conservation. Nudge one starting angle and the twin exposes sensitive dependence on initial conditions.',
+          'Orbit the mechanism to see that both rods remain in one motion plane. Set damping to zero and total energy stays nearly fixed; the separating twin exposes sensitive dependence on initial conditions.',
       },
     },
   },

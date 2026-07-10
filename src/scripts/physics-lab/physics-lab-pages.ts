@@ -126,13 +126,13 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
           {
             id: 'showTrail',
             label: locale === 'en' ? 'Trace the tip' : '描摹末端',
-            description: locale === 'en' ? 'A fading trail from the lower bob.' : '下摆球的渐隐轨迹。',
+            description: locale === 'en' ? 'A luminous path from the lower bob.' : '下摆球在空间中留下的发光轨迹。',
             checked: true,
           },
           {
             id: 'showTwin',
             label: locale === 'en' ? 'Show chaotic twin' : '显示混沌孪生',
-            description: locale === 'en' ? 'A copy offset by 0.001 degrees.' : '偏离 0.001° 的副本。',
+            description: locale === 'en' ? 'A violet copy offset by 0.001 degrees.' : '平行层中偏离 0.001° 的紫色副本。',
             checked: true,
           },
         ],
