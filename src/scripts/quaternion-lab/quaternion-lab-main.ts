@@ -1,11 +1,12 @@
 import { updateToggleButton, setRangeValue, setText } from './dom-helpers';
+import { renderLatexIntoElement } from '../math/render-latex-into-element';
 import {
   degreesToRadians,
   formatAxis,
-  formatAxisAngleFormula,
-  formatComplexNumber,
+  formatAxisAngleLatex,
   formatDegrees,
   formatNumber,
+  formatPauliMatrixLatex,
   formatQuaternion,
   formatSpinorPhase,
   pauliMatrixFromQuaternion,
@@ -25,6 +26,7 @@ type QuaternionLabState = {
 
 const DEFAULT_AXIS: AxisComponents = { x: 0.35, y: 0.72, z: 0.59 };
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+const DYNAMIC_LATEX_REFRESH_INTERVAL_MS = 100;
 
 const AXIS_PRESETS: Record<string, AxisComponents> = {
   x: { x: 1, y: 0, z: 0 },
@@ -209,22 +211,13 @@ function renderState(
     `${Math.round(state.speedDegreesPerSecond)} deg/s`,
   );
 
-  setText(labElement, '[data-quaternion-readout="quaternion"]', formatQuaternion(quaternion));
   setText(labElement, '[data-quaternion-readout="axis"]', formatAxis(state.axis));
   setText(
     labElement,
     '[data-quaternion-readout="spinorPhase"]',
     formatSpinorPhase(state.angleDegrees),
   );
-  setText(
-    labElement,
-    '[data-quaternion-readout="axisAngleFormula"]',
-    formatAxisAngleFormula(state.axis, state.angleDegrees),
-  );
-  setText(labElement, '[data-pauli-entry="m00"]', formatComplexNumber(pauliMatrix.m00));
-  setText(labElement, '[data-pauli-entry="m01"]', formatComplexNumber(pauliMatrix.m01));
-  setText(labElement, '[data-pauli-entry="m10"]', formatComplexNumber(pauliMatrix.m10));
-  setText(labElement, '[data-pauli-entry="m11"]', formatComplexNumber(pauliMatrix.m11));
+  renderDynamicLatexReadouts(labElement, state, quaternion, pauliMatrix);
 
   threeScene.update({
     angleRadians,
@@ -233,6 +226,38 @@ function renderState(
     showGhosts: state.showGhosts,
   });
   threeScene.render();
+}
+
+function renderDynamicLatexReadouts(
+  labElement: HTMLElement,
+  state: QuaternionLabState,
+  quaternion: ReturnType<typeof quaternionFromAxisAngle>,
+  pauliMatrix: ReturnType<typeof pauliMatrixFromQuaternion>,
+): void {
+  const currentTime = performance.now();
+  const previousRenderTime = Number(labElement.dataset.lastLatexRenderTime ?? '-Infinity');
+  if (
+    Number.isFinite(previousRenderTime) &&
+    currentTime - previousRenderTime < DYNAMIC_LATEX_REFRESH_INTERVAL_MS
+  ) {
+    return;
+  }
+
+  renderLatexIntoElement(
+    labElement.querySelector<HTMLElement>('[data-quaternion-readout="quaternion"]'),
+    formatQuaternion(quaternion),
+  );
+  renderLatexIntoElement(
+    labElement.querySelector<HTMLElement>('[data-quaternion-readout="axisAngleFormula"]'),
+    formatAxisAngleLatex(state.axis, state.angleDegrees),
+    true,
+  );
+  renderLatexIntoElement(
+    labElement.querySelector<HTMLElement>('[data-quaternion-readout="pauliMatrix"]'),
+    formatPauliMatrixLatex(pauliMatrix),
+    true,
+  );
+  labElement.dataset.lastLatexRenderTime = String(currentTime);
 }
 
 function setAxisRangeValues(labElement: HTMLElement, axis: AxisComponents): void {

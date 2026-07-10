@@ -317,18 +317,18 @@
 }
 
 .ligo-science__equation {
-  display: grid;
-  gap: 5px;
+  display: block;
   margin: 0 0 18px;
   padding: 13px 15px;
   border-left: 3px solid var(--plab-teal);
   background: #eef6f3;
   color: #13251f;
-  font-family: 'Newsreader', Georgia, serif;
   font-size: clamp(1.05rem, 2vw, 1.28rem);
-  font-weight: 600;
   line-height: 1.35;
-  letter-spacing: 0.01em;
+}
+
+.ligo-science__equation .katex-display > .katex {
+  text-align: left;
 }
 
 .ligo-science__variables {
@@ -344,7 +344,6 @@
 }
 
 .ligo-science__variables dt {
-  font-family: 'Newsreader', Georgia, serif;
   font-size: 0.94rem;
   font-weight: 700;
 }

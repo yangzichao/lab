@@ -2,6 +2,7 @@
 import type { PhysicsLabEntry } from '../../scripts/physics-lab/physics-lab-catalog';
 import type { PhysicsLabLocale } from '../../scripts/physics-lab/physics-lab-i18n';
 import type { PhysicsLabPage } from '../../scripts/physics-lab/physics-lab-pages';
+import MathFormula from '../math/MathFormula.astro';
 import LigoScientificExplanation from './ligo/LigoScientificExplanation.astro';
 import PhysicsLabShell from './PhysicsLabShell.astro';
 
@@ -96,7 +97,10 @@ const { entry, page, locale, entries, alternateHref, suite = 'physics' } = Astro
       page.controls.fields?.map((field) => (
         <label class="plab__field">
           <span class="plab__field-label">
-            {field.labelHtml ? <span set:html={field.labelHtml} /> : <span>{field.label}</span>}
+            <span class="plab__field-name">
+              <span>{field.label}</span>
+              {field.symbolLatex && <MathFormula expression={field.symbolLatex} />}
+            </span>
             <output data-output={field.id}>{field.outputValue}</output>
           </span>
           <input

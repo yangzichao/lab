@@ -33,8 +33,8 @@ export type PhysicsLabToggle = {
 
 export type PhysicsLabField = {
   id: string;
-  label?: string;
-  labelHtml?: string;
+  label: string;
+  symbolLatex?: string;
   outputValue: string;
   min: number;
   max: number;
@@ -139,8 +139,8 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
         fields: [
           { id: 'gravity', label: locale === 'en' ? 'Gravity' : '重力', outputValue: '1.00×', min: 0.4, max: 2.2, step: 0.05, value: 1 },
           { id: 'damping', label: locale === 'en' ? 'Damping' : '阻尼', outputValue: '0.040', min: 0, max: 0.16, step: 0.005, value: 0.04 },
-          { id: 'angle1', label: locale === 'en' ? 'Upper angle theta1' : '上摆角 θ₁', outputValue: '120°', min: -179, max: 179, step: 1, value: 120 },
-          { id: 'angle2', label: locale === 'en' ? 'Lower angle theta2' : '下摆角 θ₂', outputValue: '-35°', min: -179, max: 179, step: 1, value: -35 },
+          { id: 'angle1', label: locale === 'en' ? 'Upper angle' : '上摆角', symbolLatex: '\\theta_1', outputValue: '120°', min: -179, max: 179, step: 1, value: 120 },
+          { id: 'angle2', label: locale === 'en' ? 'Lower angle' : '下摆角', symbolLatex: '\\theta_2', outputValue: '-35°', min: -179, max: 179, step: 1, value: -35 },
         ],
       },
     },
@@ -220,8 +220,8 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
           },
         ],
         fields: [
-          { id: 'wavelength', label: locale === 'en' ? 'Wavelength λ' : '波长 λ', outputValue: '48 px', min: 24, max: 88, step: 1, value: 48 },
-          { id: 'sourceSeparation', label: locale === 'en' ? 'Source separation d' : '波源间距 d', outputValue: '160 px', min: 48, max: 260, step: 1, value: 160 },
+          { id: 'wavelength', label: locale === 'en' ? 'Wavelength' : '波长', symbolLatex: '\\lambda', outputValue: '48 px', min: 24, max: 88, step: 1, value: 48 },
+          { id: 'sourceSeparation', label: locale === 'en' ? 'Source separation' : '波源间距', symbolLatex: 'd', outputValue: '160 px', min: 48, max: 260, step: 1, value: 160 },
           { id: 'phaseOffset', label: locale === 'en' ? 'Phase offset' : '相位差', outputValue: '0°', min: -180, max: 180, step: 1, value: 0 },
           { id: 'falloff', label: locale === 'en' ? 'Falloff' : '衰减', outputValue: '0.006', min: 0.001, max: 0.014, step: 0.001, value: 0.006 },
         ],
@@ -303,7 +303,7 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
           },
         ],
         fields: [
-          { id: 'terms', label: locale === 'en' ? 'Harmonics N' : '谐波数 N', outputValue: '6', min: 1, max: 40, step: 1, value: 6 },
+          { id: 'terms', label: locale === 'en' ? 'Harmonics' : '谐波数', symbolLatex: 'N', outputValue: '6', min: 1, max: 40, step: 1, value: 6 },
           { id: 'speed', label: locale === 'en' ? 'Speed' : '速度', outputValue: '1.00×', min: 0.1, max: 3, step: 0.05, value: 1 },
         ],
       },
@@ -386,7 +386,7 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
           },
         ],
         fields: [
-          { id: 'count', label: locale === 'en' ? 'Mass count N' : '珠子数 N', outputValue: '6', min: 3, max: 12, step: 1, value: 6 },
+          { id: 'count', label: locale === 'en' ? 'Mass count' : '珠子数', symbolLatex: 'N', outputValue: '6', min: 3, max: 12, step: 1, value: 6 },
           { id: 'speed', label: locale === 'en' ? 'Speed' : '速度', outputValue: '1.00×', min: 0.2, max: 3, step: 0.1, value: 1 },
         ],
       },
@@ -410,10 +410,10 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
           { id: 'grating', label: locale === 'en' ? 'Grating' : '光栅' },
         ],
         fields: [
-          { id: 'slitWidth', label: locale === 'en' ? 'Slit width a' : '缝宽 a', outputValue: '10.0 µ', min: 1, max: 14, step: 0.5, value: 10 },
-          { id: 'slitSpacing', label: locale === 'en' ? 'Slit spacing d' : '缝间距 d', outputValue: '18.0 µ', min: 6, max: 40, step: 0.5, value: 18 },
-          { id: 'slitCount', label: locale === 'en' ? 'Slit count N' : '缝数 N', outputValue: '6', min: 2, max: 12, step: 1, value: 6 },
-          { id: 'wavelength', label: locale === 'en' ? 'Wavelength λ' : '波长 λ', outputValue: '540 nm', min: 380, max: 720, step: 1, value: 540 },
+          { id: 'slitWidth', label: locale === 'en' ? 'Slit width' : '缝宽', symbolLatex: 'a', outputValue: '10.0 µ', min: 1, max: 14, step: 0.5, value: 10 },
+          { id: 'slitSpacing', label: locale === 'en' ? 'Slit spacing' : '缝间距', symbolLatex: 'd', outputValue: '18.0 µ', min: 6, max: 40, step: 0.5, value: 18 },
+          { id: 'slitCount', label: locale === 'en' ? 'Slit count' : '缝数', symbolLatex: 'N', outputValue: '6', min: 2, max: 12, step: 1, value: 6 },
+          { id: 'wavelength', label: locale === 'en' ? 'Wavelength' : '波长', symbolLatex: '\\lambda', outputValue: '540 nm', min: 380, max: 720, step: 1, value: 540 },
         ],
         toggles: [
           {
@@ -470,11 +470,11 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
           },
         ],
         fields: [
-          { id: 'charge', label: locale === 'en' ? 'Charge q' : '电荷 q', outputValue: '+1.0 C', min: -3, max: 3, step: 0.1, value: 1 },
-          { id: 'mass', label: locale === 'en' ? 'Mass m' : '质量 m', outputValue: '1.0 kg', min: 0.2, max: 4, step: 0.1, value: 1 },
-          { id: 'magneticZ', labelHtml: locale === 'en' ? 'Magnetic field B<sub>z</sub>' : '磁场 B<sub>z</sub>', outputValue: '+2.0 T', min: -4, max: 4, step: 0.1, value: 2 },
-          { id: 'electricX', labelHtml: locale === 'en' ? 'Electric field E<sub>x</sub>' : '电场 E<sub>x</sub>', outputValue: '+0.0', min: -10, max: 10, step: 0.5, value: 0 },
-          { id: 'electricY', labelHtml: locale === 'en' ? 'Electric field E<sub>y</sub>' : '电场 E<sub>y</sub>', outputValue: '+0.0', min: -10, max: 10, step: 0.5, value: 0 },
+          { id: 'charge', label: locale === 'en' ? 'Charge' : '电荷', symbolLatex: 'q', outputValue: '+1.0 C', min: -3, max: 3, step: 0.1, value: 1 },
+          { id: 'mass', label: locale === 'en' ? 'Mass' : '质量', symbolLatex: 'm', outputValue: '1.0 kg', min: 0.2, max: 4, step: 0.1, value: 1 },
+          { id: 'magneticZ', label: locale === 'en' ? 'Magnetic field' : '磁场', symbolLatex: 'B_z', outputValue: '+2.0 T', min: -4, max: 4, step: 0.1, value: 2 },
+          { id: 'electricX', label: locale === 'en' ? 'Electric field' : '电场', symbolLatex: 'E_x', outputValue: '+0.0', min: -10, max: 10, step: 0.5, value: 0 },
+          { id: 'electricY', label: locale === 'en' ? 'Electric field' : '电场', symbolLatex: 'E_y', outputValue: '+0.0', min: -10, max: 10, step: 0.5, value: 0 },
           { id: 'speed', label: locale === 'en' ? 'Initial speed' : '初速度', outputValue: '14 m/s', min: 2, max: 30, step: 1, value: 14 },
         ],
       },
@@ -554,9 +554,9 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
           },
         ],
         fields: [
-          { id: 'focalLength', label: locale === 'en' ? 'Focal length f' : '焦距 f', outputValue: '150 px', min: -260, max: 260, step: 2, value: 150 },
-          { id: 'objectDistance', labelHtml: locale === 'en' ? 'Object distance d<sub>o</sub>' : '物距 d<sub>o</sub>', outputValue: '360 px', min: 30, max: 420, step: 2, value: 360 },
-          { id: 'objectHeight', labelHtml: locale === 'en' ? 'Object height h<sub>o</sub>' : '物高 h<sub>o</sub>', outputValue: '110 px', min: 20, max: 240, step: 2, value: 110 },
+          { id: 'focalLength', label: locale === 'en' ? 'Focal length' : '焦距', symbolLatex: 'f', outputValue: '150 px', min: -260, max: 260, step: 2, value: 150 },
+          { id: 'objectDistance', label: locale === 'en' ? 'Object distance' : '物距', symbolLatex: 'd_o', outputValue: '360 px', min: 30, max: 420, step: 2, value: 360 },
+          { id: 'objectHeight', label: locale === 'en' ? 'Object height' : '物高', symbolLatex: 'h_o', outputValue: '110 px', min: 20, max: 240, step: 2, value: 110 },
         ],
       },
     },

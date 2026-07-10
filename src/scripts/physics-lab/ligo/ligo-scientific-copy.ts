@@ -7,7 +7,7 @@ export type LigoCausalStep = {
 };
 
 export type LigoVariableDefinition = {
-  symbol: string;
+  symbolLatex: string;
   definition: string;
 };
 
@@ -15,7 +15,7 @@ export type LigoScientificExplanation = {
   question: string;
   answer: string;
   causalSteps: LigoCausalStep[];
-  equationHtml: string;
+  equationLatex: string;
   equationAriaLabel: string;
   variables: LigoVariableDefinition[];
   modelBoundary: string;
@@ -35,14 +35,14 @@ const scientificCopy: Record<
         { label: '距离改变', detail: 'x 方向变长时，y 方向同时变短' },
         { label: '圆环变形', detail: '半个周期后长短轴交换' },
       ],
-      equationHtml:
-        '<span>L<sub>x</sub>(t) ≈ L[1 + ½h<sub>+</sub>(t)]</span><span>L<sub>y</sub>(t) ≈ L[1 − ½h<sub>+</sub>(t)]</span>',
+      equationLatex:
+        '\\begin{aligned} L_x(t) &\\approx L\\left[1 + \\frac{1}{2}h_{+}(t)\\right] \\\\ L_y(t) &\\approx L\\left[1 - \\frac{1}{2}h_{+}(t)\\right] \\end{aligned}',
       equationAriaLabel:
         'L x of t is approximately L times one plus one half h plus of t. L y of t is approximately L times one minus one half h plus of t.',
       variables: [
-        { symbol: 'L', definition: '没有引力波时的基准距离' },
-        { symbol: 'h₊(t)', definition: '+ 偏振的无量纲应变' },
-        { symbol: 'Lₓ, Lᵧ', definition: '两个垂直方向上的固有距离' },
+        { symbolLatex: 'L', definition: '没有引力波时的基准距离' },
+        { symbolLatex: 'h_{+}(t)', definition: '+ 偏振的无量纲应变' },
+        { symbolLatex: 'L_x,\\,L_y', definition: '两个垂直方向上的固有距离' },
       ],
       modelBoundary:
         '这里采用长波极限和 TT gauge 的标准教学图像；动画把应变夸大了约 10²⁰ 倍。测试质量的坐标可以保持不变，但固有距离会改变。',
@@ -56,14 +56,14 @@ const scientificCopy: Record<
         { label: '双臂反相响应', detail: '+δL 与 −δL 同时出现' },
         { label: '读取长度差', detail: '差分测量保留引力波，抑制共模噪声' },
       ],
-      equationHtml:
-        '<span>ΔL<sub>diff</sub> ≡ δL<sub>x</sub> − δL<sub>y</sub> = h<sub>+</sub>L</span><span>h<sub>+</sub> = ΔL<sub>diff</sub> / L</span>',
+      equationLatex:
+        '\\begin{aligned} \\Delta L_{\\mathrm{diff}} &\\equiv \\delta L_x - \\delta L_y = h_{+}L \\\\ h_{+} &= \\frac{\\Delta L_{\\mathrm{diff}}}{L} \\end{aligned}',
       equationAriaLabel:
         'Delta L differential equals delta L x minus delta L y equals h plus times L. h plus equals delta L differential divided by L.',
       variables: [
-        { symbol: 'L', definition: '每条臂的基准长度，LIGO 为 4 km' },
-        { symbol: 'ΔLdiff', definition: '两条臂的差分长度变化' },
-        { symbol: 'h₊', definition: '与双臂方向对齐时的 + 偏振应变' },
+        { symbolLatex: 'L', definition: '每条臂的基准长度，LIGO 为 4 km' },
+        { symbolLatex: '\\Delta L_{\\mathrm{diff}}', definition: '两条臂的差分长度变化' },
+        { symbolLatex: 'h_{+}', definition: '与双臂方向对齐时的 + 偏振应变' },
       ],
       modelBoundary:
         '公式对应“引力波垂直入射且 + 偏振与双臂对齐”的最清楚情形。一般天空方向与偏振需要乘上探测器响应 F₊、F×。',
@@ -77,14 +77,14 @@ const scientificCopy: Record<
         { label: '分别往返', detail: '每束光记录对应臂的光程' },
         { label: '重新合束', detail: '返回光的相位差携带 ΔLdiff' },
       ],
-      equationHtml:
-        '<span>φ<sub>rt</sub> = 4πL / λ</span><span>Δφ = 4π(L<sub>x</sub> − L<sub>y</sub>) / λ</span>',
+      equationLatex:
+        '\\begin{aligned} \\phi_{\\mathrm{rt}} &= \\frac{4\\pi L}{\\lambda} \\\\ \\Delta\\phi &= \\frac{4\\pi(L_x - L_y)}{\\lambda} \\end{aligned}',
       equationAriaLabel:
         'The round trip phase phi equals four pi L over lambda. Delta phi equals four pi times L x minus L y over lambda.',
       variables: [
-        { symbol: 'λ', definition: '激光真空波长' },
-        { symbol: 'φrt', definition: '一次往返积累的光学相位' },
-        { symbol: 'Δφ', definition: '两条返回光之间的相位差' },
+        { symbolLatex: '\\lambda', definition: '激光真空波长' },
+        { symbolLatex: '\\phi_{\\mathrm{rt}}', definition: '一次往返积累的光学相位' },
+        { symbolLatex: '\\Delta\\phi', definition: '两条返回光之间的相位差' },
       ],
       modelBoundary:
         '这一幕先使用简单 Michelson interferometer。真实 LIGO 的 arm cavity 会让光重复采样同一臂，第五幕再加入这个增益。',
@@ -98,14 +98,14 @@ const scientificCopy: Record<
         { label: '产生 Δφ', detail: '差分臂长让一束超前、另一束落后' },
         { label: '输出光变化', detail: 'photodetector 把光功率变成电信号' },
       ],
-      equationHtml:
-        '<span>E<sub>out</sub> ∝ E<sub>0</sub> sin(Δφ/2)</span><span>I<sub>out</sub> ∝ sin²(Δφ/2)</span>',
+      equationLatex:
+        '\\begin{aligned} E_{\\mathrm{out}} &\\propto E_0\\sin\\left(\\frac{\\Delta\\phi}{2}\\right) \\\\ I_{\\mathrm{out}} &\\propto \\sin^2\\left(\\frac{\\Delta\\phi}{2}\\right) \\end{aligned}',
       equationAriaLabel:
         'Output electric field is proportional to E zero times sine delta phi over two. Output intensity is proportional to sine squared delta phi over two.',
       variables: [
-        { symbol: 'Eout', definition: '输出端的光场振幅' },
-        { symbol: 'Iout', definition: 'photodetector 测得的光强' },
-        { symbol: 'Δφ', definition: '两条返回光的相位差' },
+        { symbolLatex: 'E_{\\mathrm{out}}', definition: '输出端的光场振幅' },
+        { symbolLatex: 'I_{\\mathrm{out}}', definition: 'photodetector 测得的光强' },
+        { symbolLatex: '\\Delta\\phi', definition: '两条返回光的相位差' },
       ],
       modelBoundary:
         '图中先展示理想 dark fringe。Advanced LIGO 实际会引入很小的 DARM offset，让少量载波光充当 local oscillator，从而在线性区读取信号。',
@@ -119,14 +119,14 @@ const scientificCopy: Record<
         { label: '反复穿越 4 km', detail: '同一个长度变化被重复采样' },
         { label: '相位信号增强', detail: '再返回分束镜进行差分比较' },
       ],
-      equationHtml:
-        '<span>L<sub>effective</sub> ≈ N L<sub>arm</sub></span><span>≈ 300 × 4 km ≈ 1200 km</span>',
+      equationLatex:
+        '\\begin{aligned} L_{\\mathrm{effective}} &\\approx N L_{\\mathrm{arm}} \\\\ &\\approx 300 \\times 4\\,\\mathrm{km} \\approx 1200\\,\\mathrm{km} \\end{aligned}',
       equationAriaLabel:
         'Effective optical path is approximately N times the arm length, approximately three hundred times four kilometres, or twelve hundred kilometres.',
       variables: [
-        { symbol: 'N', definition: '教学近似中的有效穿越次数，约 300' },
-        { symbol: 'Larm', definition: '实体 arm cavity 长度，4 km' },
-        { symbol: 'Leffective', definition: '用来理解灵敏度增益的有效光程' },
+        { symbolLatex: 'N', definition: '教学近似中的有效穿越次数，约 300' },
+        { symbolLatex: 'L_{\\mathrm{arm}}', definition: '实体 arm cavity 长度，4 km' },
+        { symbolLatex: 'L_{\\mathrm{effective}}', definition: '用来理解灵敏度增益的有效光程' },
       ],
       modelBoundary:
         '“1200 km”是直观的路径长度说法；真实 cavity 增益还取决于 finesse、储存时间和引力波频率，不能在所有频率上简单等同于固定 N。',
@@ -140,14 +140,14 @@ const scientificCopy: Record<
         { label: '频率、振幅上升', detail: '形成 inspiral 的 chirp' },
         { label: '双站相关', detail: 'GW150914 在两站相差约 7 ms' },
       ],
-      equationHtml:
-        '<span>f<sub>GW</sub> ≈ 2f<sub>orb</sub></span><span>Δt = n̂ · (r<sub>H</sub> − r<sub>L</sub>) / c ≈ 7 ms</span>',
+      equationLatex:
+        '\\begin{aligned} f_{\\mathrm{GW}} &\\approx 2f_{\\mathrm{orb}} \\\\ \\Delta t &= \\frac{\\hat{\\mathbf n}\\cdot(\\mathbf r_{\\mathrm H}-\\mathbf r_{\\mathrm L})}{c} \\approx 7\\,\\mathrm{ms} \\end{aligned}',
       equationAriaLabel:
         'Gravitational wave frequency is approximately twice the orbital frequency. Delta t equals n dot the Hanford minus Livingston baseline divided by c, approximately seven milliseconds.',
       variables: [
-        { symbol: 'fGW', definition: '主导四极引力波的频率' },
-        { symbol: 'forb', definition: '双星轨道频率' },
-        { symbol: 'Δt', definition: '同一波前抵达两站的时间差' },
+        { symbolLatex: 'f_{\\mathrm{GW}}', definition: '主导四极引力波的频率' },
+        { symbolLatex: 'f_{\\mathrm{orb}}', definition: '双星轨道频率' },
+        { symbolLatex: '\\Delta t', definition: '同一波前抵达两站的时间差' },
       ],
       modelBoundary:
         '画面中的 chirp 是教学波形，不是原始探测器数据。真实分析会校准 strain、估计噪声，并用完整 waveform model 与探测器网络做统计推断。',
@@ -163,14 +163,14 @@ const scientificCopy: Record<
         { label: 'Distances change', detail: 'x grows while y shrinks' },
         { label: 'The ring deforms', detail: 'The long and short axes swap half a cycle later' },
       ],
-      equationHtml:
-        '<span>L<sub>x</sub>(t) ≈ L[1 + ½h<sub>+</sub>(t)]</span><span>L<sub>y</sub>(t) ≈ L[1 − ½h<sub>+</sub>(t)]</span>',
+      equationLatex:
+        '\\begin{aligned} L_x(t) &\\approx L\\left[1 + \\frac{1}{2}h_{+}(t)\\right] \\\\ L_y(t) &\\approx L\\left[1 - \\frac{1}{2}h_{+}(t)\\right] \\end{aligned}',
       equationAriaLabel:
         'L x of t is approximately L times one plus one half h plus of t. L y of t is approximately L times one minus one half h plus of t.',
       variables: [
-        { symbol: 'L', definition: 'Reference separation with no wave' },
-        { symbol: 'h₊(t)', definition: 'Dimensionless plus-polarized strain' },
-        { symbol: 'Lₓ, Lᵧ', definition: 'Proper separations along two transverse axes' },
+        { symbolLatex: 'L', definition: 'Reference separation with no wave' },
+        { symbolLatex: 'h_{+}(t)', definition: 'Dimensionless plus-polarized strain' },
+        { symbolLatex: 'L_x,\\,L_y', definition: 'Proper separations along two transverse axes' },
       ],
       modelBoundary:
         'This is the standard long-wavelength, TT-gauge teaching picture. The animation exaggerates strain by roughly 10²⁰. Coordinate positions may remain fixed while proper distances change.',
@@ -184,14 +184,14 @@ const scientificCopy: Record<
         { label: 'The arms respond oppositely', detail: '+δL and −δL appear together' },
         { label: 'Read the difference', detail: 'Differential sensing retains strain and rejects common motion' },
       ],
-      equationHtml:
-        '<span>ΔL<sub>diff</sub> ≡ δL<sub>x</sub> − δL<sub>y</sub> = h<sub>+</sub>L</span><span>h<sub>+</sub> = ΔL<sub>diff</sub> / L</span>',
+      equationLatex:
+        '\\begin{aligned} \\Delta L_{\\mathrm{diff}} &\\equiv \\delta L_x - \\delta L_y = h_{+}L \\\\ h_{+} &= \\frac{\\Delta L_{\\mathrm{diff}}}{L} \\end{aligned}',
       equationAriaLabel:
         'Delta L differential equals delta L x minus delta L y equals h plus times L. h plus equals delta L differential divided by L.',
       variables: [
-        { symbol: 'L', definition: 'Reference arm length; 4 km at LIGO' },
-        { symbol: 'ΔLdiff', definition: 'Differential change between the arms' },
-        { symbol: 'h₊', definition: 'Plus strain aligned with the arms' },
+        { symbolLatex: 'L', definition: 'Reference arm length; 4 km at LIGO' },
+        { symbolLatex: '\\Delta L_{\\mathrm{diff}}', definition: 'Differential change between the arms' },
+        { symbolLatex: 'h_{+}', definition: 'Plus strain aligned with the arms' },
       ],
       modelBoundary:
         'The equation shows the clearest case: normal incidence with plus polarization aligned to the arms. A general sky direction and polarization introduce detector responses F₊ and F×.',
@@ -205,14 +205,14 @@ const scientificCopy: Record<
         { label: 'Make two round trips', detail: 'Each beam records one arm’s optical path' },
         { label: 'Recombine', detail: 'Relative phase carries ΔLdiff' },
       ],
-      equationHtml:
-        '<span>φ<sub>rt</sub> = 4πL / λ</span><span>Δφ = 4π(L<sub>x</sub> − L<sub>y</sub>) / λ</span>',
+      equationLatex:
+        '\\begin{aligned} \\phi_{\\mathrm{rt}} &= \\frac{4\\pi L}{\\lambda} \\\\ \\Delta\\phi &= \\frac{4\\pi(L_x - L_y)}{\\lambda} \\end{aligned}',
       equationAriaLabel:
         'The round trip phase phi equals four pi L over lambda. Delta phi equals four pi times L x minus L y over lambda.',
       variables: [
-        { symbol: 'λ', definition: 'Laser wavelength in vacuum' },
-        { symbol: 'φrt', definition: 'Optical phase accumulated in one round trip' },
-        { symbol: 'Δφ', definition: 'Phase difference between the returning beams' },
+        { symbolLatex: '\\lambda', definition: 'Laser wavelength in vacuum' },
+        { symbolLatex: '\\phi_{\\mathrm{rt}}', definition: 'Optical phase accumulated in one round trip' },
+        { symbolLatex: '\\Delta\\phi', definition: 'Phase difference between the returning beams' },
       ],
       modelBoundary:
         'This scene begins with a simple Michelson interferometer. Real LIGO arm cavities make the light sample an arm repeatedly; scene five adds that gain.',
@@ -226,14 +226,14 @@ const scientificCopy: Record<
         { label: 'Create Δφ', detail: 'Differential arm length advances one phase and delays the other' },
         { label: 'Output power changes', detail: 'A photodetector converts light power to an electrical signal' },
       ],
-      equationHtml:
-        '<span>E<sub>out</sub> ∝ E<sub>0</sub> sin(Δφ/2)</span><span>I<sub>out</sub> ∝ sin²(Δφ/2)</span>',
+      equationLatex:
+        '\\begin{aligned} E_{\\mathrm{out}} &\\propto E_0\\sin\\left(\\frac{\\Delta\\phi}{2}\\right) \\\\ I_{\\mathrm{out}} &\\propto \\sin^2\\left(\\frac{\\Delta\\phi}{2}\\right) \\end{aligned}',
       equationAriaLabel:
         'Output electric field is proportional to E zero times sine delta phi over two. Output intensity is proportional to sine squared delta phi over two.',
       variables: [
-        { symbol: 'Eout', definition: 'Optical field amplitude at the output port' },
-        { symbol: 'Iout', definition: 'Light intensity measured by the photodetector' },
-        { symbol: 'Δφ', definition: 'Phase difference between the returning beams' },
+        { symbolLatex: 'E_{\\mathrm{out}}', definition: 'Optical field amplitude at the output port' },
+        { symbolLatex: 'I_{\\mathrm{out}}', definition: 'Light intensity measured by the photodetector' },
+        { symbolLatex: '\\Delta\\phi', definition: 'Phase difference between the returning beams' },
       ],
       modelBoundary:
         'The picture first shows an ideal dark fringe. Advanced LIGO introduces a tiny DARM offset so a small carrier field acts as a local oscillator and provides a linear DC readout.',
@@ -247,14 +247,14 @@ const scientificCopy: Record<
         { label: 'Traverse 4 km repeatedly', detail: 'The same arm change is sampled many times' },
         { label: 'Enhance phase response', detail: 'The stored field returns for differential comparison' },
       ],
-      equationHtml:
-        '<span>L<sub>effective</sub> ≈ N L<sub>arm</sub></span><span>≈ 300 × 4 km ≈ 1200 km</span>',
+      equationLatex:
+        '\\begin{aligned} L_{\\mathrm{effective}} &\\approx N L_{\\mathrm{arm}} \\\\ &\\approx 300 \\times 4\\,\\mathrm{km} \\approx 1200\\,\\mathrm{km} \\end{aligned}',
       equationAriaLabel:
         'Effective optical path is approximately N times the arm length, approximately three hundred times four kilometres, or twelve hundred kilometres.',
       variables: [
-        { symbol: 'N', definition: 'Effective traversal count in this teaching approximation, about 300' },
-        { symbol: 'Larm', definition: 'Physical arm-cavity length, 4 km' },
-        { symbol: 'Leffective', definition: 'Intuitive effective optical path' },
+        { symbolLatex: 'N', definition: 'Effective traversal count in this teaching approximation, about 300' },
+        { symbolLatex: 'L_{\\mathrm{arm}}', definition: 'Physical arm-cavity length, 4 km' },
+        { symbolLatex: 'L_{\\mathrm{effective}}', definition: 'Intuitive effective optical path' },
       ],
       modelBoundary:
         'The 1200 km figure is path-length intuition. Real cavity gain also depends on finesse, storage time, and gravitational-wave frequency; it is not a fixed N at every frequency.',
@@ -268,14 +268,14 @@ const scientificCopy: Record<
         { label: 'Frequency and amplitude rise', detail: 'The inspiral becomes a chirp' },
         { label: 'Two sites correlate', detail: 'GW150914 arrived about 7 ms apart' },
       ],
-      equationHtml:
-        '<span>f<sub>GW</sub> ≈ 2f<sub>orb</sub></span><span>Δt = n̂ · (r<sub>H</sub> − r<sub>L</sub>) / c ≈ 7 ms</span>',
+      equationLatex:
+        '\\begin{aligned} f_{\\mathrm{GW}} &\\approx 2f_{\\mathrm{orb}} \\\\ \\Delta t &= \\frac{\\hat{\\mathbf n}\\cdot(\\mathbf r_{\\mathrm H}-\\mathbf r_{\\mathrm L})}{c} \\approx 7\\,\\mathrm{ms} \\end{aligned}',
       equationAriaLabel:
         'Gravitational wave frequency is approximately twice the orbital frequency. Delta t equals n dot the Hanford minus Livingston baseline divided by c, approximately seven milliseconds.',
       variables: [
-        { symbol: 'fGW', definition: 'Dominant quadrupole gravitational-wave frequency' },
-        { symbol: 'forb', definition: 'Binary orbital frequency' },
-        { symbol: 'Δt', definition: 'Arrival-time difference between the sites' },
+        { symbolLatex: 'f_{\\mathrm{GW}}', definition: 'Dominant quadrupole gravitational-wave frequency' },
+        { symbolLatex: 'f_{\\mathrm{orb}}', definition: 'Binary orbital frequency' },
+        { symbolLatex: '\\Delta t', definition: 'Arrival-time difference between the sites' },
       ],
       modelBoundary:
         'The displayed chirp is a teaching waveform, not raw detector data. Real analysis calibrates strain, models noise, and performs statistical inference with full waveform models and the detector network.',

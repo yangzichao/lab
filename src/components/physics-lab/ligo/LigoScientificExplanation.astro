@@ -2,6 +2,7 @@
 import type { PhysicsLabLocale } from '../../../scripts/physics-lab/physics-lab-i18n';
 import { getLigoScientificExplanation } from '../../../scripts/physics-lab/ligo/ligo-scientific-copy';
 import { ligoSceneIds } from '../../../scripts/physics-lab/ligo/ligo-scene-types';
+import MathFormula from '../../math/MathFormula.astro';
 
 interface Props {
   locale: PhysicsLabLocale;
@@ -80,18 +81,18 @@ const sourceLinks = [
 
             <div class="ligo-science__math">
               <p class="ligo-science__label">{copy.equation}</p>
-              <div
+              <MathFormula
                 class="ligo-science__equation"
-                role="img"
-                aria-label={explanation.equationAriaLabel}
-                set:html={explanation.equationHtml}
+                expression={explanation.equationLatex}
+                ariaLabel={explanation.equationAriaLabel}
+                display
               />
 
               <p class="ligo-science__label">{copy.variables}</p>
               <dl class="ligo-science__variables">
                 {explanation.variables.map((variable) => (
                   <div>
-                    <dt>{variable.symbol}</dt>
+                    <dt><MathFormula expression={variable.symbolLatex} /></dt>
                     <dd>{variable.definition}</dd>
                   </div>
                 ))}

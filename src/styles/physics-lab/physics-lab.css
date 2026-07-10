@@ -390,6 +390,13 @@
   font-weight: 700;
 }
 
+.plab__field-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  min-width: 0;
+}
+
 .plab__field-label output {
   color: var(--plab-muted);
   font-variant-numeric: tabular-nums;

@@ -1,0 +1,28 @@
+---
+import { renderLatexToHtml } from '../../scripts/math/render-latex-to-html';
+
+interface Props {
+  expression: string;
+  display?: boolean;
+  class?: string;
+  ariaLabel?: string;
+}
+
+const {
+  expression,
+  display = false,
+  class: className,
+  ariaLabel,
+} = Astro.props;
+const FormulaElement = display ? 'div' : 'span';
+const renderedFormula = renderLatexToHtml(expression, display);
+---
+
+<FormulaElement
+  class:list={['math-formula', { 'math-formula--display': display }, className]}
+  aria-label={ariaLabel}
+  role={ariaLabel ? 'math' : undefined}
+  data-latex-expression={expression}
+  data-latex-display={display ? 'true' : 'false'}
+  set:html={renderedFormula}
+/>

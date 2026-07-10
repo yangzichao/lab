@@ -109,21 +109,41 @@ export function formatComplexNumber(complexNumber: ComplexNumber): string {
   return `${realPart} ${sign} ${imaginaryMagnitude}i`;
 }
 
-export function formatAxisAngleFormula(axis: AxisComponents, angleDegrees: number): string {
+export function formatAxisAngleLatex(axis: AxisComponents, angleDegrees: number): string {
   const normalizedAxis = normalizeAxis(axis);
   const halfAngleDegrees = angleDegrees / 2;
+  const vectorExpression = [
+    `${formatNumber(normalizedAxis.x, 2)}\\mathbf i`,
+    formatSignedVectorTerm(normalizedAxis.y, '\\mathbf j'),
+    formatSignedVectorTerm(normalizedAxis.z, '\\mathbf k'),
+  ].join('');
+  const halfAngleExpression = `${formatNumber(halfAngleDegrees, 1)}^{\\circ}`;
 
-  return `q = cos(${formatDegrees(halfAngleDegrees, 1)}) + (${formatNumber(
-    normalizedAxis.x,
-    2,
-  )}i + ${formatNumber(normalizedAxis.y, 2)}j + ${formatNumber(
-    normalizedAxis.z,
-    2,
-  )}k) sin(${formatDegrees(halfAngleDegrees, 1)})`;
+  return `q = \\cos\\!\\left(${halfAngleExpression}\\right) + \\left(${vectorExpression}\\right)\\sin\\!\\left(${halfAngleExpression}\\right)`;
+}
+
+export function formatPauliMatrixLatex(matrix: PauliMatrixEntries): string {
+  return `\\begin{pmatrix} ${formatComplexNumberLatex(matrix.m00)} & ${formatComplexNumberLatex(
+    matrix.m01,
+  )} \\\\ ${formatComplexNumberLatex(matrix.m10)} & ${formatComplexNumberLatex(
+    matrix.m11,
+  )} \\end{pmatrix}`;
 }
 
 export function formatSpinorPhase(angleDegrees: number): string {
   const phaseDegrees = ((angleDegrees / 2) % 360 + 360) % 360;
   const sign = Math.cos(degreesToRadians(angleDegrees / 2)) < 0 ? '负半叶' : '正半叶';
   return `${formatDegrees(phaseDegrees, 0)} / ${sign}`;
+}
+
+function formatComplexNumberLatex(complexNumber: ComplexNumber): string {
+  const realPart = formatNumber(complexNumber.real);
+  const imaginaryMagnitude = formatNumber(Math.abs(complexNumber.imaginary));
+  const sign = complexNumber.imaginary >= 0 ? '+' : '-';
+  return `${realPart} ${sign} ${imaginaryMagnitude}\\,i`;
+}
+
+function formatSignedVectorTerm(value: number, basis: string): string {
+  const sign = value >= 0 ? '+' : '-';
+  return ` ${sign} ${formatNumber(Math.abs(value), 2)}${basis}`;
 }

@@ -15,7 +15,10 @@
   color: var(--quat-ink);
 }
 
-.quaternion-lab code {
+.quaternion-lab__title-block .math-formula,
+.quaternion-pauli-copy p .math-formula {
+  margin-inline: 0.1em;
+  padding: 1px 5px;
   border-radius: 6px;
   background: #eef2ed;
   color: #22251f;
@@ -334,19 +337,25 @@
   text-transform: uppercase;
 }
 
-.quaternion-equation-block > code,
-.quaternion-matrix code {
+.quaternion-dynamic-formula,
+.quaternion-matrix {
   display: block;
   min-width: 0;
   padding: 9px 10px;
-  overflow-wrap: anywhere;
+  overflow-x: auto;
+  border-radius: 6px;
+  background: #eef2ed;
+  color: #22251f;
   font-variant-numeric: tabular-nums;
 }
 
 .quaternion-matrix {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  text-align: center;
+}
+
+.quaternion-dynamic-formula .katex-display,
+.quaternion-matrix .katex-display {
+  margin: 0;
 }
 
 .quaternion-teaching,
@@ -403,11 +412,15 @@
   line-height: 1.65;
 }
 
-.quaternion-concept-card code {
+.quaternion-concept-card .math-formula--display,
+.quaternion-application-card .math-formula--display {
   display: block;
   align-self: end;
   padding: 8px 9px;
-  overflow-wrap: anywhere;
+  border-radius: 6px;
+  background: #eef2ed;
+  color: #22251f;
+  font-size: 0.92em;
 }
 
 .quaternion-pauli-section {
@@ -426,10 +439,6 @@
   max-width: 720px;
 }
 
-.quaternion-pauli-copy code {
-  padding: 2px 5px;
-}
-
 .quaternion-pauli-table {
   display: grid;
   gap: 10px;
@@ -440,10 +449,12 @@
   font-size: 0.88rem;
 }
 
-.quaternion-pauli-table code {
+.quaternion-pauli-table .math-formula--display {
   display: block;
   padding: 9px 10px;
-  overflow-wrap: anywhere;
+  border-radius: 6px;
+  background: #eef2ed;
+  color: #22251f;
 }
 
 @media (max-width: 1040px) {
@@ -490,8 +501,7 @@
   .quaternion-readout-grid,
   .quaternion-button-row,
   .quaternion-concept-grid,
-  .quaternion-application-grid,
-  .quaternion-matrix {
+  .quaternion-application-grid {
     grid-template-columns: 1fr;
   }
 
