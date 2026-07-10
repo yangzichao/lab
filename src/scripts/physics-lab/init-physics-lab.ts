@@ -41,6 +41,10 @@ const physicsLabInitializers: Record<string, PhysicsLabInitializer> = {
     const { initLensOpticsLab } = await import('./lens-optics/lens-optics-lab');
     initLensOpticsLab();
   },
+  'ligo-interferometer': async () => {
+    const { initLigoLab } = await import('./ligo/ligo-lab');
+    initLigoLab();
+  },
   orbit: async () => {
     const { initOrbitLab } = await import('./orbit/orbit-lab');
     initOrbitLab();

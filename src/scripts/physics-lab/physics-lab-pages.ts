@@ -560,6 +560,49 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
         ],
       },
     },
+    {
+      slug: 'ligo-interferometer',
+      readouts: [
+        {
+          id: 'scene',
+          label: locale === 'en' ? 'Current scene' : '当前场景',
+          initialValue: locale === 'en' ? '1 · Spacetime strain' : '1 · 时空应变',
+        },
+        {
+          id: 'measurement',
+          label: locale === 'en' ? 'What changes' : '正在变化',
+          initialValue: locale === 'en' ? 'Proper distance' : '固有距离',
+        },
+        {
+          id: 'signal',
+          label: locale === 'en' ? 'Signal' : '信号',
+          initialValue: 'h(t)',
+        },
+      ],
+      controls: {
+        ariaLabel: locale === 'en' ? 'LIGO lesson controls' : 'LIGO 教学控制',
+        eyebrow: locale === 'en' ? 'Guided experiment' : '引导实验',
+        title: locale === 'en' ? 'How LIGO hears spacetime' : 'LIGO 如何听见时空',
+        actions: [playPauseAction(locale), resetAction(locale)],
+        presets: [
+          { id: 'spacetime', label: locale === 'en' ? '1 · Strain' : '1 · 时空应变' },
+          { id: 'arms', label: locale === 'en' ? '2 · L arms' : '2 · L 形双臂' },
+          { id: 'laser', label: locale === 'en' ? '3 · Laser' : '3 · 激光分束' },
+          { id: 'dark-port', label: locale === 'en' ? '4 · Dark port' : '4 · 暗端口' },
+          { id: 'cavity', label: locale === 'en' ? '5 · Cavity' : '5 · 光学增益' },
+          { id: 'detection', label: locale === 'en' ? '6 · Chirp' : '6 · 双站 Chirp' },
+        ],
+        notices: [
+          {
+            icon: 'ph-cube-focus',
+            text:
+              locale === 'en'
+                ? 'Choose a scene or let the lesson advance automatically. Drag the stage to inspect every mechanism in 3D.'
+                : '可以直接选择场景，也可以让课程自动前进。拖动画面，从任意角度检查每一个机构。',
+          },
+        ],
+      },
+    },
   ];
 }
 

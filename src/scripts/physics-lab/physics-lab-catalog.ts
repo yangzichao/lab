@@ -295,6 +295,30 @@ const physicsLabDefinitions: PhysicsLabDefinition[] = [
       },
     },
   },
+  {
+    slug: 'ligo-interferometer',
+    icon: 'ph-broadcast',
+    text: {
+      zh: {
+        title: 'LIGO · Listening to Spacetime',
+        eyebrow: '引力波 · 激光干涉测量',
+        tagline: '六幕三维实验，把时空的拉伸一路变成可以读取的 chirp。',
+        description:
+          '沿着一台虚拟 LIGO 探测器飞行：先看自由质量怎样随引力波呼吸，再进入四公里长的垂直双臂，跟随激光分束、往返、相消，最后看两个观测站怎样共同确认来自黑洞并合的信号。',
+        notice:
+          '为了让变化可见，所有空间形变和光学相位都被大幅夸张。真实的 GW150914 只让四公里双臂产生约 4×10⁻¹⁸ m 的长度差——大约是质子直径的 1/200。',
+      },
+      en: {
+        title: 'LIGO · Listening to Spacetime',
+        eyebrow: 'Gravitational waves · laser interferometry',
+        tagline: 'Six cinematic 3D scenes turn a spacetime strain into a readable chirp.',
+        description:
+          'Fly through a virtual LIGO detector: watch freely falling masses breathe with a gravitational wave, enter the perpendicular four-kilometre arms, follow split laser beams as they return and cancel, then see two observatories confirm a black-hole merger together.',
+        notice:
+          'Every spatial distortion and optical phase shift is enormously exaggerated for visibility. GW150914 changed the relative length of LIGO\'s four-kilometre arms by only about 4×10⁻¹⁸ m—roughly 1/200 of a proton diameter.',
+      },
+    },
+  },
 ];
 
 function toPhysicsLabEntry(
