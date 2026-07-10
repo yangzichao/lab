@@ -1,0 +1,14 @@
+---
+import QuantumLabPage from '../../../components/physics-lab/quantum/QuantumLabPage.astro';
+import { getQuantumLabSlugs } from '../../../scripts/physics-lab/quantum/quantum-lab-catalog';
+
+export function getStaticPaths() {
+  return getQuantumLabSlugs().map((slug) => ({
+    params: { slug },
+  }));
+}
+
+const slug = Astro.params.slug!;
+---
+
+<QuantumLabPage slug={slug} locale="zh" />

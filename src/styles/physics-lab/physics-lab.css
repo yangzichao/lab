@@ -13,6 +13,11 @@
   color: var(--plab-ink);
 }
 
+.plab[data-lab-suite='quantum'] {
+  --plab-teal: #6d28d9;
+  --plab-surface: #f7f5fb;
+}
+
 /* ---- Header ---- */
 .plab__head {
   margin-bottom: 26px;
@@ -77,6 +82,39 @@
 
 .plab__language-toggle-divider {
   opacity: 0.58;
+}
+
+.plab__suite-tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0 0 22px;
+  padding: 4px;
+  border: 1px solid var(--plab-border);
+  border-radius: 10px;
+  background: var(--plab-surface);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.plab__suite-tabs span,
+.plab__suite-tabs a {
+  padding: 7px 11px;
+  border-radius: 7px;
+  text-decoration: none;
+}
+
+.plab__suite-tabs span {
+  background: var(--plab-panel);
+  color: var(--plab-teal);
+  box-shadow: 0 2px 7px rgba(22, 32, 28, 0.08);
+}
+
+.plab__suite-tabs a {
+  color: var(--plab-muted);
+}
+
+.plab__suite-tabs a:hover {
+  color: var(--plab-ink);
 }
 
 .plab__eyebrow {

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { physicsLabCatalog } from '../scripts/physics-lab/physics-lab-catalog';
+import { quantumLabCatalog } from '../scripts/physics-lab/quantum/quantum-lab-catalog';
 import { systemDesignLabPages } from '../scripts/system-design-lab/system-design-pages';
 
 const labs = [
@@ -9,6 +10,12 @@ const labs = [
     href: '/quaternions/',
     description:
       '一个交互式 3D 教学 lab，讲 quaternion 旋转、SLERP、SU(2) double cover、Pauli matrices 以及 Bloch sphere 上的运动。',
+  },
+  {
+    title: 'Quantum Labs · 量子实验',
+    href: quantumLabCatalog[0]!.href,
+    description:
+      '一套独立组织的双语量子学习实验：从量子态与测量、单粒子干涉，一路走到场的模式与量子化。',
   },
   ...physicsLabCatalog.map((lab) => ({
     title: lab.title,

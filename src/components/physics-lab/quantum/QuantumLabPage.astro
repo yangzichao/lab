@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import {
+  getPhysicsLabHtmlLang,
+  normalizePhysicsLabLocale,
+  type PhysicsLabLocale,
+} from '../../../scripts/physics-lab/physics-lab-i18n';
+import {
+  findQuantumLab,
+  getQuantumLabCatalog,
+} from '../../../scripts/physics-lab/quantum/quantum-lab-catalog';
+import { getLocalizedQuantumLabPath } from '../../../scripts/physics-lab/quantum/quantum-lab-i18n';
+import { getQuantumLabPage } from '../../../scripts/physics-lab/quantum/quantum-lab-pages';
+import PhysicsLabExperience from '../PhysicsLabExperience.astro';
+
+interface Props {
+  slug: string;
+  locale?: PhysicsLabLocale;
+}
+
+const locale = normalizePhysicsLabLocale(Astro.props.locale);
+const alternateLocale: PhysicsLabLocale = locale === 'en' ? 'zh' : 'en';
+const entry = findQuantumLab(Astro.props.slug, locale);
+const page = getQuantumLabPage(Astro.props.slug, locale);
+
+if (!entry || !page) {
+  throw new Error(`Unknown quantum lab slug: ${Astro.props.slug}`);
+}
+---
+
+<BaseLayout title={`${entry.title} — Quantum Lab`} description={entry.tagline} lang={getPhysicsLabHtmlLang(locale)}>
+  <PhysicsLabExperience
+    entry={entry}
+    page={page}
+    locale={locale}
+    entries={getQuantumLabCatalog(locale)}
+    alternateHref={getLocalizedQuantumLabPath(entry.slug, alternateLocale)}
+    suite="quantum"
+  />
+
+  <script>
+    import { initQuantumLab } from '../../../scripts/physics-lab/quantum/init-quantum-lab';
+    void initQuantumLab();
+  </script>
+</BaseLayout>
