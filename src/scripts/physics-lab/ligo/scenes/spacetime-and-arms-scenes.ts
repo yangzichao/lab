@@ -1,6 +1,8 @@
 import {
   AdditiveBlending,
   AmbientLight,
+  ArrowHelper,
+  BoxGeometry,
   BufferGeometry,
   Float32BufferAttribute,
   GridHelper,
@@ -9,9 +11,11 @@ import {
   LineLoop,
   Mesh,
   MeshBasicMaterial,
+  Object3D,
   PointLight,
   SphereGeometry,
   TorusGeometry,
+  Vector3,
 } from 'three';
 import { localizedThreeDimensionalText } from '../../shared/three-dimensional-stage';
 import type { LigoSceneView } from '../ligo-scene-types';
@@ -121,6 +125,27 @@ export function createSpacetimeScene(): LigoSceneView {
   const plusRing = createParticleRing(group, -112, ligoColors.cyan, false);
   const crossRing = createParticleRing(group, 112, ligoColors.magenta, true);
   const wavefronts = createDescendingWavefronts(group, 265);
+  const plusXGauge = new Mesh(
+    new BoxGeometry(1, 2.2, 2.2),
+    new MeshBasicMaterial({ color: ligoColors.cyan, transparent: true, opacity: 0.75 }),
+  );
+  const plusZGauge = new Mesh(
+    new BoxGeometry(2.2, 2.2, 1),
+    new MeshBasicMaterial({ color: ligoColors.magenta, transparent: true, opacity: 0.72 }),
+  );
+  plusXGauge.position.set(-112, 3, 0);
+  plusZGauge.position.set(-112, 3, 0);
+
+  const propagationArrow = new ArrowHelper(
+    new Vector3(0, -1, 0),
+    new Vector3(0, 205, 0),
+    120,
+    ligoColors.amber,
+    18,
+    9,
+  );
+  const propagationAnchor = new Object3D();
+  propagationAnchor.position.set(0, 142, 0);
 
   const plusLabel = createLabelSprite(
     localizedThreeDimensionalText('+ polarization', '+ 偏振'),
@@ -138,17 +163,57 @@ export function createSpacetimeScene(): LigoSceneView {
   const ambient = new AmbientLight(0xa9d7ff, 0.42);
   const point = new PointLight(0x8bdcff, 12, 620);
   point.position.set(0, 180, 80);
-  group.add(plusLabel, crossLabel, grid, ambient, point);
+  group.add(
+    plusLabel,
+    crossLabel,
+    plusXGauge,
+    plusZGauge,
+    propagationArrow,
+    propagationAnchor,
+    grid,
+    ambient,
+    point,
+  );
+  let currentStrain = 0;
 
   return {
     id: 'spacetime',
     group,
     cameraPosition: [370, 280, 390],
     cameraTarget: [0, 0, 0],
+    callouts: [
+      {
+        anchor: plusRing.beads[0]!,
+        label: () =>
+          currentStrain >= 0
+            ? localizedThreeDimensionalText('x stretches · y squeezes', 'x 拉伸 · y 压缩')
+            : localizedThreeDimensionalText('x squeezes · y stretches', 'x 压缩 · y 拉伸'),
+        tone: 'cyan',
+      },
+      {
+        anchor: crossRing.beads[3]!,
+        label: localizedThreeDimensionalText(
+          'same deformation · rotated 45°',
+          '同一形变 · 旋转 45°',
+        ),
+        tone: 'magenta',
+      },
+      {
+        anchor: propagationAnchor,
+        label: localizedThreeDimensionalText(
+          'wave travels perpendicular to the ring',
+          '引力波垂直穿过圆环',
+        ),
+        tone: 'amber',
+      },
+    ],
     update: (elapsedSeconds) => {
       const strain = Math.sin(elapsedSeconds * 1.55) * 0.26;
+      currentStrain = strain;
       updateParticleRing(plusRing, strain);
       updateParticleRing(crossRing, strain);
+      plusXGauge.scale.x = ringRadius * 2 * (1 + strain);
+      plusZGauge.scale.z = ringRadius * 2 * (1 - strain);
       updateWavefronts(wavefronts, elapsedSeconds);
       point.intensity = 10 + Math.sin(elapsedSeconds * 1.55) * 2;
     },
@@ -167,25 +232,81 @@ export function createArmsScene(): LigoSceneView {
   const zLabel = createLabelSprite('Ly = L(1 − h/2)', '#d98cff');
   zLabel.position.set(-42, 42, 155);
   zLabel.scale.set(175, 36, 1);
+  const xLengthArrow = new ArrowHelper(
+    new Vector3(1, 0, 0),
+    new Vector3(0, 24, -18),
+    235,
+    ligoColors.cyan,
+    18,
+    9,
+  );
+  const zLengthArrow = new ArrowHelper(
+    new Vector3(0, 0, 1),
+    new Vector3(-18, 24, 0),
+    235,
+    ligoColors.magenta,
+    18,
+    9,
+  );
 
   const ambient = new AmbientLight(0xd2eaff, 0.52);
   const cyanLight = new PointLight(ligoColors.cyan, 11, 420);
   cyanLight.position.set(180, 100, -40);
   const magentaLight = new PointLight(ligoColors.magenta, 9, 420);
   magentaLight.position.set(-40, 110, 180);
-  group.add(interferometer.group, grid, xLabel, zLabel, ambient, cyanLight, magentaLight);
+  group.add(
+    interferometer.group,
+    grid,
+    xLabel,
+    zLabel,
+    xLengthArrow,
+    zLengthArrow,
+    ambient,
+    cyanLight,
+    magentaLight,
+  );
+  let currentStrain = 0;
 
   return {
     id: 'arms',
     group,
     cameraPosition: [390, 310, 425],
     cameraTarget: [70, 0, 70],
+    callouts: [
+      {
+        anchor: interferometer.xMirror,
+        label: () =>
+          currentStrain >= 0
+            ? localizedThreeDimensionalText('x arm: +δL', 'x 臂：+δL')
+            : localizedThreeDimensionalText('x arm: −δL', 'x 臂：−δL'),
+        tone: 'cyan',
+      },
+      {
+        anchor: interferometer.zMirror,
+        label: () =>
+          currentStrain >= 0
+            ? localizedThreeDimensionalText('y arm: −δL', 'y 臂：−δL')
+            : localizedThreeDimensionalText('y arm: +δL', 'y 臂：+δL'),
+        tone: 'magenta',
+      },
+      {
+        anchor: interferometer.beamSplitter,
+        label: localizedThreeDimensionalText(
+          'measure the difference · not either arm alone',
+          '测量两臂之差 · 不是单臂位移',
+        ),
+        tone: 'amber',
+      },
+    ],
     update: (elapsedSeconds) => {
       const strain = Math.sin(elapsedSeconds * 1.45) * 0.055;
+      currentStrain = strain;
       interferometer.setStrain(strain);
       updateWavefronts(wavefronts, elapsedSeconds);
       xLabel.position.x = 150 + strain * 130;
       zLabel.position.z = 155 - strain * 130;
+      xLengthArrow.setLength(235 * (1 + strain), 18, 9);
+      zLengthArrow.setLength(235 * (1 - strain), 18, 9);
     },
   };
 }

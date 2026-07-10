@@ -107,7 +107,7 @@ export function createCavityScene(): LigoSceneView {
   }
 
   const passesLabel = createLabelSprite(
-    localizedThreeDimensionalText('about 300 round trips', '约 300 次往返'),
+    localizedThreeDimensionalText('about 300 reflections', '约 300 次反射'),
     '#ff6c94',
   );
   passesLabel.position.set(0, 76, -34);
@@ -120,13 +120,42 @@ export function createCavityScene(): LigoSceneView {
   const buildupLight = new PointLight(ligoColors.laser, 20, 520);
   buildupLight.position.set(0, 50, 50);
   group.add(passesLabel, distanceLabel, ambient, buildupLight);
+  let displayedTraversal = 1;
 
   return {
     id: 'cavity',
     group,
     cameraPosition: [370, 180, 390],
     cameraTarget: [0, 0, 0],
+    callouts: [
+      {
+        anchor: inputMirror,
+        label: localizedThreeDimensionalText(
+          'input test mass · partly transmitting',
+          '输入测试质量 · 部分透射',
+        ),
+        tone: 'cyan',
+      },
+      {
+        anchor: pulses[0]!,
+        label: () =>
+          localizedThreeDimensionalText(
+            `same arm sampled again · pass ${displayedTraversal}`,
+            `再次采样同一条臂 · 第 ${displayedTraversal} 次`,
+          ),
+        tone: 'laser',
+      },
+      {
+        anchor: endMirror,
+        label: localizedThreeDimensionalText(
+          'end test mass · light returns',
+          '末端测试质量 · 光在这里返回',
+        ),
+        tone: 'amber',
+      },
+    ],
     update: (elapsedSeconds) => {
+      displayedTraversal = 1 + Math.floor((elapsedSeconds * 7) % 300);
       for (let index = 0; index < pulses.length; index += 1) {
         const progress = (elapsedSeconds * 0.24 + index / pulses.length) % 1;
         const roundTrip = progress < 0.5 ? progress * 2 : (1 - progress) * 2;
@@ -233,7 +262,19 @@ export function createDetectionScene(): LigoSceneView {
   const mergerLight = new PointLight(ligoColors.amber, 22, 520);
   mergerLight.position.set(0, 145, 20);
   const ambient = new AmbientLight(0xbcdfff, 0.35);
-  group.add(mergerLight, ambient, hanfordLabel, livingstonLabel, delayLabel);
+  const hanfordResponseLight = new PointLight(ligoColors.cyan, 3, 260);
+  hanfordResponseLight.position.set(-160, -25, 58);
+  const livingstonResponseLight = new PointLight(ligoColors.magenta, 3, 260);
+  livingstonResponseLight.position.set(145, -25, 58);
+  group.add(
+    mergerLight,
+    hanfordResponseLight,
+    livingstonResponseLight,
+    ambient,
+    hanfordLabel,
+    livingstonLabel,
+    delayLabel,
+  );
 
   const waveRings: Mesh[] = [];
   for (let index = 0; index < 7; index += 1) {
@@ -258,6 +299,32 @@ export function createDetectionScene(): LigoSceneView {
     group,
     cameraPosition: [400, 235, 440],
     cameraTarget: [0, 20, 0],
+    callouts: [
+      {
+        anchor: blackHoleA,
+        label: localizedThreeDimensionalText(
+          'orbit speeds up · fGW ≈ 2 forb',
+          '轨道加速 · fGW ≈ 2 forb',
+        ),
+        tone: 'amber',
+      },
+      {
+        anchor: livingston.group,
+        label: localizedThreeDimensionalText(
+          'Livingston L1 · signal arrives first',
+          'Livingston L1 · 信号先到',
+        ),
+        tone: 'magenta',
+      },
+      {
+        anchor: hanford.group,
+        label: localizedThreeDimensionalText(
+          'Hanford H1 · about 7 ms later',
+          'Hanford H1 · 约 7 ms 后到达',
+        ),
+        tone: 'cyan',
+      },
+    ],
     update: (elapsedSeconds) => {
       const cycle = (elapsedSeconds % 8) / 8;
       const orbitalPhase = Math.PI * 2 * (1.2 * cycle + 5.8 * cycle ** 3);
@@ -273,6 +340,8 @@ export function createDetectionScene(): LigoSceneView {
       const strain = Math.sin(orbitalPhase) * amplitude;
       hanford.setStrain(strain);
       livingston.setStrain(Math.sin(orbitalPhase - 0.55) * amplitude);
+      hanfordResponseLight.intensity = 2 + Math.abs(Math.sin(orbitalPhase + 0.55)) * amplitude * 360;
+      livingstonResponseLight.intensity = 2 + Math.abs(Math.sin(orbitalPhase)) * amplitude * 360;
 
       const cursorX = -235 + cycle * 470;
       const envelope = 3 + cycle ** 2.6 * 29;

@@ -28,7 +28,7 @@
 }
 
 .plab[data-lab='ligo-interferometer'] .plab__three-dimensional-overlay {
-  z-index: 4;
+  z-index: 6;
 }
 
 .plab[data-lab='ligo-interferometer'] .plab__three-dimensional-hint {
@@ -109,6 +109,290 @@
   transform-origin: left;
 }
 
+.ligo-callouts {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ligo-callout {
+  --ligo-callout-color: #76e5ff;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: min(250px, 34%);
+  color: #edf8ff;
+  font-size: 0.7rem;
+  font-weight: 750;
+  line-height: 1.25;
+  transform: translate(-5px, -50%);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.ligo-callout[data-side='left'] {
+  flex-direction: row-reverse;
+  transform: translate(calc(-100% + 5px), -50%);
+  text-align: right;
+}
+
+.ligo-callout[data-tone='magenta'] {
+  --ligo-callout-color: #d98cff;
+}
+
+.ligo-callout[data-tone='laser'] {
+  --ligo-callout-color: #ff5e8d;
+}
+
+.ligo-callout[data-tone='amber'] {
+  --ligo-callout-color: #ffbf69;
+}
+
+.ligo-callout i {
+  position: relative;
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border: 2px solid rgba(3, 9, 20, 0.86);
+  border-radius: 50%;
+  background: var(--ligo-callout-color);
+  box-shadow:
+    0 0 0 1px var(--ligo-callout-color),
+    0 0 13px var(--ligo-callout-color);
+}
+
+.ligo-callout i::after {
+  position: absolute;
+  top: 3px;
+  left: 8px;
+  width: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--ligo-callout-color), transparent);
+  content: '';
+}
+
+.ligo-callout[data-side='left'] i::after {
+  right: 8px;
+  left: auto;
+  background: linear-gradient(270deg, var(--ligo-callout-color), transparent);
+}
+
+.ligo-callout > span {
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--ligo-callout-color) 30%, transparent);
+  border-radius: 6px;
+  background: rgba(3, 9, 20, 0.76);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+}
+
+.ligo-science {
+  overflow: hidden;
+  border: 1px solid var(--plab-border);
+  border-radius: var(--radius);
+  background: var(--plab-panel);
+}
+
+.ligo-science__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px 20px 14px;
+  border-bottom: 1px solid var(--plab-border);
+}
+
+.ligo-science__header p,
+.ligo-science__label {
+  color: var(--plab-teal);
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.ligo-science__header p {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.ligo-science__header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.ligo-science__steps article {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+}
+
+.ligo-science__steps article[hidden] {
+  display: none;
+}
+
+.ligo-science__narrative,
+.ligo-science__math {
+  min-width: 0;
+  padding: 20px;
+}
+
+.ligo-science__math {
+  border-left: 1px solid var(--plab-border);
+  background: #f7faf8;
+}
+
+.ligo-science__label {
+  margin: 0 0 7px;
+}
+
+.ligo-science__narrative h3 {
+  margin: 0 0 9px;
+  font-size: 1.14rem;
+  line-height: 1.25;
+}
+
+.ligo-science__answer {
+  margin: 0 0 20px;
+  color: var(--plab-muted);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.ligo-science__chain {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ligo-science__chain li {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.ligo-science__chain li:not(:last-child)::after {
+  position: absolute;
+  top: 9px;
+  right: -6px;
+  color: #9aa9a2;
+  content: '→';
+  font-size: 0.74rem;
+}
+
+.ligo-science__chain li > span {
+  display: grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #e5f5f5;
+  color: #076978;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.ligo-science__chain li > div {
+  display: grid;
+  gap: 3px;
+}
+
+.ligo-science__chain strong {
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+.ligo-science__chain small {
+  color: var(--plab-muted);
+  font-size: 0.71rem;
+  line-height: 1.4;
+}
+
+.ligo-science__equation {
+  display: grid;
+  gap: 5px;
+  margin: 0 0 18px;
+  padding: 13px 15px;
+  border-left: 3px solid var(--plab-teal);
+  background: #eef6f3;
+  color: #13251f;
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: clamp(1.05rem, 2vw, 1.28rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.ligo-science__variables {
+  display: grid;
+  gap: 5px;
+  margin: 0 0 17px;
+}
+
+.ligo-science__variables > div {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.ligo-science__variables dt {
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.ligo-science__variables dd {
+  margin: 0;
+  color: var(--plab-muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.ligo-science__boundary {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-top: 13px;
+  border-top: 1px solid var(--plab-border);
+  color: var(--plab-muted);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.ligo-science__boundary strong {
+  color: var(--plab-ink);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ligo-science__sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+  padding: 11px 20px;
+  border-top: 1px solid var(--plab-border);
+  color: var(--plab-muted);
+  font-size: 0.7rem;
+}
+
+.ligo-science__sources span {
+  font-weight: 800;
+}
+
+.ligo-science__sources a {
+  color: var(--plab-teal);
+  font-weight: 700;
+}
+
 .plab[data-lab='ligo-interferometer'] .plab__presets {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -143,6 +427,47 @@
 
   .ligo-stage-copy__progress-track {
     margin-top: 9px;
+  }
+
+  .ligo-callout {
+    max-width: 46%;
+    font-size: 0.62rem;
+  }
+
+  .ligo-callout > span {
+    padding: 4px 6px;
+  }
+
+  .ligo-science__header {
+    display: grid;
+    gap: 2px;
+    padding: 15px 16px 12px;
+  }
+
+  .ligo-science__header h2 {
+    text-align: left;
+  }
+
+  .ligo-science__steps article {
+    grid-template-columns: 1fr;
+  }
+
+  .ligo-science__narrative,
+  .ligo-science__math {
+    padding: 16px;
+  }
+
+  .ligo-science__math {
+    border-top: 1px solid var(--plab-border);
+    border-left: 0;
+  }
+
+  .ligo-science__chain {
+    grid-template-columns: 1fr;
+  }
+
+  .ligo-science__chain li:not(:last-child)::after {
+    content: none;
   }
 }
 

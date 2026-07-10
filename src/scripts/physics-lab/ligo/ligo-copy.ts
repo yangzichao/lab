@@ -47,9 +47,9 @@ const ligoSceneCopy: Record<PhysicsLabLocale, Record<LigoSceneId, LigoSceneCopy>
     cavity: {
       number: '05 / 06',
       eyebrow: '把极小效应积累起来',
-      title: '光在四公里腔内往返数百次',
+      title: '光在四公里腔内反复穿越',
       description: 'Fabry–Pérot cavity 让光反复采样臂长。四公里实体臂因此得到约 1200 km 的有效光程。',
-      measurement: '约 300 次往返',
+      measurement: '约 300 次反射',
       signal: '有效光程 ≈ 1200 km',
     },
     detection: {
@@ -99,7 +99,7 @@ const ligoSceneCopy: Record<PhysicsLabLocale, Record<LigoSceneId, LigoSceneCopy>
       eyebrow: 'Accumulate the tiny effect',
       title: 'Light samples each four-kilometre arm hundreds of times',
       description: 'Fabry–Pérot cavities repeatedly sample the arm length, turning a physical 4 km arm into about 1200 km of effective optical path.',
-      measurement: 'About 300 round trips',
+      measurement: 'About 300 reflections',
       signal: 'Effective path ≈ 1200 km',
     },
     detection: {

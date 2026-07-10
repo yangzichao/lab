@@ -11,7 +11,7 @@ import { getLigoSceneCopy } from './ligo-copy';
 import { isLigoSceneId, ligoSceneIds, type LigoSceneId } from './ligo-scene-types';
 import { LigoThreeDimensionalRenderer } from './ligo-three-dimensional-renderer';
 
-const secondsPerScene = 11;
+const secondsPerScene = 20;
 
 type NarrativeOverlay = {
   root: HTMLElement;
@@ -78,6 +78,9 @@ export function initLigoLab(): void {
     setReadout(root, 'scene', `${Number(copy.number.slice(0, 2))} · ${copy.title}`);
     setReadout(root, 'measurement', copy.measurement);
     setReadout(root, 'signal', copy.signal);
+    root.querySelectorAll<HTMLElement>('[data-ligo-science-step]').forEach((step) => {
+      step.hidden = step.dataset.ligoScienceStep !== activeSceneId;
+    });
     markActiveSceneButton();
   };
 

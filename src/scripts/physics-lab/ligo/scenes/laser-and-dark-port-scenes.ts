@@ -1,8 +1,10 @@
 import {
   AdditiveBlending,
   AmbientLight,
+  ArrowHelper,
   BufferGeometry,
   CylinderGeometry,
+  DoubleSide,
   Float32BufferAttribute,
   GridHelper,
   Group,
@@ -107,17 +109,45 @@ export function createLaserScene(): LigoSceneView {
   const laserLight = new PointLight(0xff2d68, 12, 360);
   laserLight.position.set(0, 66, 0);
   group.add(splitLabel, returnLabel, ambient, laserLight);
+  let returnPhase = false;
 
   return {
     id: 'laser',
     group,
     cameraPosition: [380, 245, 410],
     cameraTarget: [72, 5, 72],
+    callouts: [
+      {
+        anchor: source,
+        label: localizedThreeDimensionalText(
+          'one coherent laser sets the ruler',
+          '同一束相干激光定义光学尺',
+        ),
+        tone: 'laser',
+      },
+      {
+        anchor: interferometer.beamSplitter,
+        label: localizedThreeDimensionalText(
+          'split here · compare here again',
+          '在这里分束 · 也在这里重新比较',
+        ),
+        tone: 'amber',
+      },
+      {
+        anchor: interferometer.xMirror,
+        label: () =>
+          returnPhase
+            ? localizedThreeDimensionalText('returning light carries phase', '返回光携带累积相位')
+            : localizedThreeDimensionalText('outbound light samples length', '去程光正在采样臂长'),
+        tone: 'cyan',
+      },
+    ],
     update: (elapsedSeconds) => {
       const strain = Math.sin(elapsedSeconds * 1.35) * 0.035;
       interferometer.setStrain(strain);
       for (const pulse of pulses) {
         const progress = (elapsedSeconds * 0.27 + pulse.offset) % 1;
+        const isReturning = progress >= 0.5;
         const roundTripProgress = progress < 0.5 ? progress * 2 : (1 - progress) * 2;
         const distance = roundTripProgress * armLength;
         pulse.mesh.position.set(
@@ -127,7 +157,15 @@ export function createLaserScene(): LigoSceneView {
         );
         const pulseScale = 0.72 + Math.sin(progress * Math.PI) * 0.55;
         pulse.mesh.scale.setScalar(pulseScale);
+        (pulse.mesh.material as MeshBasicMaterial).color.setHex(
+          isReturning
+            ? pulse.arm === 'x'
+              ? ligoColors.cyan
+              : ligoColors.magenta
+            : 0xffe0e9,
+        );
       }
+      returnPhase = (elapsedSeconds * 0.27) % 1 >= 0.5;
       laserLight.intensity = 10 + Math.sin(elapsedSeconds * 6) * 2;
     },
   };
@@ -198,21 +236,90 @@ export function createDarkPortScene(): LigoSceneView {
     '#ff6c94',
   );
   detectorLabel.position.set(-96, 50, -202);
+  const phasorRing = new Mesh(
+    new RingGeometry(42, 43.5, 72),
+    new MeshBasicMaterial({
+      color: 0xa7bfd2,
+      transparent: true,
+      opacity: 0.28,
+      side: DoubleSide,
+    }),
+  );
+  phasorRing.position.set(112, 92, -108);
+  const phasorOrigin = phasorRing.position.clone();
+  const xPhaseArrow = new ArrowHelper(
+    new Vector3(1, 0, 0),
+    phasorOrigin,
+    40,
+    ligoColors.cyan,
+    9,
+    5,
+  );
+  const zPhaseArrow = new ArrowHelper(
+    new Vector3(-1, 0, 0),
+    phasorOrigin,
+    40,
+    ligoColors.magenta,
+    9,
+    5,
+  );
 
   const ambient = new AmbientLight(0xc8e5ff, 0.38);
   const detectorLight = new PointLight(ligoColors.laser, 0, 300);
   detectorLight.position.copy(detector.position).add(new Vector3(0, 35, 0));
-  group.add(detector, detectorHalo, formula, detectorLabel, ambient, detectorLight);
+  group.add(
+    detector,
+    detectorHalo,
+    formula,
+    detectorLabel,
+    phasorRing,
+    xPhaseArrow,
+    zPhaseArrow,
+    ambient,
+    detectorLight,
+  );
+  let currentIntensity = 0;
+  let currentPhaseDifference = 0;
 
   return {
     id: 'dark-port',
     group,
     cameraPosition: [330, 205, 350],
     cameraTarget: [18, 8, -28],
+    callouts: [
+      {
+        anchor: phasorRing,
+        label: () =>
+          localizedThreeDimensionalText(
+            `returning phases differ by ${Math.abs(currentPhaseDifference).toFixed(2)} rad`,
+            `两束返回光相差 ${Math.abs(currentPhaseDifference).toFixed(2)} rad`,
+          ),
+        tone: 'cyan',
+      },
+      {
+        anchor: detector,
+        label: () =>
+          localizedThreeDimensionalText(
+            `photodetector power: ${(currentIntensity * 100).toFixed(0)}%`,
+            `探测器光强：${(currentIntensity * 100).toFixed(0)}%`,
+          ),
+        tone: 'laser',
+      },
+      {
+        anchor: interferometer.beamSplitter,
+        label: localizedThreeDimensionalText(
+          'destructive interference happens here',
+          '两束光在这里发生相消干涉',
+        ),
+        tone: 'amber',
+      },
+    ],
     update: (elapsedSeconds) => {
       const strain = Math.sin(elapsedSeconds * 1.42) * 0.035;
       const phaseDifference = strain * 32;
       const intensity = Math.sin(phaseDifference / 2) ** 2;
+      currentIntensity = intensity;
+      currentPhaseDifference = phaseDifference;
       interferometer.setStrain(strain);
 
       for (let index = 0; index < pointCount; index += 1) {
@@ -237,6 +344,12 @@ export function createDarkPortScene(): LigoSceneView {
       const haloMaterial = detectorHalo.material as MeshBasicMaterial;
       haloMaterial.opacity = intensity * 0.82;
       detectorHalo.scale.setScalar(0.85 + intensity * 0.55);
+      xPhaseArrow.setDirection(
+        new Vector3(Math.cos(phaseDifference / 2), Math.sin(phaseDifference / 2), 0),
+      );
+      zPhaseArrow.setDirection(
+        new Vector3(-Math.cos(phaseDifference / 2), Math.sin(-phaseDifference / 2), 0),
+      );
     },
   };
 }

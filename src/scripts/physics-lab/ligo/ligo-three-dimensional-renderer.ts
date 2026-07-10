@@ -6,6 +6,7 @@ import { ThreeDimensionalStage, createStarField } from '../shared/three-dimensio
 import { createCavityScene, createDetectionScene } from './scenes/cavity-and-detection-scenes';
 import { createDarkPortScene, createLaserScene } from './scenes/laser-and-dark-port-scenes';
 import { createArmsScene, createSpacetimeScene } from './scenes/spacetime-and-arms-scenes';
+import { LigoCalloutLayer } from './ligo-callout-layer';
 import type { LigoSceneId, LigoSceneView } from './ligo-scene-types';
 import { disposeObjectTree } from './ligo-three-helpers';
 
@@ -20,6 +21,7 @@ function easeInOutCubic(value: number): number {
 export class LigoThreeDimensionalRenderer {
   private readonly stage: ThreeDimensionalStage;
   private readonly composer: EffectComposer;
+  private readonly calloutLayer: LigoCalloutLayer;
   private readonly scenes: Map<LigoSceneId, LigoSceneView>;
   private readonly prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   private activeScene: LigoSceneView;
@@ -40,6 +42,11 @@ export class LigoThreeDimensionalRenderer {
       legend: [],
     });
     this.stage.controls.maxPolarAngle = Math.PI * 0.52;
+    const stageElement = canvas.closest<HTMLElement>('.plab__stage');
+    if (!stageElement) {
+      throw new Error('LIGO renderer requires a .plab__stage container.');
+    }
+    this.calloutLayer = new LigoCalloutLayer(stageElement, this.stage.camera);
 
     const sceneViews = [
       createSpacetimeScene(),
@@ -63,6 +70,8 @@ export class LigoThreeDimensionalRenderer {
       new UnrealBloomPass(new Vector2(900, 560), 0.88, 0.72, 0.24),
     );
 
+    this.calloutLayer.setCallouts(this.activeScene.callouts);
+    this.stage.controls.addEventListener('change', this.updateCallouts);
     this.jumpToSceneCamera(this.activeScene);
   }
 
@@ -75,6 +84,7 @@ export class LigoThreeDimensionalRenderer {
     this.activeScene.group.visible = false;
     nextScene.group.visible = true;
     this.activeScene = nextScene;
+    this.calloutLayer.setCallouts(nextScene.callouts);
     this.transitionStartPosition.copy(this.stage.camera.position);
     this.transitionStartTarget.copy(this.stage.controls.target);
     this.transitionEndPosition.set(...nextScene.cameraPosition);
@@ -112,12 +122,14 @@ export class LigoThreeDimensionalRenderer {
       }
     }
     this.stage.controls.update();
+    this.calloutLayer.update();
     this.composer.render();
   }
 
   renderStatic(elapsedSeconds: number): void {
     this.activeScene.update(elapsedSeconds);
     this.stage.controls.update();
+    this.calloutLayer.update();
     this.composer.render();
   }
 
@@ -125,6 +137,8 @@ export class LigoThreeDimensionalRenderer {
     for (const sceneView of this.scenes.values()) {
       disposeObjectTree(sceneView.group);
     }
+    this.stage.controls.removeEventListener('change', this.updateCallouts);
+    this.calloutLayer.dispose();
     this.composer.dispose();
     this.stage.dispose();
   }
@@ -133,5 +147,10 @@ export class LigoThreeDimensionalRenderer {
     this.stage.camera.position.set(...sceneView.cameraPosition);
     this.stage.controls.target.set(...sceneView.cameraTarget);
     this.stage.controls.update();
+    this.calloutLayer.update();
   }
+
+  private readonly updateCallouts = (): void => {
+    this.calloutLayer.update();
+  };
 }

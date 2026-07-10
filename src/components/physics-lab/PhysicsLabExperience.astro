@@ -2,6 +2,7 @@
 import type { PhysicsLabEntry } from '../../scripts/physics-lab/physics-lab-catalog';
 import type { PhysicsLabLocale } from '../../scripts/physics-lab/physics-lab-i18n';
 import type { PhysicsLabPage } from '../../scripts/physics-lab/physics-lab-pages';
+import LigoScientificExplanation from './ligo/LigoScientificExplanation.astro';
 import PhysicsLabShell from './PhysicsLabShell.astro';
 
 interface Props {
@@ -33,6 +34,14 @@ const { entry, page, locale, entries, alternateHref, suite = 'physics' } = Astro
       ))
     }
   </Fragment>
+
+  {
+    entry.slug === 'ligo-interferometer' && (
+      <Fragment slot="lesson">
+        <LigoScientificExplanation locale={locale} />
+      </Fragment>
+    )
+  }
 
   <form class="plab__panel" slot="controls" aria-label={page.controls.ariaLabel}>
     <div class="plab__panel-head">
