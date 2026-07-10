@@ -198,6 +198,8 @@
 
 .plab__stage {
   position: relative;
+  display: grid;
+  place-items: center;
   overflow: hidden;
   border: 1px solid var(--plab-border);
   border-radius: var(--radius);
@@ -298,6 +300,10 @@
 .plab__controls-col {
   display: grid;
   gap: 12px;
+}
+
+.plab__lesson-col {
+  margin-top: 28px;
 }
 
 .plab__panel {
@@ -467,6 +473,7 @@
   .plab__title {
     font-size: 1.8rem;
   }
+
 }
 
 @media (max-width: 640px) {
@@ -479,4 +486,5 @@
     justify-self: start;
     order: -1;
   }
+
 }

@@ -1,5 +1,6 @@
 ---
 import '../../styles/physics-lab/physics-lab.css';
+import '../../styles/physics-lab/fullscreen.css';
 import { getPhysicsLabCatalog, type PhysicsLabEntry } from '../../scripts/physics-lab/physics-lab-catalog';
 import {
   getAlternatePhysicsLabLocale,
@@ -62,6 +63,11 @@ const relatedSuiteHref =
       : '/physics/quantum/qubit-state/';
 const canvasAriaLabel =
   locale === 'en' ? `${entry.title} simulation canvas` : `${entry.title} 仿真画布`;
+const interactiveRegionLabel =
+  locale === 'en' ? `${entry.title} interactive model` : `${entry.title} 交互模型`;
+const modelLabel = locale === 'en' ? 'Interactive model' : '交互模型';
+const enterFullscreenLabel = locale === 'en' ? 'Enter fullscreen' : '进入全屏';
+const exitFullscreenLabel = locale === 'en' ? 'Exit fullscreen' : '退出全屏';
 ---
 
 <section class="plab" data-lab={entry.slug} data-locale={locale} data-lab-suite={suite}>
@@ -108,28 +114,65 @@ const canvasAriaLabel =
     </nav>
   </header>
 
-  <div class="plab__workspace">
-    <div class="plab__stage-col">
-      <div class="plab__stage">
-        <canvas
-          class="plab__canvas"
-          width="900"
-          height="560"
-          data-stage-canvas
-          aria-label={canvasAriaLabel}></canvas>
+  <div
+    class="plab__interactive"
+    data-fullscreen-region
+    data-fullscreen-active="false"
+    role="region"
+    aria-label={interactiveRegionLabel}
+  >
+    <div class="plab__interactive-toolbar">
+      <div>
+        <span>{modelLabel}</span>
+        <strong>{entry.title}</strong>
       </div>
-      <div class="plab__readouts">
-        <slot name="readouts" />
-      </div>
-      <slot name="lesson" />
+      <button
+        class="plab__fullscreen-toggle"
+        type="button"
+        data-fullscreen-toggle
+        data-enter-label={enterFullscreenLabel}
+        data-exit-label={exitFullscreenLabel}
+        aria-label={enterFullscreenLabel}
+        aria-pressed="false"
+        title={enterFullscreenLabel}
+      >
+        <i class="ph ph-arrows-out" aria-hidden="true"></i>
+        <span data-fullscreen-label="enter">{enterFullscreenLabel}</span>
+        <span data-fullscreen-label="exit" hidden>{exitFullscreenLabel}</span>
+      </button>
     </div>
 
-    <aside class="plab__controls-col">
-      <slot name="controls" />
-      <p class="plab__notice">
-        <i class="ph ph-lightbulb" aria-hidden="true"></i>
-        <span>{entry.notice}</span>
-      </p>
-    </aside>
+    <div class="plab__workspace">
+      <div class="plab__stage-col">
+        <div class="plab__stage">
+          <canvas
+            class="plab__canvas"
+            width="900"
+            height="560"
+            data-stage-canvas
+            aria-label={canvasAriaLabel}></canvas>
+        </div>
+        <div class="plab__readouts">
+          <slot name="readouts" />
+        </div>
+      </div>
+
+      <aside class="plab__controls-col">
+        <slot name="controls" />
+        <p class="plab__notice">
+          <i class="ph ph-lightbulb" aria-hidden="true"></i>
+          <span>{entry.notice}</span>
+        </p>
+      </aside>
+    </div>
+  </div>
+
+  <div class="plab__lesson-col">
+    <slot name="lesson" />
   </div>
 </section>
+
+<script>
+  import { initPhysicsLabFullscreen } from '../../scripts/physics-lab/fullscreen/init-physics-lab-fullscreen';
+  initPhysicsLabFullscreen();
+</script>

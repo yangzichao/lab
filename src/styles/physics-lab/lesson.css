@@ -1,0 +1,215 @@
+.plab-lesson {
+  overflow: hidden;
+  border: 1px solid var(--plab-border);
+  border-radius: var(--radius);
+  background: var(--plab-panel);
+}
+
+.plab-lesson__header {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(280px, 1.18fr);
+  gap: 6px 28px;
+  padding: 26px 28px;
+  border-bottom: 1px solid var(--plab-border);
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--plab-teal) 8%, white), transparent 48%),
+    var(--plab-panel);
+}
+
+.plab-lesson__header > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--plab-teal);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.plab-lesson__header h2 {
+  margin: 0;
+  font-family: 'Newsreader', serif;
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+}
+
+.plab-lesson__header > span {
+  align-self: end;
+  color: var(--plab-muted);
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.plab-lesson__section {
+  padding: 24px 28px 28px;
+}
+
+.plab-lesson__section + .plab-lesson__section {
+  border-top: 1px solid var(--plab-border);
+}
+
+.plab-lesson__section > h3 {
+  margin: 0 0 16px;
+  color: var(--plab-muted);
+  font-size: 0.72rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.plab-lesson__formula-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.plab-lesson__formula-card {
+  display: grid;
+  align-content: start;
+  gap: 13px;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--plab-border);
+  border-radius: 12px;
+  background: #f8faf7;
+}
+
+.plab-lesson__formula-card h4 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.plab-lesson__formula-card .math-formula--display {
+  margin: 2px 0;
+  padding: 14px 8px;
+  border-block: 1px solid color-mix(in srgb, var(--plab-teal) 16%, transparent);
+  color: var(--plab-ink);
+  font-size: clamp(0.78rem, 1.6vw, 1rem);
+}
+
+.plab-lesson__formula-card p {
+  margin: 0;
+  color: var(--plab-muted);
+  font-size: 0.84rem;
+  line-height: 1.58;
+}
+
+.plab-lesson__procedure ol {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plab-lesson__procedure li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 4px 20px 4px 0;
+}
+
+.plab-lesson__procedure li + li {
+  padding-left: 20px;
+  border-left: 1px solid var(--plab-border);
+}
+
+.plab-lesson__step-number {
+  color: var(--plab-teal);
+  font-size: 0.74rem;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+
+.plab-lesson__procedure h4 {
+  margin: 0 0 7px;
+  font-size: 0.91rem;
+}
+
+.plab-lesson__procedure p {
+  margin: 0 0 10px;
+  color: var(--plab-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.plab-lesson__procedure small {
+  display: block;
+  color: var(--plab-ink);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.plab-lesson__procedure small strong {
+  color: var(--plab-teal);
+}
+
+.plab-lesson__takeaway {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: baseline;
+  padding: 18px 28px;
+  background: var(--plab-ink);
+  color: #ffffff;
+}
+
+.plab-lesson__takeaway span {
+  color: #86d5cb;
+  font-size: 0.69rem;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.plab-lesson__takeaway p {
+  margin: 0;
+  font-family: 'Newsreader', serif;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 900px) {
+  .plab-lesson__header {
+    grid-template-columns: 1fr;
+  }
+
+  .plab-lesson__header > p {
+    grid-column: auto;
+  }
+
+  .plab-lesson__formula-grid,
+  .plab-lesson__procedure ol {
+    grid-template-columns: 1fr;
+  }
+
+  .plab-lesson__procedure li {
+    padding: 12px 0;
+  }
+
+  .plab-lesson__procedure li + li {
+    padding-left: 0;
+    border-top: 1px solid var(--plab-border);
+    border-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .plab-lesson__header,
+  .plab-lesson__section {
+    padding: 20px;
+  }
+
+  .plab-lesson__formula-card {
+    padding: 16px;
+  }
+
+  .plab-lesson__takeaway {
+    grid-template-columns: 1fr;
+    gap: 7px;
+    padding: 18px 20px;
+  }
+}

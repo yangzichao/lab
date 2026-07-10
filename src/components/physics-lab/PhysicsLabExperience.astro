@@ -2,7 +2,10 @@
 import type { PhysicsLabEntry } from '../../scripts/physics-lab/physics-lab-catalog';
 import type { PhysicsLabLocale } from '../../scripts/physics-lab/physics-lab-i18n';
 import type { PhysicsLabPage } from '../../scripts/physics-lab/physics-lab-pages';
+import { getClassicalPhysicsLabLesson } from '../../scripts/physics-lab/lessons/classical-physics-lab-lessons';
+import { getQuantumPhysicsLabLesson } from '../../scripts/physics-lab/lessons/quantum-physics-lab-lessons';
 import MathFormula from '../math/MathFormula.astro';
+import PhysicsLabLesson from './PhysicsLabLesson.astro';
 import LigoScientificExplanation from './ligo/LigoScientificExplanation.astro';
 import PhysicsLabShell from './PhysicsLabShell.astro';
 
@@ -16,6 +19,10 @@ interface Props {
 }
 
 const { entry, page, locale, entries, alternateHref, suite = 'physics' } = Astro.props;
+const lesson =
+  suite === 'quantum'
+    ? getQuantumPhysicsLabLesson(entry.slug, locale)
+    : getClassicalPhysicsLabLesson(entry.slug, locale);
 ---
 
 <PhysicsLabShell
@@ -36,13 +43,10 @@ const { entry, page, locale, entries, alternateHref, suite = 'physics' } = Astro
     }
   </Fragment>
 
-  {
-    entry.slug === 'ligo-interferometer' && (
-      <Fragment slot="lesson">
-        <LigoScientificExplanation locale={locale} />
-      </Fragment>
-    )
-  }
+  <Fragment slot="lesson">
+    {lesson && <PhysicsLabLesson lesson={lesson} locale={locale} />}
+    {entry.slug === 'ligo-interferometer' && <LigoScientificExplanation locale={locale} />}
+  </Fragment>
 
   <form class="plab__panel" slot="controls" aria-label={page.controls.ariaLabel}>
     <div class="plab__panel-head">

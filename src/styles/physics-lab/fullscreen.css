@@ -1,0 +1,195 @@
+.plab__interactive {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.plab__interactive-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 42px;
+  padding: 0 2px;
+}
+
+.plab__interactive-toolbar > div {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  min-width: 0;
+}
+
+.plab__interactive-toolbar span {
+  color: var(--plab-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.plab__interactive-toolbar strong {
+  overflow: hidden;
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plab__fullscreen-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid var(--plab-border);
+  border-radius: 999px;
+  background: var(--plab-panel);
+  color: var(--plab-ink);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(22, 32, 28, 0.08);
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    transform var(--transition);
+}
+
+.plab__fullscreen-toggle:hover {
+  border-color: var(--plab-teal);
+  background: var(--plab-surface);
+  transform: translateY(-1px);
+}
+
+.plab__fullscreen-toggle i {
+  color: var(--plab-teal);
+  font-size: 1rem;
+}
+
+.plab__fullscreen-toggle span {
+  color: inherit;
+  font-size: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.plab__fullscreen-toggle span[hidden] {
+  display: none;
+}
+
+body.plab-fullscreen-fallback-active {
+  position: fixed;
+  right: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.plab__interactive:fullscreen,
+.plab__interactive.is-fullscreen-fallback {
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100dvh;
+  padding: 12px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% -20%, rgba(15, 118, 110, 0.1), transparent 38%),
+    #edf2ed;
+}
+
+.plab__interactive.is-fullscreen-fallback {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+}
+
+.plab__interactive:fullscreen .plab__interactive-toolbar,
+.plab__interactive.is-fullscreen-fallback .plab__interactive-toolbar {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 4px 2px;
+}
+
+.plab__interactive:fullscreen .plab__workspace,
+.plab__interactive.is-fullscreen-fallback .plab__workspace {
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 24vw, 390px);
+  min-height: 0;
+}
+
+.plab__interactive:fullscreen .plab__stage-col,
+.plab__interactive.is-fullscreen-fallback .plab__stage-col {
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+}
+
+.plab__interactive:fullscreen .plab__stage,
+.plab__interactive.is-fullscreen-fallback .plab__stage {
+  min-height: 0;
+  background: #e5ebe5;
+}
+
+.plab__interactive:fullscreen .plab__canvas,
+.plab__interactive.is-fullscreen-fallback .plab__canvas {
+  flex: 0 0 auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.plab__interactive:fullscreen .plab__controls-col,
+.plab__interactive.is-fullscreen-fallback .plab__controls-col {
+  align-content: start;
+  min-height: 0;
+  padding-right: 3px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 720px) {
+  .plab__interactive:fullscreen,
+  .plab__interactive.is-fullscreen-fallback {
+    overflow-y: auto;
+  }
+
+  .plab__interactive:fullscreen .plab__workspace,
+  .plab__interactive.is-fullscreen-fallback .plab__workspace {
+    flex: 0 0 auto;
+    grid-template-columns: 1fr;
+  }
+
+  .plab__interactive:fullscreen .plab__stage-col,
+  .plab__interactive.is-fullscreen-fallback .plab__stage-col {
+    grid-template-rows: auto auto;
+  }
+
+  .plab__interactive:fullscreen .plab__controls-col,
+  .plab__interactive.is-fullscreen-fallback .plab__controls-col {
+    overflow: visible;
+  }
+
+  .plab__interactive:fullscreen .plab__canvas,
+  .plab__interactive.is-fullscreen-fallback .plab__canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .plab__interactive-toolbar > div {
+    display: grid;
+    gap: 1px;
+  }
+
+  .plab__fullscreen-toggle span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
