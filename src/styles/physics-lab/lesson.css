@@ -35,11 +35,80 @@
   letter-spacing: -0.02em;
 }
 
-.plab-lesson__header > span {
+.plab-lesson__context {
+  display: grid;
+  gap: 12px;
   align-self: end;
+}
+
+.plab-lesson__context p {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: 12px;
+  margin: 0;
   color: var(--plab-muted);
-  font-size: 0.94rem;
-  line-height: 1.65;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.plab-lesson__context strong {
+  color: var(--plab-ink);
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.plab-lesson__quick-map {
+  display: grid;
+  grid-template-columns: minmax(130px, 0.24fr) minmax(0, 1fr);
+  gap: 24px;
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--plab-border);
+  background: var(--plab-ink);
+  color: #ffffff;
+}
+
+.plab-lesson__quick-map > p {
+  margin: 2px 0 0;
+  color: #86d5cb;
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.plab-lesson__quick-map dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+}
+
+.plab-lesson__quick-map dl > div {
+  padding-right: 24px;
+}
+
+.plab-lesson__quick-map dl > div + div {
+  padding-right: 0;
+  padding-left: 24px;
+  border-left: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.plab-lesson__quick-map dt {
+  margin-bottom: 6px;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.plab-lesson__quick-map dd {
+  margin: 0;
+  font-family: 'Newsreader', serif;
+  font-size: 1.08rem;
+  line-height: 1.42;
 }
 
 .plab-lesson__section {
@@ -94,6 +163,48 @@
   color: var(--plab-muted);
   font-size: 0.84rem;
   line-height: 1.58;
+}
+
+.plab-lesson__difficulties > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.plab-lesson__difficulties article {
+  padding: 18px 20px;
+  border-left: 3px solid color-mix(in srgb, var(--plab-teal) 70%, white);
+  background: color-mix(in srgb, var(--plab-teal) 5%, white);
+}
+
+.plab-lesson__difficulties h4 {
+  margin: 0 0 12px;
+  font-size: 0.94rem;
+}
+
+.plab-lesson__difficulties p {
+  display: grid;
+  grid-template-columns: 7.4rem minmax(0, 1fr);
+  gap: 10px;
+  margin: 0;
+  color: var(--plab-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.plab-lesson__difficulties p + p {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--plab-border);
+  color: var(--plab-ink);
+}
+
+.plab-lesson__difficulties p strong {
+  color: var(--plab-teal);
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
 }
 
 .plab-lesson__procedure ol {
@@ -181,7 +292,13 @@
     grid-column: auto;
   }
 
+  .plab-lesson__quick-map {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
   .plab-lesson__formula-grid,
+  .plab-lesson__difficulties > div,
   .plab-lesson__procedure ol {
     grid-template-columns: 1fr;
   }
@@ -199,8 +316,30 @@
 
 @media (max-width: 640px) {
   .plab-lesson__header,
-  .plab-lesson__section {
+  .plab-lesson__section,
+  .plab-lesson__quick-map {
     padding: 20px;
+  }
+
+  .plab-lesson__context p,
+  .plab-lesson__difficulties p {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+
+  .plab-lesson__quick-map dl {
+    grid-template-columns: 1fr;
+  }
+
+  .plab-lesson__quick-map dl > div {
+    padding: 0;
+  }
+
+  .plab-lesson__quick-map dl > div + div {
+    margin-top: 14px;
+    padding: 14px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-left: 0;
   }
 
   .plab-lesson__formula-card {

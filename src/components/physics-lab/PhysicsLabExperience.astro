@@ -2,8 +2,7 @@
 import type { PhysicsLabEntry } from '../../scripts/physics-lab/physics-lab-catalog';
 import type { PhysicsLabLocale } from '../../scripts/physics-lab/physics-lab-i18n';
 import type { PhysicsLabPage } from '../../scripts/physics-lab/physics-lab-pages';
-import { getClassicalPhysicsLabLesson } from '../../scripts/physics-lab/lessons/classical-physics-lab-lessons';
-import { getQuantumPhysicsLabLesson } from '../../scripts/physics-lab/lessons/quantum-physics-lab-lessons';
+import { getPhysicsLabLesson } from '../../scripts/physics-lab/lessons/physics-lab-lesson-registry';
 import MathFormula from '../math/MathFormula.astro';
 import PhysicsLabLesson from './PhysicsLabLesson.astro';
 import LigoScientificExplanation from './ligo/LigoScientificExplanation.astro';
@@ -19,10 +18,7 @@ interface Props {
 }
 
 const { entry, page, locale, entries, alternateHref, suite = 'physics' } = Astro.props;
-const lesson =
-  suite === 'quantum'
-    ? getQuantumPhysicsLabLesson(entry.slug, locale)
-    : getClassicalPhysicsLabLesson(entry.slug, locale);
+const lesson = getPhysicsLabLesson(entry.slug, locale, suite);
 ---
 
 <PhysicsLabShell

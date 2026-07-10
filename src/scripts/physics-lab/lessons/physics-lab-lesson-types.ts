@@ -1,3 +1,5 @@
+import type { PhysicsLabLocale } from '../physics-lab-i18n';
+
 export type PhysicsLabLessonFormula = {
   title: string;
   expressionLatex: string;
@@ -10,10 +12,28 @@ export type PhysicsLabLessonStep = {
   observation: string;
 };
 
+export type PhysicsLabLessonDifficulty = {
+  title: string;
+  misconception: string;
+  resolution: string;
+};
+
 export type PhysicsLabLesson = {
   title: string;
-  introduction: string;
+  background: string;
+  motivation: string;
+  focusQuestion: string;
+  keyInsight: string;
   formulas: PhysicsLabLessonFormula[];
+  commonDifficulties: PhysicsLabLessonDifficulty[];
   steps: PhysicsLabLessonStep[];
   takeaway: string;
 };
+
+export type LocalizedPhysicsLabLesson = Record<PhysicsLabLocale, PhysicsLabLesson>;
+
+export function definePhysicsLabLesson(
+  lesson: LocalizedPhysicsLabLesson,
+): LocalizedPhysicsLabLesson {
+  return lesson;
+}
