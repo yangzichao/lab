@@ -8,6 +8,7 @@ import {
   setRangeValue,
   setReadout,
 } from '../shared/dom-controls';
+import { createAnimationLoop } from '../shared/animation-loop';
 import { formatFixed, formatSigned } from '../shared/format';
 import { setupStageCanvas } from '../shared/stage';
 import { solveThickLens, type ThickLensParameters } from './thick-lens-physics';
@@ -27,6 +28,7 @@ export function initThickLensLab(): void {
   const context = setupStageCanvas(canvas);
   if (!context) return;
   const english = document.documentElement.lang.startsWith('en');
+  let visualPhase = 0;
   const parameters = (): ThickLensParameters => ({
     lensThickness: getRangeValue(root, 'lensThickness', defaults.lensThickness),
     objectDepth: getRangeValue(root, 'objectDepth', defaults.objectDepth),
@@ -47,7 +49,7 @@ export function initThickLensLab(): void {
   const render = (): void => {
     const value = parameters();
     const solution = solveThickLens(value);
-    drawThickLensScene(context, value, solution, { showNormals: isChecked(root, 'showNormals', true), showParaxial: isChecked(root, 'showParaxial', true), english });
+    drawThickLensScene(context, value, solution, { showNormals: isChecked(root, 'showNormals', true), showParaxial: isChecked(root, 'showParaxial', true), english, phase: visualPhase });
     const nearDistance = solution.nearBundle.image?.x;
     const farDistance = solution.farBundle.image?.x;
     setReadout(root, 'effectiveFocalLength', `${formatFixed(solution.effectiveFocalLength, 0)} mm`);
@@ -72,4 +74,8 @@ export function initThickLensLab(): void {
   onControlInput(root, () => { updateOutputs(); render(); });
   updateOutputs();
   render();
+  createAnimationLoop((deltaSeconds) => {
+    visualPhase = (visualPhase + deltaSeconds) % 1000;
+    render();
+  }).start();
 }

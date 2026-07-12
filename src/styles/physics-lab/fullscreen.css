@@ -132,6 +132,17 @@ body.plab-fullscreen-fallback-active {
   background: #e5ebe5;
 }
 
+.plab[data-lab='magnus-effect'] .plab__interactive:fullscreen .plab__stage,
+.plab[data-lab='magnus-effect'] .plab__interactive.is-fullscreen-fallback .plab__stage,
+.plab[data-lab='thick-lens-refraction'] .plab__interactive:fullscreen .plab__stage,
+.plab[data-lab='thick-lens-refraction'] .plab__interactive.is-fullscreen-fallback .plab__stage,
+.plab[data-lab='laser-resonant-cavity'] .plab__interactive:fullscreen .plab__stage,
+.plab[data-lab='laser-resonant-cavity'] .plab__interactive.is-fullscreen-fallback .plab__stage,
+.plab[data-lab='stellar-fusion-chain'] .plab__interactive:fullscreen .plab__stage,
+.plab[data-lab='stellar-fusion-chain'] .plab__interactive.is-fullscreen-fallback .plab__stage {
+  background: #071421;
+}
+
 .plab__interactive:fullscreen .plab__canvas,
 .plab__interactive.is-fullscreen-fallback .plab__canvas {
   flex: 0 0 auto;

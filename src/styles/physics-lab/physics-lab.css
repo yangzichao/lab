@@ -218,6 +218,24 @@
   background: #07111d;
 }
 
+.plab[data-lab='magnus-effect'] .plab__stage,
+.plab[data-lab='thick-lens-refraction'] .plab__stage,
+.plab[data-lab='laser-resonant-cavity'] .plab__stage,
+.plab[data-lab='stellar-fusion-chain'] .plab__stage {
+  border-color: #20394a;
+  background: #071421;
+  box-shadow:
+    0 18px 48px rgba(7, 20, 33, 0.2),
+    inset 0 0 0 1px rgba(150, 220, 255, 0.05);
+}
+
+.plab[data-lab='magnus-effect'] .plab__canvas,
+.plab[data-lab='thick-lens-refraction'] .plab__canvas,
+.plab[data-lab='laser-resonant-cavity'] .plab__canvas,
+.plab[data-lab='stellar-fusion-chain'] .plab__canvas {
+  background: #071421;
+}
+
 .plab__three-dimensional-overlay {
   position: absolute;
   inset: 0;
