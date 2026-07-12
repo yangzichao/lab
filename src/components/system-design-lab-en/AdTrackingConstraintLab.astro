@@ -1,5 +1,6 @@
 ---
 import '../system-design-lab/ad-tracking-constraint-lab.css';
+import { getSystemDesignArticleHref } from '../../scripts/system-design-lab/system-design-article-links';
 
 const workloadControls = [
   {
@@ -160,6 +161,7 @@ const teachingAssumptions = [
   'Real capacity depends on payload size, batching, replication, acks, indexes, query shape, disk, network, and operational SLOs.',
   'The lab is strongest for interview reasoning: show the simplest design first, then name the exact constraint that forces the next component.',
 ];
+const articleHref = getSystemDesignArticleHref('ad-tracking');
 ---
 
 <section class="system-lab" id="ad-tracking" data-system-design-lab>
@@ -171,6 +173,9 @@ const teachingAssumptions = [
       path, then adjust the workload to see exactly when one host, one shared database, or one
       partition stops being a good answer.
     </p>
+    <div class="system-lab__intro-actions">
+      <a href={articleHref}>Read the full tutorial</a>
+    </div>
   </div>
 
   <section class="system-lab__scenarios" aria-label="Normal architecture evolution scenarios">

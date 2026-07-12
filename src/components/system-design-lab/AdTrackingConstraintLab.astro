@@ -1,5 +1,6 @@
 ---
 import './ad-tracking-constraint-lab.css';
+import { getSystemDesignArticleHref } from '../../scripts/system-design-lab/system-design-article-links';
 
 const workloadControls = [
   {
@@ -160,6 +161,7 @@ const teachingAssumptions = [
   '真实容量取决于 payload 大小、batching、replication、acks、index、查询形态、磁盘、网络以及运维 SLO。',
   '这个 lab 最适合用来做面试推演：先给出最简单的设计，再点名那个逼你加下一个组件的具体约束。',
 ];
+const articleHref = getSystemDesignArticleHref('ad-tracking');
 ---
 
 <section class="system-lab" id="ad-tracking" data-system-design-lab>
@@ -170,6 +172,9 @@ const teachingAssumptions = [
       从最简单的 click/impression collector 开始。用这些 scenario 走一条常规的演化路径，再调
       workload，看清楚单机、单个共享 database、或单个 partition 究竟在什么时候不再是好答案。
     </p>
+    <div class="system-lab__intro-actions">
+      <a href={articleHref}>阅读完整教程</a>
+    </div>
   </div>
 
   <section class="system-lab__scenarios" aria-label="常规架构演化 scenario">

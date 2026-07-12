@@ -17,6 +17,7 @@ import {
   seedFromString,
 } from '../../scripts/system-design-lab/architecture-rough';
 import { getSystemDesignLabUiCopy } from '../../scripts/system-design-lab/system-design-lab-copy';
+import { getSystemDesignArticleHref } from '../../scripts/system-design-lab/system-design-article-links';
 import {
   normalizeSystemDesignLocale,
   type SystemDesignLocale,
@@ -31,6 +32,7 @@ const { lab } = Astro.props;
 const locale = normalizeSystemDesignLocale(Astro.props.locale);
 const copy = getSystemDesignLabUiCopy(locale);
 const flowMarkerId = `system-lab-arrow-${lab.id}`;
+const articleHref = getSystemDesignArticleHref(lab.id, lab.articleHref);
 
 // Pre-render the hand-drawn (Excalidraw-style) geometry at build time.
 const sketchedZones = lab.diagram.zones.map((zone) => ({
@@ -68,13 +70,9 @@ const sketchedNodes = lab.diagram.nodes.map((node) => {
     <p class="system-lab__eyebrow">{lab.eyebrow}</p>
     <h1 class="system-lab__title">{lab.title}</h1>
     <p class="system-lab__summary">{lab.summary}</p>
-    {
-      lab.articleHref && (
-        <div class="system-lab__intro-actions">
-          <a href={lab.articleHref}>{copy.readSourceArticle}</a>
-        </div>
-      )
-    }
+    <div class="system-lab__intro-actions">
+      <a href={articleHref}>{copy.readSourceArticle}</a>
+    </div>
   </div>
 
   {
