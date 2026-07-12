@@ -8,27 +8,17 @@ import {
   normalizePhysicsLabLocale,
   type PhysicsLabLocale,
 } from './physics-lab-i18n';
+import { fusionChainDefinition } from './fusion-chain/fusion-chain-page';
+import { laserCavityDefinition } from './laser-cavity/laser-cavity-page';
+import { magnusEffectDefinition } from './magnus-effect/magnus-effect-page';
+import { thickLensDefinition } from './thick-lens/thick-lens-page';
+import type { PhysicsLabDefinition, PhysicsLabEntry } from './physics-lab-catalog-types';
 
-export type LocalizedPhysicsLabText = {
-  title: string;
-  eyebrow: string;
-  tagline: string;
-  description: string;
-  notice: string;
-};
-
-export type PhysicsLabDefinition = {
-  slug: string;
-  icon: string;
-  text: Record<PhysicsLabLocale, LocalizedPhysicsLabText>;
-};
-
-export type PhysicsLabEntry = LocalizedPhysicsLabText & {
-  slug: string;
-  href: string;
-  icon: string;
-  locale: PhysicsLabLocale;
-};
+export type {
+  LocalizedPhysicsLabText,
+  PhysicsLabDefinition,
+  PhysicsLabEntry,
+} from './physics-lab-catalog-types';
 
 const physicsLabDefinitions: PhysicsLabDefinition[] = [
   {
@@ -319,6 +309,10 @@ const physicsLabDefinitions: PhysicsLabDefinition[] = [
       },
     },
   },
+  magnusEffectDefinition,
+  thickLensDefinition,
+  laserCavityDefinition,
+  fusionChainDefinition,
 ];
 
 function toPhysicsLabEntry(

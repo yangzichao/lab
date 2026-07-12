@@ -3,66 +3,22 @@ import {
   normalizePhysicsLabLocale,
   type PhysicsLabLocale,
 } from './physics-lab-i18n';
+import { createFusionChainPage } from './fusion-chain/fusion-chain-page';
+import { createLaserCavityPage } from './laser-cavity/laser-cavity-page';
+import { createMagnusEffectPage } from './magnus-effect/magnus-effect-page';
+import type { PhysicsLabAction, PhysicsLabPage } from './physics-lab-page-types';
+import { createThickLensPage } from './thick-lens/thick-lens-page';
 
-export type PhysicsLabReadout = {
-  id: string;
-  label: string;
-  initialValue: string;
-};
-
-export type PhysicsLabAction = {
-  id: string;
-  icon: string;
-  label: string;
-  primary?: boolean;
-  runningLabel?: string;
-  pausedLabel?: string;
-};
-
-export type PhysicsLabPreset = {
-  id: string;
-  label: string;
-};
-
-export type PhysicsLabToggle = {
-  id: string;
-  label: string;
-  description: string;
-  checked?: boolean;
-};
-
-export type PhysicsLabField = {
-  id: string;
-  label: string;
-  symbolLatex?: string;
-  outputValue: string;
-  min: number;
-  max: number;
-  step: number;
-  value: number;
-};
-
-export type PhysicsLabInlineNotice = {
-  icon: string;
-  text: string;
-};
-
-export type PhysicsLabControlPanel = {
-  ariaLabel: string;
-  eyebrow: string;
-  title: string;
-  actions: PhysicsLabAction[];
-  presets?: PhysicsLabPreset[];
-  toggles?: PhysicsLabToggle[];
-  fields?: PhysicsLabField[];
-  notices?: PhysicsLabInlineNotice[];
-};
-
-export type PhysicsLabPage = {
-  slug: string;
-  readouts: PhysicsLabReadout[];
-  controls: PhysicsLabControlPanel;
-};
+export type {
+  PhysicsLabAction,
+  PhysicsLabControlPanel,
+  PhysicsLabField,
+  PhysicsLabInlineNotice,
+  PhysicsLabPage,
+  PhysicsLabPreset,
+  PhysicsLabReadout,
+  PhysicsLabToggle,
+} from './physics-lab-page-types';
 
 const labels = {
   zh: {
@@ -603,6 +559,10 @@ function getLocalizedPhysicsLabPages(locale: PhysicsLabLocale): PhysicsLabPage[]
         ],
       },
     },
+    createMagnusEffectPage(locale),
+    createThickLensPage(locale),
+    createLaserCavityPage(locale),
+    createFusionChainPage(locale),
   ];
 }
 

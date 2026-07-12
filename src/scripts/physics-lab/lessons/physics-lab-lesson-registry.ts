@@ -5,9 +5,13 @@ import { diffractionLesson } from './classical/diffraction-lesson';
 import { doublePendulumLesson } from './classical/double-pendulum-lesson';
 import { electricFieldLesson } from './classical/electric-field-lesson';
 import { fourierEpicyclesLesson } from './classical/fourier-epicycles-lesson';
+import { fusionChainLesson } from './classical/fusion-chain-lesson';
 import { idealGasLesson } from './classical/ideal-gas-lesson';
+import { laserCavityLesson } from './classical/laser-cavity-lesson';
 import { lensOpticsLesson } from './classical/lens-optics-lesson';
+import { magnusEffectLesson } from './classical/magnus-effect-lesson';
 import { orbitLesson } from './classical/orbit-lesson';
+import { thickLensLesson } from './classical/thick-lens-lesson';
 import { threeBodyLesson } from './classical/three-body-lesson';
 import { waveInterferenceLesson } from './classical/wave-interference-lesson';
 import type {
@@ -33,9 +37,13 @@ const lessonRegistry: Readonly<
     'double-pendulum': doublePendulumLesson,
     'electric-field': electricFieldLesson,
     'fourier-epicycles': fourierEpicyclesLesson,
+    'laser-resonant-cavity': laserCavityLesson,
+    'magnus-effect': magnusEffectLesson,
     'ideal-gas': idealGasLesson,
     'lens-optics': lensOpticsLesson,
     orbit: orbitLesson,
+    'stellar-fusion-chain': fusionChainLesson,
+    'thick-lens-refraction': thickLensLesson,
     'three-body': threeBodyLesson,
     'wave-interference': waveInterferenceLesson,
   },

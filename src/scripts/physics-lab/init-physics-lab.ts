@@ -33,6 +33,22 @@ const physicsLabInitializers: Record<string, PhysicsLabInitializer> = {
     );
     initFourierEpicyclesLab();
   },
+  'magnus-effect': async () => {
+    const { initMagnusEffectLab } = await import('./magnus-effect/magnus-effect-lab');
+    initMagnusEffectLab();
+  },
+  'thick-lens-refraction': async () => {
+    const { initThickLensLab } = await import('./thick-lens/thick-lens-lab');
+    initThickLensLab();
+  },
+  'laser-resonant-cavity': async () => {
+    const { initLaserCavityLab } = await import('./laser-cavity/laser-cavity-lab');
+    initLaserCavityLab();
+  },
+  'stellar-fusion-chain': async () => {
+    const { initFusionChainLab } = await import('./fusion-chain/fusion-chain-lab');
+    initFusionChainLab();
+  },
   'ideal-gas': async () => {
     const { initIdealGasLab } = await import('./ideal-gas/ideal-gas-lab');
     initIdealGasLab();
