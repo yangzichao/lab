@@ -1,0 +1,366 @@
+---
+import type {
+  DiagramFlowDefinition,
+  DiagramNodeDefinition,
+  DiagramZoneDefinition,
+} from '../../scripts/system-design-lab/lab-types';
+import {
+  nodeDetailMarkup,
+  nodeFillPrimitives,
+  nodeGlyphMarkup,
+  nodeKind,
+  nodeOutlinePrimitives,
+  nodeTextTop,
+} from '../../scripts/system-design-lab/architecture-shapes';
+import {
+  roughFillMarkup,
+  roughFlowMarkup,
+  roughStrokeMarkup,
+  roughZoneMarkup,
+  seedFromString,
+} from '../../scripts/system-design-lab/architecture-rough';
+import {
+  normalizeSystemDesignLocale,
+  type SystemDesignLocale,
+} from '../../scripts/system-design-lab/system-design-i18n';
+
+interface Props {
+  locale?: SystemDesignLocale;
+}
+
+const locale = normalizeSystemDesignLocale(Astro.props.locale);
+const copy = locale === 'en'
+  ? {
+      title: 'Ad click tracking architecture diagram',
+      description:
+        'Whiteboard-style architecture diagram for an ad click and impression tracking pipeline.',
+      zones: {
+        clients: 'Clients',
+        edge: 'Edge / API',
+        backbone: 'Event backbone',
+        processing: 'Processing',
+        storage: 'Storage + serving',
+      },
+      nodes: {
+        source: ['Client', 'ad server'],
+        loadBalancer: ['Load balancer', 'health + fanout'],
+        collectors: ['Single collector', 'validate + write'],
+        eventLog: ['Event log', 'buffer + replay'],
+        partitioning: ['Partition key', 'campaign / bucket'],
+        streaming: ['Stream workers', 'dedupe + windows'],
+        sharedDatabase: ['Primary DB', 'raw + reports'],
+        servingStores: ['Serving stores', 'OLAP / billing'],
+        warehouse: ['Warehouse', 'offline truth'],
+      },
+    }
+  : {
+      title: 'Ad click tracking 架构图',
+      description: '一条 ad click 与 impression 追踪 pipeline 的白板风格架构图。',
+      zones: {
+        clients: 'Clients',
+        edge: 'Edge / API',
+        backbone: 'Event backbone',
+        processing: '处理',
+        storage: '存储 + serving',
+      },
+      nodes: {
+        source: ['Client', 'ad server'],
+        loadBalancer: ['Load balancer', '健康检查 + fanout'],
+        collectors: ['单机 collector', '校验 + 写入'],
+        eventLog: ['Event log', '缓冲 + replay'],
+        partitioning: ['Partition key', 'campaign / bucket'],
+        streaming: ['Stream workers', 'dedupe + windows'],
+        sharedDatabase: ['Primary DB', '原始 + 报表'],
+        servingStores: ['Serving stores', 'OLAP / billing'],
+        warehouse: ['Warehouse', '离线真值'],
+      },
+    };
+
+const zones: DiagramZoneDefinition[] = [
+  { id: 'clients', label: copy.zones.clients, x: 20, y: 70, width: 150, height: 360 },
+  { id: 'edge', label: copy.zones.edge, x: 210, y: 45, width: 190, height: 410 },
+  {
+    id: 'backbone',
+    label: copy.zones.backbone,
+    x: 440,
+    y: 70,
+    width: 180,
+    height: 385,
+  },
+  {
+    id: 'processing',
+    label: copy.zones.processing,
+    x: 660,
+    y: 70,
+    width: 165,
+    height: 385,
+  },
+  { id: 'storage', label: copy.zones.storage, x: 865, y: 45, width: 155, height: 440 },
+];
+
+const flows: DiagramFlowDefinition[] = [
+  {
+    id: 'clientToLoadBalancer',
+    path: 'M155 250 C190 250 190 155 225 155',
+    variant: 'primary',
+  },
+  {
+    id: 'clientToCollectors',
+    path: 'M156 265 C192 265 210 306 225 306',
+    variant: 'primary',
+  },
+  {
+    id: 'loadBalancerToCollectors',
+    path: 'M300 200 L300 260',
+    variant: 'primary',
+  },
+  {
+    id: 'collectorsToEventLog',
+    path: 'M375 310 C405 310 405 220 450 220',
+    variant: 'primary',
+  },
+  {
+    id: 'eventLogToStreaming',
+    path: 'M590 220 C625 220 625 245 675 245',
+    variant: 'primary',
+  },
+  {
+    id: 'streamingToServing',
+    path: 'M805 245 C835 245 845 270 880 270',
+    variant: 'primary',
+  },
+  {
+    id: 'eventLogToPartitioning',
+    path: 'M520 270 L520 330',
+    variant: 'secondary',
+  },
+  {
+    id: 'partitioningToStreaming',
+    path: 'M590 375 C635 375 640 285 675 285',
+    variant: 'secondary',
+  },
+  {
+    id: 'eventLogToDatabase',
+    path: 'M590 208 C700 155 800 128 880 128',
+    variant: 'secondary',
+  },
+  {
+    id: 'streamingToDatabase',
+    path: 'M805 225 C845 180 860 135 880 128',
+    variant: 'secondary',
+  },
+  {
+    id: 'streamingToWarehouse',
+    path: 'M805 290 C845 290 862 445 880 445',
+    variant: 'secondary',
+  },
+  {
+    id: 'streamingToArchive',
+    path: 'M755 300 C810 325 830 445 880 445',
+    variant: 'secondary',
+  },
+  {
+    id: 'collectorsToDatabase',
+    path: 'M375 290 C550 200 730 140 880 128',
+    variant: 'direct',
+  },
+];
+
+const nodes: DiagramNodeDefinition[] = [
+  {
+    id: 'source',
+    title: copy.nodes.source[0],
+    subtitle: copy.nodes.source[1],
+    x: 48,
+    y: 205,
+    width: 108,
+    height: 96,
+    kind: 'client',
+  },
+  {
+    id: 'loadBalancer',
+    title: copy.nodes.loadBalancer[0],
+    subtitle: copy.nodes.loadBalancer[1],
+    x: 225,
+    y: 112,
+    width: 150,
+    height: 88,
+    kind: 'lb',
+  },
+  {
+    id: 'collectors',
+    title: copy.nodes.collectors[0],
+    subtitle: copy.nodes.collectors[1],
+    x: 225,
+    y: 260,
+    width: 150,
+    height: 100,
+    kind: 'compute',
+  },
+  {
+    id: 'eventLog',
+    title: copy.nodes.eventLog[0],
+    subtitle: copy.nodes.eventLog[1],
+    x: 450,
+    y: 170,
+    width: 140,
+    height: 100,
+    kind: 'queue',
+  },
+  {
+    id: 'partitioning',
+    title: copy.nodes.partitioning[0],
+    subtitle: copy.nodes.partitioning[1],
+    x: 450,
+    y: 330,
+    width: 140,
+    height: 90,
+    kind: 'scheduler',
+  },
+  {
+    id: 'streaming',
+    title: copy.nodes.streaming[0],
+    subtitle: copy.nodes.streaming[1],
+    x: 675,
+    y: 190,
+    width: 130,
+    height: 110,
+    kind: 'stream',
+  },
+  {
+    id: 'sharedDatabase',
+    title: copy.nodes.sharedDatabase[0],
+    subtitle: copy.nodes.sharedDatabase[1],
+    x: 880,
+    y: 82,
+    width: 120,
+    height: 92,
+    kind: 'db',
+  },
+  {
+    id: 'servingStores',
+    title: copy.nodes.servingStores[0],
+    subtitle: copy.nodes.servingStores[1],
+    x: 880,
+    y: 220,
+    width: 120,
+    height: 100,
+    kind: 'nosql',
+  },
+  {
+    id: 'warehouse',
+    title: copy.nodes.warehouse[0],
+    subtitle: copy.nodes.warehouse[1],
+    x: 880,
+    y: 400,
+    width: 120,
+    height: 90,
+    kind: 'db',
+  },
+];
+
+const sketchedZones = zones.map((zone) => ({
+  ...zone,
+  sketch: roughZoneMarkup(
+    zone.x,
+    zone.y,
+    zone.width,
+    zone.height,
+    seedFromString(`ad-tracking-zone-${zone.id}`),
+  ),
+}));
+
+const sketchedFlows = flows.map((flow) => ({
+  ...flow,
+  sketch: roughFlowMarkup(flow.path, seedFromString(`ad-tracking-flow-${flow.id}`)),
+}));
+
+const sketchedNodes = nodes.map((node) => {
+  const seed = seedFromString(`ad-tracking-node-${node.id}`);
+  return {
+    node,
+    kind: nodeKind(node),
+    textTop: nodeTextTop(node),
+    fill: roughFillMarkup(nodeFillPrimitives(node), seed),
+    stroke: roughStrokeMarkup(nodeOutlinePrimitives(node), seed),
+    detail: nodeDetailMarkup(node),
+    glyph: nodeGlyphMarkup(node),
+  };
+});
+
+const titleId = `ad-tracking-sketch-title-${locale}`;
+const descriptionId = `ad-tracking-sketch-description-${locale}`;
+const flowMarkerId = `system-lab-arrow-ad-tracking-${locale}`;
+---
+
+<svg
+  class="system-lab__sketch"
+  viewBox="0 0 1040 560"
+  role="img"
+  aria-labelledby={`${titleId} ${descriptionId}`}
+  style={`--system-lab-flow-marker: url('#${flowMarkerId}')`}
+>
+  <title id={titleId}>{copy.title}</title>
+  <desc id={descriptionId}>{copy.description}</desc>
+
+  <defs>
+    <marker
+      id={flowMarkerId}
+      viewBox="0 0 12 12"
+      refX="9"
+      refY="6"
+      markerWidth="9"
+      markerHeight="9"
+      orient="auto-start-reverse"
+    >
+      <path class="system-lab__arrowhead" d="M2 2 L10 6 L2 10"></path>
+    </marker>
+  </defs>
+
+  {
+    sketchedZones.map((zone) => (
+      <g class={`system-lab__sketch-zone system-lab__sketch-zone--${zone.id}`}>
+        <g class="system-lab__zone-shape" set:html={zone.sketch} />
+        <text x={zone.x + 16} y={zone.y + 28}>{zone.label}</text>
+      </g>
+    ))
+  }
+
+  <g class="system-lab__sketch-flows">
+    {
+      sketchedFlows.map((flow) => (
+        <g
+          class={`system-lab__sketch-flow-group system-lab__sketch-flow-group--${flow.variant ?? 'primary'}`}
+          data-flow={flow.id}
+          set:html={flow.sketch}
+        />
+      ))
+    }
+  </g>
+
+  {
+    sketchedNodes.map(({ node, kind, textTop, fill, stroke, detail, glyph }) => (
+      <g
+        class={`system-lab__sketch-node system-lab__sketch-node--${kind}`}
+        data-node={node.id}
+        data-kind={kind}
+      >
+        <g class="system-lab__rough-fill-group" set:html={fill} />
+        <g class="system-lab__rough-stroke-group" set:html={stroke} />
+        {detail && <g class="system-lab__shape-detail-group" set:html={detail} />}
+        <g set:html={glyph} />
+        <text x={node.x + node.width / 2} y={textTop} data-node-title={node.id}>
+          {node.title}
+        </text>
+        <text
+          x={node.x + node.width / 2}
+          y={textTop + 18}
+          class="system-lab__sketch-small"
+          data-node-copy={node.id}
+        >
+          {node.subtitle}
+        </text>
+      </g>
+    ))
+  }
+</svg>

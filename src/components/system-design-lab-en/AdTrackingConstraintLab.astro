@@ -1,5 +1,6 @@
 ---
 import '../system-design-lab/ad-tracking-constraint-lab.css';
+import AdTrackingArchitectureDiagram from '../system-design-lab/AdTrackingArchitectureDiagram.astro';
 import { getSystemDesignArticleHref } from '../../scripts/system-design-lab/system-design-article-links';
 
 const workloadControls = [
@@ -258,129 +259,7 @@ const articleHref = getSystemDesignArticleHref('ad-tracking');
           <strong data-architecture-path>Ad events -> single collector -> shared database</strong>
         </div>
 
-        <svg
-          class="system-lab__sketch"
-          viewBox="0 0 1040 560"
-          role="img"
-          aria-labelledby="ad-tracking-sketch-title ad-tracking-sketch-description"
-        >
-          <title id="ad-tracking-sketch-title">Ad click tracking architecture diagram</title>
-          <desc id="ad-tracking-sketch-description">
-            Whiteboard-style architecture diagram for an ad click and impression tracking pipeline.
-          </desc>
-
-          <defs>
-            <marker
-              id="system-lab-arrow"
-              viewBox="0 0 12 12"
-              refX="10"
-              refY="6"
-              markerWidth="8"
-              markerHeight="8"
-              orient="auto-start-reverse"
-            >
-              <path d="M2 2 L10 6 L2 10 Z"></path>
-            </marker>
-          </defs>
-
-          <g class="system-lab__sketch-zone system-lab__sketch-zone--clients">
-            <rect x="20" y="70" width="150" height="360" rx="10"></rect>
-            <text x="38" y="100">Clients</text>
-          </g>
-          <g class="system-lab__sketch-zone system-lab__sketch-zone--edge">
-            <rect x="210" y="45" width="190" height="410" rx="10"></rect>
-            <text x="228" y="75">Edge / API</text>
-          </g>
-          <g class="system-lab__sketch-zone system-lab__sketch-zone--backbone">
-            <rect x="440" y="70" width="180" height="385" rx="10"></rect>
-            <text x="458" y="100">Event backbone</text>
-          </g>
-          <g class="system-lab__sketch-zone system-lab__sketch-zone--processing">
-            <rect x="660" y="70" width="165" height="385" rx="10"></rect>
-            <text x="678" y="100">Processing</text>
-          </g>
-          <g class="system-lab__sketch-zone system-lab__sketch-zone--storage">
-            <rect x="865" y="45" width="155" height="440" rx="10"></rect>
-            <text x="883" y="75">Storage + serving</text>
-          </g>
-
-          <g class="system-lab__sketch-flows">
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--primary" data-flow="clientToLoadBalancer" d="M155 250 C190 250 190 155 225 155"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--primary" data-flow="clientToCollectors" d="M156 265 C192 265 210 306 225 306"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--primary" data-flow="loadBalancerToCollectors" d="M300 190 L300 260"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--primary" data-flow="collectorsToEventLog" d="M370 310 C405 310 405 220 450 220"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--primary" data-flow="eventLogToStreaming" d="M590 220 C625 220 625 220 675 220"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--primary" data-flow="streamingToServing" d="M805 220 C835 220 835 220 880 220"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--secondary" data-flow="eventLogToPartitioning" d="M525 265 L525 330"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--secondary" data-flow="partitioningToStreaming" d="M590 370 C635 370 640 285 675 285"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--secondary" data-flow="eventLogToDatabase" d="M590 208 C700 155 800 118 880 118"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--secondary" data-flow="streamingToDatabase" d="M805 215 C845 175 860 130 880 120"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--secondary" data-flow="streamingToWarehouse" d="M805 290 C845 290 862 415 880 415"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--secondary" data-flow="streamingToArchive" d="M755 285 C810 285 830 440 880 440"></path>
-            <path class="system-lab__sketch-flow system-lab__sketch-flow--direct" data-flow="collectorsToDatabase" d="M375 290 C550 200 730 135 880 122"></path>
-          </g>
-
-          <g class="system-lab__sketch-node" data-node="source" transform="translate(48 210)">
-            <rect width="108" height="84" rx="10"></rect>
-            <text x="16" y="32">Client</text>
-            <text x="16" y="54" class="system-lab__sketch-small">ad server</text>
-          </g>
-
-          <g class="system-lab__sketch-node" data-node="loadBalancer" transform="translate(225 120)">
-            <rect width="150" height="70" rx="10"></rect>
-            <text x="18" y="31">Load balancer</text>
-            <text x="18" y="52" class="system-lab__sketch-small">health + fanout</text>
-          </g>
-
-          <g class="system-lab__sketch-node" data-node="collectors" transform="translate(225 260)">
-            <rect width="150" height="92" rx="10"></rect>
-            <text x="18" y="35" data-node-title="collectors">Single collector</text>
-            <text x="18" y="58" class="system-lab__sketch-small" data-node-copy="collectors">
-              validate + write
-            </text>
-          </g>
-
-          <g class="system-lab__sketch-node" data-node="eventLog" transform="translate(450 180)">
-            <rect width="140" height="86" rx="10"></rect>
-            <text x="18" y="34">Event log</text>
-            <text x="18" y="57" class="system-lab__sketch-small">buffer + replay</text>
-          </g>
-
-          <g class="system-lab__sketch-node" data-node="partitioning" transform="translate(450 330)">
-            <rect width="140" height="82" rx="10"></rect>
-            <text x="18" y="33">Partition key</text>
-            <text x="18" y="55" class="system-lab__sketch-small">campaign / bucket</text>
-          </g>
-
-          <g class="system-lab__sketch-node" data-node="streaming" transform="translate(675 190)">
-            <rect width="130" height="126" rx="10"></rect>
-            <text x="18" y="38">Stream</text>
-            <text x="18" y="61">workers</text>
-            <text x="18" y="87" class="system-lab__sketch-small">dedupe</text>
-            <text x="18" y="108" class="system-lab__sketch-small">windows</text>
-          </g>
-
-          <g class="system-lab__sketch-node" data-node="sharedDatabase" transform="translate(880 82)">
-            <rect width="120" height="80" rx="10"></rect>
-            <text x="16" y="32">Primary DB</text>
-            <text x="16" y="54" class="system-lab__sketch-small" data-node-copy="sharedDatabase">
-              raw + reports
-            </text>
-          </g>
-
-          <g class="system-lab__sketch-node" data-node="servingStores" transform="translate(880 220)">
-            <rect width="120" height="92" rx="10"></rect>
-            <text x="16" y="35">Serving</text>
-            <text x="16" y="58">stores</text>
-            <text x="16" y="78" class="system-lab__sketch-small">OLAP / billing</text>
-          </g>
-
-          <g class="system-lab__sketch-node" data-node="warehouse" transform="translate(880 400)">
-            <rect width="120" height="78" rx="10"></rect>
-            <text x="16" y="32">Warehouse</text>
-            <text x="16" y="54" class="system-lab__sketch-small">offline truth</text>
-          </g>
-        </svg>
+        <AdTrackingArchitectureDiagram locale="en" />
 
         <div class="system-lab__mobile-flow" aria-label="Calculated mobile architecture flow">
           <div class="system-lab__mobile-stage">
