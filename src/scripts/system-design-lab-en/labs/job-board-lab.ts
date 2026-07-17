@@ -14,6 +14,7 @@ const comfortablePostgresCandidatesPerQuery = 50_000;
 const comfortablePostgresCandidateScoresPerSecond = 50_000_000;
 const searchDocumentsPerShard = 5_000_000;
 const searchIndexUpdatesPerShardSecond = 5_000;
+const popularResultCacheTtlSeconds = 30;
 
 export const jobBoardLabDefinition: SystemDesignLabDefinition = {
   id: 'job-board',
@@ -21,7 +22,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
   title:
     'A Job Board starts with PostgreSQL full-text retrieval and typed filters. A Search Service becomes a separate component only when candidate scoring, search features, or independent scaling becomes the binding constraint.',
   summary:
-    'Adjust active jobs, search QPS, common-keyword match rate, metadata-filter selectivity, job updates, latency, and freshness. Watch B-tree / GIN / GiST / partial indexes remain sufficient—or make Elasticsearch / OpenSearch earn the cost of a derived index and an asynchronous freshness boundary.',
+    'Adjust active jobs, search QPS, measured cache hits for reusable queries, keyword candidates, job updates, and freshness. See when PostgreSQL is enough, when popular results or a search session deserve a cache, and when Elasticsearch / OpenSearch should become an independent component.',
   controls: [
     {
       id: 'activeJobs',
@@ -43,6 +44,16 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       defaultValue: 300,
       scale: 'log',
       format: 'requests-per-second',
+    },
+    {
+      id: 'resultCacheHitPercent',
+      label: 'Result-cache hit rate',
+      help: 'Measured share hitting the same normalized popular-query / first-page key; high-cardinality long-tail search is usually near zero.',
+      min: 0,
+      max: 80,
+      defaultValue: 0,
+      scale: 'linear',
+      format: 'percentage',
     },
     {
       id: 'keywordMatchPercent',
@@ -108,6 +119,12 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       help: 'Counting every match weakens Top-K early termination; most UIs should show 1,000+.',
       defaultValue: false,
     },
+    {
+      id: 'stableSearchSession',
+      label: 'Need a stable search session',
+      help: 'Materialize a bounded Top 1,000 Job IDs for a few minutes so later pages see one set; this does not reduce first-search work.',
+      defaultValue: false,
+    },
   ],
   scenarios: [
     {
@@ -118,6 +135,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       values: {
         activeJobs: 200_000,
         searchQps: 80,
+        resultCacheHitPercent: 0,
         keywordMatchPercent: 0.2,
         filterRetentionPercent: 2,
         jobUpdatesPerSecond: 5,
@@ -125,6 +143,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         freshnessBudgetSeconds: 5,
         advancedSearchFeatures: false,
         exactTotalCount: false,
+        stableSearchSession: false,
       },
     },
     {
@@ -135,6 +154,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       values: {
         activeJobs: 3_000_000,
         searchQps: 300,
+        resultCacheHitPercent: 0,
         keywordMatchPercent: 1,
         filterRetentionPercent: 5,
         jobUpdatesPerSecond: 20,
@@ -142,6 +162,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         freshnessBudgetSeconds: 5,
         advancedSearchFeatures: false,
         exactTotalCount: false,
+        stableSearchSession: false,
       },
     },
     {
@@ -152,6 +173,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       values: {
         activeJobs: 10_000_000,
         searchQps: 1_000,
+        resultCacheHitPercent: 0,
         keywordMatchPercent: 20,
         filterRetentionPercent: 20,
         jobUpdatesPerSecond: 50,
@@ -159,6 +181,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         freshnessBudgetSeconds: 5,
         advancedSearchFeatures: false,
         exactTotalCount: false,
+        stableSearchSession: false,
       },
     },
     {
@@ -169,6 +192,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       values: {
         activeJobs: 20_000_000,
         searchQps: 5_000,
+        resultCacheHitPercent: 0,
         keywordMatchPercent: 8,
         filterRetentionPercent: 15,
         jobUpdatesPerSecond: 100,
@@ -176,6 +200,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         freshnessBudgetSeconds: 5,
         advancedSearchFeatures: true,
         exactTotalCount: false,
+        stableSearchSession: false,
       },
     },
     {
@@ -186,6 +211,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       values: {
         activeJobs: 20_000_000,
         searchQps: 5_000,
+        resultCacheHitPercent: 0,
         keywordMatchPercent: 8,
         filterRetentionPercent: 15,
         jobUpdatesPerSecond: 30_000,
@@ -193,13 +219,33 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         freshnessBudgetSeconds: 0.5,
         advancedSearchFeatures: true,
         exactTotalCount: true,
+        stableSearchSession: false,
+      },
+    },
+    {
+      id: 'selective-result-cache',
+      step: '06',
+      title: 'Cache only hot results',
+      summary: 'Forty percent of 5k incoming QPS hits a normalized first-page key; cache protects the hot set without hiding long-tail miss cost.',
+      values: {
+        activeJobs: 30_000_000,
+        searchQps: 5_000,
+        resultCacheHitPercent: 40,
+        keywordMatchPercent: 8,
+        filterRetentionPercent: 15,
+        jobUpdatesPerSecond: 100,
+        latencyBudgetMs: 200,
+        freshnessBudgetSeconds: 60,
+        advancedSearchFeatures: true,
+        exactTotalCount: false,
+        stableSearchSession: false,
       },
     },
   ],
   diagram: buildColumnDiagram({
     title: 'Job Board search architecture',
     description:
-      'Whiteboard Job Board architecture: PostgreSQL stores Job truth; CDC / Outbox captures committed changes, a Queue buffers and transports them, and an Indexer builds the searchable copy.',
+      'Whiteboard Job Board architecture: cache is conditional and appears only with evidence for popular normalized queries or stable search sessions; PostgreSQL stores truth and the CDC pipeline updates a derived Search Index.',
     columns: [
       {
         id: 'clients',
@@ -233,6 +279,13 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
             subtitle: 'retrieve + rank',
             summary: 'Queries PostgreSQL indexes or runs BM25 + filters in a dedicated Search Service',
             kind: 'api',
+          },
+          {
+            id: 'resultCache',
+            title: 'Conditional cache',
+            subtitle: 'hot results / session',
+            summary: 'Caches only popular first-page results or a bounded Top 1,000 session; long-tail misses still reach the search backend',
+            kind: 'cache',
           },
           {
             id: 'jobApi',
@@ -311,8 +364,11 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       { from: 'jobSeeker', to: 'searchApi', variant: 'primary' },
       { from: 'jobSeeker', to: 'applicationApi', variant: 'direct' },
       { from: 'employer', to: 'jobApi', variant: 'primary' },
+      { from: 'searchApi', to: 'resultCache', variant: 'primary' },
       { from: 'searchApi', to: 'postgresIndexes', variant: 'direct' },
       { from: 'searchApi', to: 'searchCluster', variant: 'primary' },
+      { from: 'resultCache', to: 'postgresIndexes', variant: 'direct' },
+      { from: 'resultCache', to: 'searchCluster', variant: 'primary' },
       { from: 'jobApi', to: 'jobTable', variant: 'primary' },
       { from: 'applicationApi', to: 'jobTable', variant: 'primary' },
       { from: 'jobTable', to: 'postgresIndexes', variant: 'secondary' },
@@ -326,6 +382,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
     { id: 'candidates', label: 'Candidates ranked per query' },
     { id: 'postgresPressure', label: 'PostgreSQL search CPU pressure' },
     { id: 'latency', label: 'Search latency vs p95 budget' },
+    { id: 'backendTraffic', label: 'Backend search traffic after cache' },
     { id: 'freshness', label: 'Search freshness lag' },
     { id: 'resultWork', label: 'Top-K / total-count work' },
   ],
@@ -333,6 +390,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
     { id: 'typedFilters', title: 'Typed filters' },
     { id: 'postgresFts', title: 'PostgreSQL FTS' },
     { id: 'partialIndexes', title: 'Active-only partial indexes' },
+    { id: 'resultCache', title: 'Conditional result / session cache' },
     { id: 'searchService', title: 'Independent Search Service' },
     { id: 'indexingPipeline', title: 'CDC / Outbox / Queue' },
     { id: 'applicationValidation', title: 'Application-time validation' },
@@ -358,6 +416,13 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       url: 'https://docs.opensearch.org/latest/search-plugins/keyword-search/',
       summary:
         'A dedicated Search Service treats full-text relevance, non-scoring filters, and Top-K retrieval as the primary workload rather than an add-on to a relational database.',
+    },
+    {
+      title: 'Elasticsearch does not cache full search hits by default',
+      source: 'Elasticsearch — Shard request cache',
+      url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/shard-request-cache.html',
+      summary:
+        'The shard request cache defaults to size=0 totals, aggregations, and suggestions. Popular Top 20 results require an explicit Search API cache such as Redis.',
     },
     {
       title: 'CDC captures committed row-level database changes',
@@ -386,6 +451,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
     'Keyword match rate and filter retention should come from the real query distribution; total row count alone cannot decide a search migration.',
     'PostgreSQL indexes update in the Job transaction; a separate Search Service is modeled with an approximately one-second refresh plus indexing backlog.',
     'The production path uses Outbox / CDC -> durable Queue -> Indexer. A small system may omit the Queue, but it must not synchronously dual-write PostgreSQL and the Search Service.',
+    'Result cache is off by default. Only measured reuse of normalized popular-query / first-page keys earns a 30-second TTL. A search session stores bounded Top 1,000 Job IDs for a few minutes to stabilize pagination, not accelerate the first query.',
     'Regardless of which index serves search, the Application API uses current PostgreSQL Job.status for the final correctness decision.',
   ],
   teachingWalkthrough: [
@@ -444,6 +510,17 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         'Refresh, segment merge, indexing backlog, and exact counting all add work. Search should accept bounded lag and a 1,000+ count; application correctness never depends on the Search Service.',
       takeaway: 'Dedicated search improves retrieval but turns freshness into an explicit system budget.',
     },
+    {
+      id: 'conditional-cache',
+      step: '06',
+      focus: 'Cache needs evidence of reuse',
+      scenarioId: 'selective-result-cache',
+      question:
+        'Peak traffic is 5k Search QPS and 40% truly repeats a normalized first-page key. Should cache become a permanent layer for every search?',
+      reveal:
+        'No. Give only those hot keys a 30-second TTL: 2k QPS returns from cache while 3k QPS of long-tail misses still reaches the Search Service; six primary shards mean about 18k shard operations/s. If pagination must remain stable, separately store a bounded Top 1,000 Job-ID search session—the first search still runs.',
+      takeaway: 'Cache optimizes reusable traffic only; decide on Elasticsearch from cache-miss latency, candidate work, and search features.',
+    },
   ],
   analyze: analyzeJobBoardWorkload,
 };
@@ -451,6 +528,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
 function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
   const activeJobs = numericValue(workload, 'activeJobs');
   const searchQps = numericValue(workload, 'searchQps');
+  const resultCacheHitPercent = numericValue(workload, 'resultCacheHitPercent');
   const keywordMatchPercent = numericValue(workload, 'keywordMatchPercent');
   const filterRetentionPercent = numericValue(workload, 'filterRetentionPercent');
   const jobUpdatesPerSecond = numericValue(workload, 'jobUpdatesPerSecond');
@@ -458,10 +536,14 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
   const freshnessBudgetSeconds = numericValue(workload, 'freshnessBudgetSeconds');
   const advancedSearchFeatures = Boolean(workload.advancedSearchFeatures);
   const exactTotalCount = Boolean(workload.exactTotalCount);
+  const stableSearchSession = Boolean(workload.stableSearchSession);
+  const cacheActive = resultCacheHitPercent > 0 || stableSearchSession;
+  const backendSearchQps = searchQps * (1 - resultCacheHitPercent / 100);
+  const cacheSavedQps = searchQps - backendSearchQps;
 
   const keywordCandidates = activeJobs * (keywordMatchPercent / 100);
   const rankedCandidates = Math.max(1, keywordCandidates * (filterRetentionPercent / 100));
-  const candidateScoresPerSecond = rankedCandidates * searchQps;
+  const candidateScoresPerSecond = rankedCandidates * backendSearchQps;
   const postgresPressure =
     candidateScoresPerSecond / comfortablePostgresCandidateScoresPerSecond;
   const postgresContentionMultiplier = Math.max(1, Math.sqrt(postgresPressure));
@@ -489,6 +571,10 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
     ? jobUpdatesPerSecond / indexingCapacity
     : jobUpdatesPerSecond / 20_000;
   const searchFreshnessSeconds = needsSearchService ? Math.max(1, indexingPressure) : 0.02;
+  const visibleSearchFreshnessSeconds =
+    searchFreshnessSeconds +
+    (resultCacheHitPercent > 0 ? popularResultCacheTtlSeconds : 0);
+  const backendShardOperationsPerSecond = backendSearchQps * searchShardCount;
   const resultWorkRatio = exactTotalCount
     ? rankedCandidates / comfortablePostgresCandidatesPerQuery
     : Math.min(rankedCandidates, 1_000) / comfortablePostgresCandidatesPerQuery;
@@ -497,18 +583,28 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
     needsSearchService,
     advancedSearchFeatures,
     exactTotalCount,
+    cacheActive,
   };
 
   return {
     architectureTitle: chooseArchitectureTitle(flags),
     architectureSummary: chooseArchitectureSummary(flags),
-    architecturePath: needsSearchService
-      ? 'Search API -> Search Service; Job change -> PostgreSQL -> CDC / Outbox -> Queue -> Indexer -> Search Service'
-      : 'Search API -> PostgreSQL partial indexes -> ts_rank -> stable Top 20',
+    architecturePath: cacheActive
+      ? needsSearchService
+        ? 'Search API -> conditional Result / Session Cache -> Search Service; only cache misses run BM25'
+        : 'Search API -> conditional Result / Session Cache -> PostgreSQL indexes; only cache misses rank'
+      : needsSearchService
+        ? 'Search API -> Search Service; Job change -> PostgreSQL -> CDC / Outbox -> Queue -> Indexer -> Search Service'
+        : 'Search API -> PostgreSQL partial indexes -> ts_rank -> stable Top 20',
     nodeStates: {
       jobSeeker: 'ok',
       employer: 'ok',
       searchApi: selectedLatencyMs > latencyBudgetMs ? 'overloaded' : 'ok',
+      resultCache: cacheActive
+        ? visibleSearchFreshnessSeconds > freshnessBudgetSeconds
+          ? 'warning'
+          : 'needed'
+        : 'inactive',
       jobApi: 'ok',
       applicationApi: 'needed',
       jobTable: 'ok',
@@ -522,8 +618,15 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
       jobSeekerToSearchApi: 'active',
       jobSeekerToApplicationApi: 'active',
       employerToJobApi: 'active',
-      searchApiToPostgresIndexes: needsSearchService ? 'inactive' : 'active',
-      searchApiToSearchCluster: needsSearchService ? 'active' : 'inactive',
+      searchApiToResultCache: cacheActive ? 'active' : 'inactive',
+      searchApiToPostgresIndexes:
+        !cacheActive && !needsSearchService ? 'active' : 'inactive',
+      searchApiToSearchCluster:
+        !cacheActive && needsSearchService ? 'active' : 'inactive',
+      resultCacheToPostgresIndexes:
+        cacheActive && !needsSearchService ? 'active' : 'inactive',
+      resultCacheToSearchCluster:
+        cacheActive && needsSearchService ? 'active' : 'inactive',
       jobApiToJobTable: 'active',
       applicationApiToJobTable: 'active',
       jobTableToPostgresIndexes: 'active',
@@ -556,14 +659,31 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
           ? `The selected path uses ${formatCount(searchShardCount)} Search shards for parallel BM25 + filters; this is a model, not a vendor promise.`
           : 'The selected path uses PostgreSQL GIN + typed filters with no extra network hop or derived index.',
       },
+      backendTraffic: {
+        ratio: backendSearchQps / Math.max(1, searchQps),
+        valueText: `${formatRate(backendSearchQps)} / ${formatRate(searchQps)}`,
+        copy: cacheActive
+          ? `${formatPercent(resultCacheHitPercent)} measured hits save ${formatRate(
+              cacheSavedQps,
+            )} backend requests; remaining traffic × ${formatCount(
+              searchShardCount,
+            )} shards = about ${formatRate(backendShardOperationsPerSecond)} shard operations/s.`
+          : 'There is no evidence of reusable hot queries; every Search QPS reaches PostgreSQL or the Search Service.',
+      },
       freshness: {
-        ratio: searchFreshnessSeconds / freshnessBudgetSeconds,
-        valueText: needsSearchService
-          ? `~${formatDuration(searchFreshnessSeconds)} lag`
-          : 'transactional',
-        copy: needsSearchService
-          ? `${formatRate(jobUpdatesPerSecond)} updates/s pass through CDC, Queue, Indexer, and refresh; search freshness and application correctness are now separate boundaries.`
-          : 'The Job row and PostgreSQL indexes update in one transaction; a new statement sees committed state.',
+        ratio: visibleSearchFreshnessSeconds / freshnessBudgetSeconds,
+        valueText: resultCacheHitPercent > 0
+          ? `worst ~${formatDuration(visibleSearchFreshnessSeconds)}`
+          : needsSearchService
+            ? `~${formatDuration(searchFreshnessSeconds)} lag`
+            : 'transactional',
+        copy: resultCacheHitPercent > 0
+          ? `A 30-second cache TTL adds to about ${formatDuration(
+              searchFreshnessSeconds,
+            )} backend lag; applications still recheck active status in PostgreSQL.`
+          : needsSearchService
+            ? `${formatRate(jobUpdatesPerSecond)} updates/s pass through CDC, Queue, Indexer, and refresh; search freshness and application correctness are now separate boundaries.`
+            : 'The Job row and PostgreSQL indexes update in one transaction; a new statement sees committed state.',
       },
       resultWork: {
         ratio: resultWorkRatio,
@@ -577,7 +697,12 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
       ...flags,
       rankedCandidates,
       searchFreshnessSeconds,
+      visibleSearchFreshnessSeconds,
       freshnessBudgetSeconds,
+      resultCacheHitPercent,
+      stableSearchSession,
+      backendSearchQps,
+      searchQps,
     }),
     reasons: buildReasons({
       ...flags,
@@ -586,9 +711,23 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
       estimatedPostgresLatencyMs,
       latencyBudgetMs,
       searchFreshnessSeconds,
+      visibleSearchFreshnessSeconds,
       freshnessBudgetSeconds,
       exactTotalCount,
+      cacheActive,
+      resultCacheHitPercent,
+      cacheSavedQps,
     }),
+    nodeTitles: {
+      resultCache: stableSearchSession
+        ? 'Search session cache'
+        : `Result cache · ${formatPercent(resultCacheHitPercent)} hit`,
+    },
+    nodeCopies: {
+      resultCache: stableSearchSession
+        ? 'Stores bounded Top 1,000 Job IDs for a few minutes so later cursor pages use one result set; the first search is a miss.'
+        : `Caches only normalized popular-query / first-page keys for ${popularResultCacheTtlSeconds} seconds; long-tail misses continue to the backend.`,
+    },
   };
 }
 
@@ -596,9 +735,16 @@ type ArchitectureFlags = {
   needsSearchService: boolean;
   advancedSearchFeatures: boolean;
   exactTotalCount: boolean;
+  cacheActive: boolean;
 };
 
 function chooseArchitectureTitle(flags: ArchitectureFlags): string {
+  if (flags.cacheActive && flags.needsSearchService) {
+    return 'Independent Search Service + conditional Result / Session Cache';
+  }
+  if (flags.cacheActive) {
+    return 'PostgreSQL search + conditional Result / Session Cache';
+  }
   if (flags.needsSearchService && flags.advancedSearchFeatures) {
     return 'PostgreSQL source of truth + independent Search Service';
   }
@@ -609,6 +755,11 @@ function chooseArchitectureTitle(flags: ArchitectureFlags): string {
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
+  if (flags.cacheActive) {
+    return flags.needsSearchService
+      ? 'Cache serves only measured reusable first-page traffic or a stable session. Every miss still reaches Elasticsearch/OpenSearch, so cache cannot hide cold-query cost.'
+      : 'PostgreSQL still runs real search. Cache protects only a small hot-result or stable-session set, not every query as a permanent layer.';
+  }
   if (flags.needsSearchService) {
     return 'Elasticsearch/OpenSearch is an independent component: Search API reads its derived inverted index; Job writes and Application correctness stay in PostgreSQL.';
   }
@@ -619,7 +770,12 @@ function buildDecisions(
   analysis: ArchitectureFlags & {
     rankedCandidates: number;
     searchFreshnessSeconds: number;
+    visibleSearchFreshnessSeconds: number;
     freshnessBudgetSeconds: number;
+    resultCacheHitPercent: number;
+    stableSearchSession: boolean;
+    backendSearchQps: number;
+    searchQps: number;
   },
 ): Record<string, { state: DecisionState; copy: string }> {
   return {
@@ -636,6 +792,24 @@ function buildDecisions(
     partialIndexes: {
       state: 'needed',
       copy: 'Limit online B-tree, GIN, and GiST indexes to status = active so closed history does not grow the working set.',
+    },
+    resultCache: {
+      state: analysis.cacheActive
+        ? analysis.visibleSearchFreshnessSeconds > analysis.freshnessBudgetSeconds
+          ? 'tradeoff'
+          : 'useful'
+        : 'not-yet',
+      copy: analysis.stableSearchSession
+        ? 'Materialize only a bounded Top 1,000 Job-ID search session so later cursor pages stay stable; the first query still performs complete retrieval and ranking.'
+        : analysis.resultCacheHitPercent > 0
+          ? `${formatPercent(
+              analysis.resultCacheHitPercent,
+            )} measured hot first-page hits reduce ${formatRate(
+              analysis.searchQps,
+            )} incoming QPS to ${formatRate(
+              analysis.backendSearchQps,
+            )} backend QPS using a normalized key and 30-second TTL.`
+          : 'Do not add an external Result Cache without evidence of reuse; high-cardinality long-tail queries rarely reuse a complete Top-K.',
     },
     searchService: {
       state: analysis.needsSearchService ? 'needed' : 'not-yet',
@@ -669,8 +843,12 @@ function buildReasons(
     estimatedPostgresLatencyMs: number;
     latencyBudgetMs: number;
     searchFreshnessSeconds: number;
+    visibleSearchFreshnessSeconds: number;
     freshnessBudgetSeconds: number;
     exactTotalCount: boolean;
+    cacheActive: boolean;
+    resultCacheHitPercent: number;
+    cacheSavedQps: number;
   },
 ): LabReason[] {
   const reasons: LabReason[] = [];
@@ -712,6 +890,23 @@ function buildReasons(
       text: `The derived Search Index has about ${formatDuration(
         analysis.searchFreshnessSeconds,
       )} lag against a ${formatDuration(analysis.freshnessBudgetSeconds)} target.`,
+    });
+  }
+
+  if (analysis.cacheActive) {
+    reasons.push({
+      severity:
+        analysis.visibleSearchFreshnessSeconds > analysis.freshnessBudgetSeconds
+          ? 'danger'
+          : 'ok',
+      text:
+        analysis.resultCacheHitPercent > 0
+          ? `Selective cache saves about ${formatRate(
+              analysis.cacheSavedQps,
+            )} backend QPS but raises worst-visible staleness to about ${formatDuration(
+              analysis.visibleSearchFreshnessSeconds,
+            )}.`
+          : 'A search-session cache stabilizes pagination only; it does not reduce first-search candidate work.',
     });
   }
 

@@ -93,10 +93,10 @@ export const systemDesignLabPages: SystemDesignLabPage[] = [
     navLabel: 'Job Board',
     cardTitle: 'Job Board Search Lab',
     cardDescription:
-      '从 PostgreSQL 的 B-tree / GIN / GiST / partial indexes 起步；让 candidate scoring、QPS 和高级搜索需求决定 Elasticsearch/OpenSearch 什么时候成为独立 component。',
+      '从 PostgreSQL indexes 起步；用 cache-miss QPS、candidate scoring 和高级搜索需求判断 conditional cache 与 Elasticsearch/OpenSearch 什么时候真正值得加入。',
     pageTitle: 'Job Board Search — 系统设计 Lab | Zichao Yang',
     metaDescription:
-      '约束驱动的 Job Board 搜索实验场：组合 PostgreSQL 全文与结构化索引，观察 common keyword candidate explosion，并在证据要求时拆出独立 Search Service。',
+      '约束驱动的 Job Board 搜索实验场：组合 PostgreSQL 索引，量化 selective result/session cache，并用 cold-path evidence 决定何时拆出 Search Service。',
   },
   {
     slug: 'web-crawler',

@@ -86,10 +86,10 @@ export const systemDesignLabPages: SystemDesignLabPage[] = [
     navLabel: 'Job Board',
     cardTitle: 'Job Board Search Lab',
     cardDescription:
-      'Start with PostgreSQL B-tree / GIN / GiST / partial indexes, then let candidate scoring, QPS, and search features decide when Elasticsearch/OpenSearch earns its place as a separate component.',
+      'Start with PostgreSQL indexes, then use cache-miss QPS, candidate scoring, and search features to decide when a conditional cache or Elasticsearch/OpenSearch earns its place.',
     pageTitle: 'Job Board Search — System Design Lab | Zichao Yang',
     metaDescription:
-      'Constraint-driven Job Board search playground: compose PostgreSQL full-text and typed indexes, expose common-keyword candidate explosion, and split out a Search Service only when evidence demands it.',
+      'Constraint-driven Job Board search playground: compose PostgreSQL indexes, quantify selective result/session caching, and split out a Search Service only when cold-path evidence demands it.',
   },
   {
     slug: 'web-crawler',

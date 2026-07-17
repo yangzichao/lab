@@ -14,6 +14,7 @@ const comfortablePostgresCandidatesPerQuery = 50_000;
 const comfortablePostgresCandidateScoresPerSecond = 50_000_000;
 const searchDocumentsPerShard = 5_000_000;
 const searchIndexUpdatesPerShardSecond = 5_000;
+const popularResultCacheTtlSeconds = 30;
 
 export const jobBoardLabDefinition: SystemDesignLabDefinition = {
   id: 'job-board',
@@ -21,7 +22,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
   title:
     'Job Board 先用 PostgreSQL 完成全文检索与结构化过滤；只有候选打分、搜索功能或独立扩容成为主导约束时，Search Service 才成为单独的 component。',
   summary:
-    '调节 active jobs、搜索 QPS、常见 keyword 的命中率、metadata filter 的选择性、职位更新率、latency 与 freshness 预算。观察 B-tree / GIN / GiST / partial index 何时足够，以及 Elasticsearch / OpenSearch 何时值得承担一份派生索引和异步 freshness。',
+    '调节 active jobs、搜索 QPS、可复用 query 的实测 cache hit、keyword candidates、职位更新率与 freshness 预算。观察 PostgreSQL 何时足够、热门结果或 search session 何时值得 cache，以及 Elasticsearch / OpenSearch 何时才应成为独立 component。',
   controls: [
     {
       id: 'activeJobs',
@@ -43,6 +44,16 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       defaultValue: 300,
       scale: 'log',
       format: 'requests-per-second',
+    },
+    {
+      id: 'resultCacheHitPercent',
+      label: 'Result cache hit rate',
+      help: '实测有多少请求命中同一个 normalized popular-query / first-page key；高基数 long-tail search 通常接近 0。',
+      min: 0,
+      max: 80,
+      defaultValue: 0,
+      scale: 'linear',
+      format: 'percentage',
     },
     {
       id: 'keywordMatchPercent',
@@ -108,6 +119,12 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       help: '精确统计所有 matches 会削弱 Top-K early termination；通常应显示 1,000+。',
       defaultValue: false,
     },
+    {
+      id: 'stableSearchSession',
+      label: '需要稳定的 search session',
+      help: '把一次搜索的 bounded Top 1,000 job IDs 保存几分钟，让后续翻页看到同一个集合；它不降低第一次搜索成本。',
+      defaultValue: false,
+    },
   ],
   scenarios: [
     {
@@ -118,6 +135,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       values: {
         activeJobs: 200_000,
         searchQps: 80,
+        resultCacheHitPercent: 0,
         keywordMatchPercent: 0.2,
         filterRetentionPercent: 2,
         jobUpdatesPerSecond: 5,
@@ -125,6 +143,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         freshnessBudgetSeconds: 5,
         advancedSearchFeatures: false,
         exactTotalCount: false,
+        stableSearchSession: false,
       },
     },
     {
@@ -135,6 +154,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       values: {
         activeJobs: 3_000_000,
         searchQps: 300,
+        resultCacheHitPercent: 0,
         keywordMatchPercent: 1,
         filterRetentionPercent: 5,
         jobUpdatesPerSecond: 20,
@@ -142,6 +162,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         freshnessBudgetSeconds: 5,
         advancedSearchFeatures: false,
         exactTotalCount: false,
+        stableSearchSession: false,
       },
     },
     {
@@ -152,6 +173,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       values: {
         activeJobs: 10_000_000,
         searchQps: 1_000,
+        resultCacheHitPercent: 0,
         keywordMatchPercent: 20,
         filterRetentionPercent: 20,
         jobUpdatesPerSecond: 50,
@@ -159,6 +181,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         freshnessBudgetSeconds: 5,
         advancedSearchFeatures: false,
         exactTotalCount: false,
+        stableSearchSession: false,
       },
     },
     {
@@ -169,6 +192,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       values: {
         activeJobs: 20_000_000,
         searchQps: 5_000,
+        resultCacheHitPercent: 0,
         keywordMatchPercent: 8,
         filterRetentionPercent: 15,
         jobUpdatesPerSecond: 100,
@@ -176,6 +200,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         freshnessBudgetSeconds: 5,
         advancedSearchFeatures: true,
         exactTotalCount: false,
+        stableSearchSession: false,
       },
     },
     {
@@ -186,6 +211,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       values: {
         activeJobs: 20_000_000,
         searchQps: 5_000,
+        resultCacheHitPercent: 0,
         keywordMatchPercent: 8,
         filterRetentionPercent: 15,
         jobUpdatesPerSecond: 30_000,
@@ -193,13 +219,33 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         freshnessBudgetSeconds: 0.5,
         advancedSearchFeatures: true,
         exactTotalCount: true,
+        stableSearchSession: false,
+      },
+    },
+    {
+      id: 'selective-result-cache',
+      step: '06',
+      title: '热门结果才 Cache',
+      summary: '5k incoming QPS 中有 40% 命中 normalized first-page key；Cache 只保护热点，不掩盖 long-tail miss 成本。',
+      values: {
+        activeJobs: 30_000_000,
+        searchQps: 5_000,
+        resultCacheHitPercent: 40,
+        keywordMatchPercent: 8,
+        filterRetentionPercent: 15,
+        jobUpdatesPerSecond: 100,
+        latencyBudgetMs: 200,
+        freshnessBudgetSeconds: 60,
+        advancedSearchFeatures: true,
+        exactTotalCount: false,
+        stableSearchSession: false,
       },
     },
   ],
   diagram: buildColumnDiagram({
     title: 'Job Board 搜索架构图',
     description:
-      '白板风格 Job Board 架构：PostgreSQL 保存 Job truth；CDC / Outbox 捕获 committed changes，Queue 负责缓冲和传输，Indexer 负责生成可搜索副本。',
+      '白板风格 Job Board 架构：Cache 不是固定层，只在热门 normalized query 或稳定 search session 有证据时出现；PostgreSQL 保存 truth，CDC pipeline 更新派生 Search Index。',
     columns: [
       {
         id: 'clients',
@@ -233,6 +279,13 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
             subtitle: 'retrieve + rank',
             summary: '查询 PostgreSQL indexes，或在独立 Search Service 中执行 BM25 + filters',
             kind: 'api',
+          },
+          {
+            id: 'resultCache',
+            title: 'Conditional cache',
+            subtitle: 'hot results / session',
+            summary: '只缓存热门 first-page result 或 bounded Top 1,000 session；long-tail miss 继续进入搜索后端',
+            kind: 'cache',
           },
           {
             id: 'jobApi',
@@ -311,8 +364,11 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       { from: 'jobSeeker', to: 'searchApi', variant: 'primary' },
       { from: 'jobSeeker', to: 'applicationApi', variant: 'direct' },
       { from: 'employer', to: 'jobApi', variant: 'primary' },
+      { from: 'searchApi', to: 'resultCache', variant: 'primary' },
       { from: 'searchApi', to: 'postgresIndexes', variant: 'direct' },
       { from: 'searchApi', to: 'searchCluster', variant: 'primary' },
+      { from: 'resultCache', to: 'postgresIndexes', variant: 'direct' },
+      { from: 'resultCache', to: 'searchCluster', variant: 'primary' },
       { from: 'jobApi', to: 'jobTable', variant: 'primary' },
       { from: 'applicationApi', to: 'jobTable', variant: 'primary' },
       { from: 'jobTable', to: 'postgresIndexes', variant: 'secondary' },
@@ -326,6 +382,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
     { id: 'candidates', label: '每次查询需要 ranking 的 candidates' },
     { id: 'postgresPressure', label: 'PostgreSQL search CPU 压力' },
     { id: 'latency', label: 'Search latency vs p95 预算' },
+    { id: 'backendTraffic', label: 'Cache 后的 backend search traffic' },
     { id: 'freshness', label: 'Search freshness lag' },
     { id: 'resultWork', label: 'Top-K / total count 工作量' },
   ],
@@ -333,6 +390,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
     { id: 'typedFilters', title: 'Typed filters' },
     { id: 'postgresFts', title: 'PostgreSQL FTS' },
     { id: 'partialIndexes', title: 'Active-only partial indexes' },
+    { id: 'resultCache', title: 'Conditional result / session cache' },
     { id: 'searchService', title: '独立 Search Service' },
     { id: 'indexingPipeline', title: 'CDC / Outbox / Queue' },
     { id: 'applicationValidation', title: '申请时回源校验' },
@@ -358,6 +416,13 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
       url: 'https://docs.opensearch.org/latest/search-plugins/keyword-search/',
       summary:
         '专用 Search Service 把全文 relevance、non-scoring filters 和 Top-K retrieval 当作核心 workload，而不是关系数据库中的附加能力。',
+    },
+    {
+      title: 'Elasticsearch 默认不会 cache 带 hits 的完整搜索结果',
+      source: 'Elasticsearch — Shard request cache',
+      url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/shard-request-cache.html',
+      summary:
+        'Shard request cache 默认只 cache size=0 的 totals、aggregations 和 suggestions；热门 Top 20 result 需要 Search API 明确使用 Redis 一类的外部 cache。',
     },
     {
       title: 'CDC 捕获数据库已经提交的 row-level changes',
@@ -386,6 +451,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
     'Keyword 命中率与 filters 保留率应来自真实 query distribution；表的总行数本身不能决定是否迁移搜索。',
     'PostgreSQL indexes 与 Job row 在同一事务维护；独立 Search Service 被建模为约 1 秒 refresh，再叠加 indexing backlog。',
     '生产路径使用 Outbox / CDC -> durable Queue -> Indexer；小规模版本可以省略 Queue，但不能同步双写 PostgreSQL 与 Search Service。',
+    'Result cache 默认关闭；只有 normalized popular-query / first-page 的实测 hit rate 足够高时，才使用 30 秒 TTL。Search session 则保存 bounded Top 1,000 job IDs 几分钟，换取稳定分页而非第一次查询加速。',
     '无论搜索读哪套 index，Application API 都以 PostgreSQL 当前 Job.status 作为最终正确性判断。',
   ],
   teachingWalkthrough: [
@@ -444,6 +510,17 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
         'refresh、segment merge、indexing backlog 和 exact count 都会增加成本。搜索可以接受有界的 lag 与 1,000+ count；不能接受 lag 的申请正确性则从不依赖 Search Service。',
       takeaway: '独立搜索换来更强 retrieval，也把 freshness 变成必须明确预算的系统属性。',
     },
+    {
+      id: 'conditional-cache',
+      step: '06',
+      focus: 'Cache 需要重复性证据',
+      scenarioId: 'selective-result-cache',
+      question:
+        'Peak 是 5k Search QPS，其中 40% 真正重复命中 normalized first-page key。应该把 Cache 画成所有搜索的固定 layer 吗？',
+      reveal:
+        '不应该。只让这些热门 key 使用 30 秒 TTL：2k QPS 在 Cache 返回，3k QPS long-tail misses 仍进入 Search Service；6 个 primary shards 对应约 18k shard operations/s。若产品要求翻页集合稳定，则另存 bounded Top 1,000 job IDs 的 search session，但第一次搜索照样要执行。',
+      takeaway: 'Cache 只优化可复用流量；是否需要 Elasticsearch 要用 cache miss 的 latency、candidate work 和功能需求判断。',
+    },
   ],
   analyze: analyzeJobBoardWorkload,
 };
@@ -451,6 +528,7 @@ export const jobBoardLabDefinition: SystemDesignLabDefinition = {
 function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
   const activeJobs = numericValue(workload, 'activeJobs');
   const searchQps = numericValue(workload, 'searchQps');
+  const resultCacheHitPercent = numericValue(workload, 'resultCacheHitPercent');
   const keywordMatchPercent = numericValue(workload, 'keywordMatchPercent');
   const filterRetentionPercent = numericValue(workload, 'filterRetentionPercent');
   const jobUpdatesPerSecond = numericValue(workload, 'jobUpdatesPerSecond');
@@ -458,10 +536,14 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
   const freshnessBudgetSeconds = numericValue(workload, 'freshnessBudgetSeconds');
   const advancedSearchFeatures = Boolean(workload.advancedSearchFeatures);
   const exactTotalCount = Boolean(workload.exactTotalCount);
+  const stableSearchSession = Boolean(workload.stableSearchSession);
+  const cacheActive = resultCacheHitPercent > 0 || stableSearchSession;
+  const backendSearchQps = searchQps * (1 - resultCacheHitPercent / 100);
+  const cacheSavedQps = searchQps - backendSearchQps;
 
   const keywordCandidates = activeJobs * (keywordMatchPercent / 100);
   const rankedCandidates = Math.max(1, keywordCandidates * (filterRetentionPercent / 100));
-  const candidateScoresPerSecond = rankedCandidates * searchQps;
+  const candidateScoresPerSecond = rankedCandidates * backendSearchQps;
   const postgresPressure =
     candidateScoresPerSecond / comfortablePostgresCandidateScoresPerSecond;
   const postgresContentionMultiplier = Math.max(1, Math.sqrt(postgresPressure));
@@ -491,6 +573,10 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
   const searchFreshnessSeconds = needsSearchService
     ? Math.max(1, indexingPressure) // refresh interval plus queueing pressure
     : 0.02;
+  const visibleSearchFreshnessSeconds =
+    searchFreshnessSeconds +
+    (resultCacheHitPercent > 0 ? popularResultCacheTtlSeconds : 0);
+  const backendShardOperationsPerSecond = backendSearchQps * searchShardCount;
   const resultWorkRatio = exactTotalCount
     ? rankedCandidates / comfortablePostgresCandidatesPerQuery
     : Math.min(rankedCandidates, 1_000) / comfortablePostgresCandidatesPerQuery;
@@ -499,18 +585,28 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
     needsSearchService,
     advancedSearchFeatures,
     exactTotalCount,
+    cacheActive,
   };
 
   return {
     architectureTitle: chooseArchitectureTitle(flags),
     architectureSummary: chooseArchitectureSummary(flags),
-    architecturePath: needsSearchService
-      ? 'Search API -> Search Service；Job change -> PostgreSQL -> CDC / Outbox -> Queue -> Indexer -> Search Service'
-      : 'Search API -> PostgreSQL partial indexes -> ts_rank -> stable Top 20',
+    architecturePath: cacheActive
+      ? needsSearchService
+        ? 'Search API -> conditional Result / Session Cache -> Search Service；cache miss 才执行 BM25'
+        : 'Search API -> conditional Result / Session Cache -> PostgreSQL indexes；cache miss 才 ranking'
+      : needsSearchService
+        ? 'Search API -> Search Service；Job change -> PostgreSQL -> CDC / Outbox -> Queue -> Indexer -> Search Service'
+        : 'Search API -> PostgreSQL partial indexes -> ts_rank -> stable Top 20',
     nodeStates: {
       jobSeeker: 'ok',
       employer: 'ok',
       searchApi: selectedLatencyMs > latencyBudgetMs ? 'overloaded' : 'ok',
+      resultCache: cacheActive
+        ? visibleSearchFreshnessSeconds > freshnessBudgetSeconds
+          ? 'warning'
+          : 'needed'
+        : 'inactive',
       jobApi: 'ok',
       applicationApi: 'needed',
       jobTable: 'ok',
@@ -524,8 +620,15 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
       jobSeekerToSearchApi: 'active',
       jobSeekerToApplicationApi: 'active',
       employerToJobApi: 'active',
-      searchApiToPostgresIndexes: needsSearchService ? 'inactive' : 'active',
-      searchApiToSearchCluster: needsSearchService ? 'active' : 'inactive',
+      searchApiToResultCache: cacheActive ? 'active' : 'inactive',
+      searchApiToPostgresIndexes:
+        !cacheActive && !needsSearchService ? 'active' : 'inactive',
+      searchApiToSearchCluster:
+        !cacheActive && needsSearchService ? 'active' : 'inactive',
+      resultCacheToPostgresIndexes:
+        cacheActive && !needsSearchService ? 'active' : 'inactive',
+      resultCacheToSearchCluster:
+        cacheActive && needsSearchService ? 'active' : 'inactive',
       jobApiToJobTable: 'active',
       applicationApiToJobTable: 'active',
       jobTableToPostgresIndexes: 'active',
@@ -558,14 +661,31 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
           ? `当前路径使用 ${formatCount(searchShardCount)} 个 Search shard 并行做 BM25 + filters；这是模型估算，不是厂商承诺。`
           : '当前路径直接使用 PostgreSQL GIN + typed filters；没有额外网络 hop 或派生索引。',
       },
+      backendTraffic: {
+        ratio: backendSearchQps / Math.max(1, searchQps),
+        valueText: `${formatRate(backendSearchQps)} / ${formatRate(searchQps)}`,
+        copy: cacheActive
+          ? `${formatPercent(resultCacheHitPercent)} measured hit 节省 ${formatRate(
+              cacheSavedQps,
+            )} backend requests；剩余 traffic × ${formatCount(
+              searchShardCount,
+            )} shards = 约 ${formatRate(backendShardOperationsPerSecond)} shard operations/s。`
+          : '没有可复用热门 query 的证据；全部 Search QPS 都进入 PostgreSQL 或 Search Service。',
+      },
       freshness: {
-        ratio: searchFreshnessSeconds / freshnessBudgetSeconds,
-        valueText: needsSearchService
-          ? `约 ${formatDuration(searchFreshnessSeconds)} lag`
-          : '事务内更新',
-        copy: needsSearchService
-          ? `${formatRate(jobUpdatesPerSecond)} updates/s 经过 CDC、Queue、Indexer 和 refresh；搜索 freshness 与申请正确性已成为两个边界。`
-          : 'Job row 与 PostgreSQL indexes 在同一事务维护；新 statement 在 commit 后看到新状态。',
+        ratio: visibleSearchFreshnessSeconds / freshnessBudgetSeconds,
+        valueText: resultCacheHitPercent > 0
+          ? `最坏约 ${formatDuration(visibleSearchFreshnessSeconds)}`
+          : needsSearchService
+            ? `约 ${formatDuration(searchFreshnessSeconds)} lag`
+            : '事务内更新',
+        copy: resultCacheHitPercent > 0
+          ? `30 秒 cache TTL 叠加约 ${formatDuration(
+              searchFreshnessSeconds,
+            )} backend lag；申请仍回 PostgreSQL 校验 active。`
+          : needsSearchService
+            ? `${formatRate(jobUpdatesPerSecond)} updates/s 经过 CDC、Queue、Indexer 和 refresh；搜索 freshness 与申请正确性已成为两个边界。`
+            : 'Job row 与 PostgreSQL indexes 在同一事务维护；新 statement 在 commit 后看到新状态。',
       },
       resultWork: {
         ratio: resultWorkRatio,
@@ -579,7 +699,12 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
       ...flags,
       rankedCandidates,
       searchFreshnessSeconds,
+      visibleSearchFreshnessSeconds,
       freshnessBudgetSeconds,
+      resultCacheHitPercent,
+      stableSearchSession,
+      backendSearchQps,
+      searchQps,
     }),
     reasons: buildReasons({
       ...flags,
@@ -588,9 +713,23 @@ function analyzeJobBoardWorkload(workload: WorkloadValues): LabAnalysis {
       estimatedPostgresLatencyMs,
       latencyBudgetMs,
       searchFreshnessSeconds,
+      visibleSearchFreshnessSeconds,
       freshnessBudgetSeconds,
       exactTotalCount,
+      cacheActive,
+      resultCacheHitPercent,
+      cacheSavedQps,
     }),
+    nodeTitles: {
+      resultCache: stableSearchSession
+        ? 'Search session cache'
+        : `Result cache · ${formatPercent(resultCacheHitPercent)} hit`,
+    },
+    nodeCopies: {
+      resultCache: stableSearchSession
+        ? '保存 bounded Top 1,000 job IDs 几分钟，使后续 cursor pages 使用同一个结果集合；第一次搜索不命中。'
+        : `只缓存 normalized popular-query / first-page key，TTL ${popularResultCacheTtlSeconds} 秒；long-tail misses 继续查询 backend。`,
+    },
   };
 }
 
@@ -598,9 +737,16 @@ type ArchitectureFlags = {
   needsSearchService: boolean;
   advancedSearchFeatures: boolean;
   exactTotalCount: boolean;
+  cacheActive: boolean;
 };
 
 function chooseArchitectureTitle(flags: ArchitectureFlags): string {
+  if (flags.cacheActive && flags.needsSearchService) {
+    return '独立 Search Service + conditional Result / Session Cache';
+  }
+  if (flags.cacheActive) {
+    return 'PostgreSQL search + conditional Result / Session Cache';
+  }
   if (flags.needsSearchService && flags.advancedSearchFeatures) {
     return 'PostgreSQL source of truth + 独立 Search Service';
   }
@@ -611,6 +757,11 @@ function chooseArchitectureTitle(flags: ArchitectureFlags): string {
 }
 
 function chooseArchitectureSummary(flags: ArchitectureFlags): string {
+  if (flags.cacheActive) {
+    return flags.needsSearchService
+      ? 'Cache 只服务实测可复用的热门 first-page 或稳定 session；所有 misses 仍进入 Elasticsearch/OpenSearch，所以 cache 不能掩盖 cold-query 成本。'
+      : 'PostgreSQL 仍承担真实 search；Cache 只保护少量热门结果或稳定 session，不作为所有 query 的固定 layer。';
+  }
   if (flags.needsSearchService) {
     return 'Elasticsearch/OpenSearch 是一个独立 component：Search API 读取它的派生 inverted index；Job writes 与 Application correctness 仍由 PostgreSQL 负责。';
   }
@@ -621,7 +772,12 @@ function buildDecisions(
   analysis: ArchitectureFlags & {
     rankedCandidates: number;
     searchFreshnessSeconds: number;
+    visibleSearchFreshnessSeconds: number;
     freshnessBudgetSeconds: number;
+    resultCacheHitPercent: number;
+    stableSearchSession: boolean;
+    backendSearchQps: number;
+    searchQps: number;
   },
 ): Record<string, { state: DecisionState; copy: string }> {
   return {
@@ -638,6 +794,24 @@ function buildDecisions(
     partialIndexes: {
       state: 'needed',
       copy: '把在线 B-tree、GIN 和 GiST 都限制为 status = active，避免 closed history 扩大 working set。',
+    },
+    resultCache: {
+      state: analysis.cacheActive
+        ? analysis.visibleSearchFreshnessSeconds > analysis.freshnessBudgetSeconds
+          ? 'tradeoff'
+          : 'useful'
+        : 'not-yet',
+      copy: analysis.stableSearchSession
+        ? '只 materialize bounded Top 1,000 job IDs 的短期 search session，让后续 cursor pages 稳定；第一次查询仍执行完整 retrieval 和 ranking。'
+        : analysis.resultCacheHitPercent > 0
+          ? `${formatPercent(
+              analysis.resultCacheHitPercent,
+            )} 实测热门 first-page hit 把 ${formatRate(
+              analysis.searchQps,
+            )} incoming QPS 降为 ${formatRate(
+              analysis.backendSearchQps,
+            )} backend QPS；使用 normalized key 和 30 秒 TTL。`
+          : '没有重复性证据时不加入外部 Result Cache；高基数 long-tail query 很难复用完整 Top-K。',
     },
     searchService: {
       state: analysis.needsSearchService ? 'needed' : 'not-yet',
@@ -671,8 +845,12 @@ function buildReasons(
     estimatedPostgresLatencyMs: number;
     latencyBudgetMs: number;
     searchFreshnessSeconds: number;
+    visibleSearchFreshnessSeconds: number;
     freshnessBudgetSeconds: number;
     exactTotalCount: boolean;
+    cacheActive: boolean;
+    resultCacheHitPercent: number;
+    cacheSavedQps: number;
   },
 ): LabReason[] {
   const reasons: LabReason[] = [];
@@ -714,6 +892,23 @@ function buildReasons(
       text: `派生 Search Index 约有 ${formatDuration(
         analysis.searchFreshnessSeconds,
       )} lag；freshness 目标是 ${formatDuration(analysis.freshnessBudgetSeconds)}。`,
+    });
+  }
+
+  if (analysis.cacheActive) {
+    reasons.push({
+      severity:
+        analysis.visibleSearchFreshnessSeconds > analysis.freshnessBudgetSeconds
+          ? 'danger'
+          : 'ok',
+      text:
+        analysis.resultCacheHitPercent > 0
+          ? `Selective cache 节省约 ${formatRate(
+              analysis.cacheSavedQps,
+            )} backend QPS，但最坏可见 stale 增加到约 ${formatDuration(
+              analysis.visibleSearchFreshnessSeconds,
+            )}。`
+          : 'Search session cache 只换取稳定 pagination；它不降低第一次搜索的 candidate work。',
     });
   }
 
