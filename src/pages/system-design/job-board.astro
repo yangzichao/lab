@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SystemDesignLabNav from '../../components/system-design-lab/SystemDesignLabNav.astro';
+import SystemDesignConstraintLab from '../../components/system-design-lab/SystemDesignConstraintLab.astro';
+import { jobBoardLabDefinition } from '../../scripts/system-design-lab/labs/job-board-lab';
+import { getSystemDesignLabPage } from '../../scripts/system-design-lab/system-design-pages';
+
+const page = getSystemDesignLabPage('job-board');
+---
+
+<BaseLayout title={page.pageTitle} description={page.metaDescription}>
+  <SystemDesignLabNav current="job-board" />
+  <SystemDesignConstraintLab lab={jobBoardLabDefinition} />
+</BaseLayout>

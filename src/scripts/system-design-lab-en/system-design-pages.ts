@@ -82,6 +82,16 @@ export const systemDesignLabPages: SystemDesignLabPage[] = [
       'Constraint-driven search autocomplete playground with a guided walkthrough: precomputed top-k tries, hot-prefix caching, prefix sharding, and near-real-time updates.',
   },
   {
+    slug: 'job-board',
+    navLabel: 'Job Board',
+    cardTitle: 'Job Board Search Lab',
+    cardDescription:
+      'Start with PostgreSQL B-tree / GIN / GiST / partial indexes, then let candidate scoring, QPS, and search features decide when Elasticsearch/OpenSearch earns its place as a separate component.',
+    pageTitle: 'Job Board Search — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven Job Board search playground: compose PostgreSQL full-text and typed indexes, expose common-keyword candidate explosion, and split out a Search Service only when evidence demands it.',
+  },
+  {
     slug: 'web-crawler',
     navLabel: 'Web Crawler',
     cardTitle: 'Web Crawler Lab',

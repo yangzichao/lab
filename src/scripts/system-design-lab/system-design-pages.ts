@@ -89,6 +89,16 @@ export const systemDesignLabPages: SystemDesignLabPage[] = [
       '约束驱动的 search autocomplete 实验场，带逐步教学：预计算的 top-k trie、热门前缀 caching、prefix sharding，以及准实时更新。',
   },
   {
+    slug: 'job-board',
+    navLabel: 'Job Board',
+    cardTitle: 'Job Board Search Lab',
+    cardDescription:
+      '从 PostgreSQL 的 B-tree / GIN / GiST / partial indexes 起步；让 candidate scoring、QPS 和高级搜索需求决定 Elasticsearch/OpenSearch 什么时候成为独立 component。',
+    pageTitle: 'Job Board Search — 系统设计 Lab | Zichao Yang',
+    metaDescription:
+      '约束驱动的 Job Board 搜索实验场：组合 PostgreSQL 全文与结构化索引，观察 common keyword candidate explosion，并在证据要求时拆出独立 Search Service。',
+  },
+  {
     slug: 'web-crawler',
     navLabel: 'Web Crawler',
     cardTitle: 'Web Crawler Lab',
