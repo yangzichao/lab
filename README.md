@@ -7,17 +7,6 @@ they can evolve independently. Lives at **[lab.zichaoyang.com](https://lab.zicha
 | Lab | Path |
 | --- | --- |
 | Quaternion Rotation Lab | `/quaternions/` |
-| Double Pendulum | `/physics/double-pendulum/` |
-| Orbit Lab | `/physics/orbit/` |
-| Wave Interference | `/physics/wave-interference/` |
-| Electric Field | `/physics/electric-field/` |
-| Fourier Epicycles | `/physics/fourier-epicycles/` |
-| Kinetic Theory | `/physics/ideal-gas/` |
-| Coupled Oscillators | `/physics/coupled-oscillators/` |
-| Diffraction | `/physics/diffraction/` |
-| Charged Particle | `/physics/charged-particle/` |
-| Three-Body Problem | `/physics/three-body/` |
-| Lenses & Refraction | `/physics/lens-optics/` |
 | URL Shortener Lab | `/system-design/url-shortener/` |
 | Rate Limiter Lab | `/system-design/rate-limiter/` |
 | News Feed Lab | `/system-design/news-feed/` |
@@ -44,6 +33,10 @@ they can evolve independently. Lives at **[lab.zichaoyang.com](https://lab.zicha
 | RLHF Pipeline Lab | `/system-design/rlhf-pipeline/` |
 | Agent Orchestration Lab | `/system-design/agent-orchestration/` |
 
+Physics experiments now live in the separate
+**[Sandbox Physics](https://sandboxphysics.com/)** repository and site. Legacy
+`/physics/` and `/en/physics/` pages remain here only as static redirect pages.
+
 ## Develop
 
 ```sh
@@ -61,10 +54,9 @@ Pushed to `main` → GitHub Actions builds and publishes to GitHub Pages
 ## Layout
 
 - `src/pages/index.astro` — landing page listing the labs.
-- `src/pages/quaternions.astro`,
-  `src/pages/physics/{double-pendulum,orbit,wave-interference,electric-field,fourier-epicycles,ideal-gas,coupled-oscillators,diffraction,charged-particle,three-body,lens-optics}.astro`, and
-  and `src/pages/system-design/<slug>.astro` (25 labs — core system design,
-  then ML systems, then LLM training/inference/agent infra) — the labs.
+- `src/pages/quaternions.astro` and `src/pages/system-design/<slug>.astro`
+  (core system design, then ML systems, then LLM training/inference/agent
+  infrastructure) — the interactive labs.
 - Each system design lab is its own page; metadata (page title, nav label, index
   card) lives in `src/scripts/system-design-lab/system-design-pages.ts` and the
   cross-lab nav is `src/components/system-design-lab/SystemDesignLabNav.astro`.
@@ -75,13 +67,8 @@ Pushed to `main` → GitHub Actions builds and publishes to GitHub Pages
   and add a `system-design-pages.ts` entry. Most labs ship a `teachingWalkthrough`
   — an ordered Socratic walkthrough whose steps apply scenarios so the diagram,
   meters, and decisions react live (Ad Tracking is the one bespoke exception).
-- Each physics lab is one page driven by a shared shell
-  (`src/components/physics-lab/PhysicsLabShell.astro`) and registered in
-  `src/scripts/physics-lab/physics-lab-catalog.ts`. Adding a new physics lab is:
-  write its `<slug>/` module (physics + render + lab controller under
-  `src/scripts/physics-lab/`), add a catalog entry, add a page.
-- `src/scripts/physics-lab/shared/` — canvas toolkit, RAF loop, DOM control
-  helpers, and formatters reused by every physics lab.
+- `src/data/legacy-redirects/physics-lab-redirects.ts` keeps the former physics
+  URLs pointed at their matching Sandbox Physics pages.
 - `src/scripts/<lab>/` — per-lab logic; `src/styles/<lab>/` — per-lab styles.
 - `src/components/system-design-lab/` — system-design lab widgets.
 - `src/layouts/BaseLayout.astro` + `src/scripts/effects/` — shared shell carried

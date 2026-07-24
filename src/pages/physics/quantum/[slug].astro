@@ -1,14 +1,12 @@
 ---
-import QuantumLabPage from '../../../components/physics-lab/quantum/QuantumLabPage.astro';
-import { getQuantumLabSlugs } from '../../../scripts/physics-lab/quantum/quantum-lab-catalog';
+import ExternalRedirectPage from '../../../components/redirects/ExternalRedirectPage.astro';
+import { getLegacyQuantumPhysicsRedirectPaths } from '../../../data/legacy-redirects/physics-lab-redirects';
 
 export function getStaticPaths() {
-  return getQuantumLabSlugs().map((slug) => ({
-    params: { slug },
-  }));
+  return getLegacyQuantumPhysicsRedirectPaths('zh');
 }
 
-const slug = Astro.params.slug!;
+const { destination } = Astro.props;
 ---
 
-<QuantumLabPage slug={slug} locale="zh" />
+<ExternalRedirectPage destination={destination} />

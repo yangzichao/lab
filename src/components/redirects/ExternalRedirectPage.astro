@@ -1,0 +1,65 @@
+---
+interface Props {
+  destination: string;
+}
+
+const { destination } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content={`0; url=${destination}`} />
+    <link rel="canonical" href={destination} />
+    <title>Redirecting to Sandbox Physics</title>
+    <script is:inline>
+      const canonicalLink = document.querySelector('link[rel="canonical"]');
+
+      if (canonicalLink instanceof HTMLLinkElement) {
+        const destinationUrl = new URL(canonicalLink.href);
+        destinationUrl.search = window.location.search;
+        destinationUrl.hash = window.location.hash;
+        window.location.replace(destinationUrl.toString());
+      }
+    </script>
+  </head>
+  <body>
+    <main>
+      <p>
+        Physics experiments have moved to
+        <a href={destination}>Sandbox Physics</a>.
+      </p>
+    </main>
+  </body>
+</html>
+
+<style>
+  :global(html) {
+    color-scheme: light;
+    font-family:
+      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+    background: #f7f5ef;
+    color: #20201d;
+  }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  main {
+    padding: 2rem;
+    text-align: center;
+  }
+
+  a {
+    color: #245e54;
+    font-weight: 650;
+  }
+</style>

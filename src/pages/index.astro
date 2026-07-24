@@ -1,7 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { physicsLabCatalog } from '../scripts/physics-lab/physics-lab-catalog';
-import { quantumLabCatalog } from '../scripts/physics-lab/quantum/quantum-lab-catalog';
 import { systemDesignLabPages } from '../scripts/system-design-lab/system-design-pages';
 
 const labs = [
@@ -12,16 +10,11 @@ const labs = [
       '一个交互式 3D 教学 lab，讲 quaternion 旋转、SLERP、SU(2) double cover、Pauli matrices 以及 Bloch sphere 上的运动。',
   },
   {
-    title: 'Quantum Labs · 量子实验',
-    href: quantumLabCatalog[0]!.href,
+    title: 'Sandbox Physics · 物理实验',
+    href: 'https://sandboxphysics.com/',
     description:
-      '一套独立组织的双语量子学习实验：从量子态与测量、单粒子干涉，一路走到场的模式与量子化。',
+      '物理仿真与量子实验已经迁移到独立站点 Sandbox Physics，继续提供中英文交互式学习体验。',
   },
-  ...physicsLabCatalog.map((lab) => ({
-    title: lab.title,
-    href: lab.href,
-    description: lab.tagline,
-  })),
   ...systemDesignLabPages.map((page) => ({
     title: page.cardTitle,
     href: `/system-design/${page.slug}/`,
@@ -32,7 +25,7 @@ const labs = [
 
 <BaseLayout
   title="Lab — Zichao Yang"
-  description="Zichao Yang 的交互式教学 lab 与小玩具：quaternion 旋转、物理仿真，以及系统设计的演练场。一切都在你的浏览器里运行。"
+  description="Zichao Yang 的交互式教学 lab 与小玩具：quaternion 旋转与系统设计演练场。一切都在你的浏览器里运行。"
 >
   <header class="lab-index__header">
     <a href="https://zichaoyang.com/" class="lab-index__back">&larr; zichaoyang.com</a>

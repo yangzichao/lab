@@ -1,14 +1,12 @@
 ---
-import PhysicsLabPage from '../../../components/physics-lab/PhysicsLabPage.astro';
-import { getPhysicsLabSlugs } from '../../../scripts/physics-lab/physics-lab-catalog';
+import ExternalRedirectPage from '../../../components/redirects/ExternalRedirectPage.astro';
+import { getLegacyClassicalPhysicsRedirectPaths } from '../../../data/legacy-redirects/physics-lab-redirects';
 
 export function getStaticPaths() {
-  return getPhysicsLabSlugs().map((slug) => ({
-    params: { slug },
-  }));
+  return getLegacyClassicalPhysicsRedirectPaths('en');
 }
 
-const slug = Astro.params.slug!;
+const { destination } = Astro.props;
 ---
 
-<PhysicsLabPage slug={slug} locale="en" />
+<ExternalRedirectPage destination={destination} />
