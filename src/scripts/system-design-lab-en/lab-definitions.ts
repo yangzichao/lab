@@ -5,6 +5,7 @@ import { fileSyncLabDefinition } from './labs/file-sync-lab';
 import { fraudDetectionLabDefinition } from './labs/fraud-detection-lab';
 import { googleDocsLabDefinition } from './labs/google-docs-lab';
 import { jobBoardLabDefinition } from './labs/job-board-lab';
+import { youtubeLikeCounterLabDefinition } from './labs/youtube-like-counter-lab';
 import { keyValueStoreLabDefinition } from './labs/kv-store-lab';
 import { llmInferenceLabDefinition } from './labs/llm-inference-lab';
 import { llmTrainingInfraLabDefinition } from './labs/llm-training-infra-lab';
@@ -34,6 +35,7 @@ export const systemDesignLabDefinitions = [
   notificationSystemLabDefinition,
   searchAutocompleteLabDefinition,
   jobBoardLabDefinition,
+  youtubeLikeCounterLabDefinition,
   webCrawlerLabDefinition,
   videoStreamingLabDefinition,
   fileSyncLabDefinition,

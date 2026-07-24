@@ -92,6 +92,16 @@ export const systemDesignLabPages: SystemDesignLabPage[] = [
       'Constraint-driven Job Board search playground: compose PostgreSQL indexes, quantify selective result/session caching, and split out a Search Service only when cold-path evidence demands it.',
   },
   {
+    slug: 'youtube-like-counter',
+    navLabel: 'Like Counter',
+    cardTitle: 'YouTube Like Counter Lab',
+    cardDescription:
+      'Start with idempotent user-video reaction state, then use retries, hot-video skew, counter shards, and freshness to decide when an async aggregate and count cache earn their place.',
+    pageTitle: 'YouTube Like Counter — System Design Lab | Zichao Yang',
+    metaDescription:
+      'Constraint-driven YouTube Like Counter playground: compare desired-state APIs, single and sharded counters, Outbox/Event Log aggregation, hot-count caching, and multi-region per-key ordering.',
+  },
+  {
     slug: 'web-crawler',
     navLabel: 'Web Crawler',
     cardTitle: 'Web Crawler Lab',

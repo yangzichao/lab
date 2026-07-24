@@ -99,6 +99,16 @@ export const systemDesignLabPages: SystemDesignLabPage[] = [
       '约束驱动的 Job Board 搜索实验场：组合 PostgreSQL 索引，量化 selective result/session cache，并用 cold-path evidence 决定何时拆出 Search Service。',
   },
   {
+    slug: 'youtube-like-counter',
+    navLabel: 'Like Counter',
+    cardTitle: 'YouTube Like Counter Lab',
+    cardDescription:
+      '从 idempotent user-video reaction 起步；用 retry、热门视频 skew、counter shards 和 freshness 预算决定何时拆出异步 aggregate 与 count cache。',
+    pageTitle: 'YouTube Like Counter — 系统设计 Lab | Zichao Yang',
+    metaDescription:
+      '约束驱动的 YouTube Like Counter 实验场：比较 desired-state API、单行与 sharded counters、Outbox/Event Log 异步聚合、热门 count cache 和 multi-region per-key ordering。',
+  },
+  {
     slug: 'web-crawler',
     navLabel: 'Web Crawler',
     cardTitle: 'Web Crawler Lab',
